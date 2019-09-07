@@ -21,6 +21,7 @@ _year(MDate x)
 	unsigned int guess = x / 365U;
 	guess -= _j00(guess) > x;
 	guess -= _j00(guess) > x;
+	/* more corrections in the year 3000 or so */
 	return guess;
 }
 
@@ -43,7 +44,7 @@ year(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = INTEGER(x)[i];
-		INTEGER(ans)[i] = _year(m);
+		INTEGER(ans)[i] = m != NA_INTEGER ? _year(m) : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -61,7 +62,7 @@ yday(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = INTEGER(x)[i];
-		INTEGER(ans)[i] = _yday(m);
+		INTEGER(ans)[i] = m != NA_INTEGER ? _yday(m) : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -79,11 +80,11 @@ month(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = INTEGER(x)[i];
-		int yd = _yday(m);
+		int yd = _yday(m) - 1;
 		int pent = yd / 153;
 		int pend = yd % 153;
-		int mo = pend % 61;
-		INTEGER(ans)[i] = 5 * pend + mo + 1;
+		int mo = 2 * pend / 61;
+		INTEGER(ans)[i] = m != NA_INTEGER ? 5 * pent + mo + 1 : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -101,11 +102,10 @@ mday(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = INTEGER(x)[i];
-		int yd = _yday(m);
-		int pent = yd / 153;
+		int yd = _yday(m) - 1;
 		int pend = yd % 153;
-		int md = (pend % 61) / 2;
-		INTEGER(ans)[i] = md + 1;
+		int md = (2 * pend % 61) / 2;
+		INTEGER(ans)[i] = m != NA_INTEGER ? md + 1 : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
