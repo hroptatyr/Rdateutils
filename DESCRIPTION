@@ -1,0 +1,11 @@
+Package: Rdateutils
+Type: Package
+Title: dateutils in R
+Version: 0.1
+Date: 2019-09-06
+Depends: 
+Author: Sebastian Freundt
+Maintainer: Sebastian Freundt <freundt@ga-group.nl>
+Description: fast date handling in R
+License: BSD3c
+NeedsCompilation: yes

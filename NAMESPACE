@@ -1,0 +1,9 @@
+useDynLib(Rdateutils, .registration=TRUE)
+
+## for now
+import(data.table)
+
+export(year)
+export(yday)
+export(month)
+export(mday)
