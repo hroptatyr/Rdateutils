@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <R.h>
-#include "Rdateutils.h"
+#include "dateutils.h"
 #include "nifty.h"
 
 static inline MDate

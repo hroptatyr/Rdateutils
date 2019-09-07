@@ -1,6 +1,6 @@
 R ?= R --vanilla
 
-PKG = Rdateutils_0.1.tar.gz
+PKG = dateutils_0.1.tar.gz
 
 .PHONY: all
 all: build install

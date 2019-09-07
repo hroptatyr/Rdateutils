@@ -1,4 +1,4 @@
-#include "Rdateutils.h"
+#include "dateutils.h"
 #include <Rdefines.h>
 #include <R_ext/Rdynload.h>
 #include <R_ext/Visibility.h>
@@ -17,7 +17,7 @@ R_ExternalMethodDef externalMethods[] = {
 	{NULL, NULL, 0}
 };
 
-void attribute_visible R_init_Rdateutils(DllInfo *info)
+void attribute_visible R_init_dateutils(DllInfo *info)
 {
 	R_registerRoutines(info, NULL, callMethods, NULL, externalMethods);
 	return;

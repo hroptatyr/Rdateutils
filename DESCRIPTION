@@ -1,4 +1,4 @@
-Package: Rdateutils
+Package: dateutils
 Type: Package
 Title: dateutils in R
 Version: 0.1

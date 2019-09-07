@@ -1,4 +1,4 @@
-useDynLib(Rdateutils, .registration=TRUE)
+useDynLib(dateutils, .registration=TRUE)
 
 ## for now
 import(data.table)

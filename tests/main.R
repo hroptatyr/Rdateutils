@@ -1,4 +1,4 @@
-library(Rdateutils)
+library(dateutils)
 
 d <- c(
 	"2000-01-01", "2000-01-31",
