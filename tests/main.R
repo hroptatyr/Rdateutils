@@ -1,4 +1,3 @@
-library(data.table)
 library(dateutils)
 
 d <- c(
@@ -20,9 +19,11 @@ d <- c(
 	"2001-04-01", "2001-04-31",
 	"2001-05-01", "2001-05-31")
 
+d <- as.EDate(d)
+
 year.d <- c(
-	1999L, 1999L,
-	1999L, 1999L, 1999L,
+	2000L, 2000L,
+	2000L, 2000L, 2000L,
 	2000L, 2000L,
 	2000L, 2000L,
 	2000L, 2000L,
@@ -33,8 +34,8 @@ year.d <- c(
 	2000L, 2000L,
 	2000L, 2000L,
 	2000L, 2000L,
-	2000L, 2000L,
-	2000L, 2000L,
+	2001L, 2001L,
+	2001L, 2001L,
 	2001L, 2001L,
 	2001L, NA_integer_,
 	2001L, 2001L)
@@ -101,7 +102,7 @@ print(all(!is.na(yday.d) & yday(d) == yday.d | is.na(yday(d))))
 print(all(!is.na(month.d) & month(d) == month.d | is.na(month(d))))
 print(all(!is.na(mday.d) & mday(d) == mday.d | is.na(mday(d))))
 
-bigd <- rep(as.IDate(d), 40000)
+bigd <- rep(as.EDate(d), 40000)
 library(microbenchmark)
 print(microbenchmark(year(bigd)))
 print(microbenchmark(yday(bigd)))

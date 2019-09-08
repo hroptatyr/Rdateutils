@@ -1,7 +1,7 @@
 #include <R.h>
 #include <Rinternals.h>
 
-typedef unsigned int MDate;
+typedef unsigned int EDate;
 
 SEXP year(SEXP x);
 SEXP yday(SEXP x);

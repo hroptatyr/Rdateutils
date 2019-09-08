@@ -1,25 +1,82 @@
+as.EDate <- function(x, ...) UseMethod("as.EDate")
+
+as.EDate.default <- function(x, ..., tz=attr(x, "tzone"))
+{
+	as.EDate(as.Date(x, tz=if(!is.null(tz)) tz else "UTC", ...))
+}
+
+as.EDate.Date <- as.EDate.IDate <- function(x, ...)
+{
+	x <- as.integer(x) + 719468L ##/*0000-03-00*/
+	class(x) <- "EDate"
+	return(x)
+}
+
+as.EDate.POSIXct <- function(x, tz=attr(x, "tzone"), ...)
+{
+	if (is.null(tz) || tz == "UTC") {
+		x <- as.integer(x / 86400)
+		class(x) <- "EDate"
+		return(x)
+	}
+	return(as.EDate(as.Date(x, tz=tz, ...)))
+}
+
+as.EDate.EDate <- function(x, ...)
+{
+	return(x)
+}
+
+as.EDate.numeric <- function(x, ...)
+{
+## assume correct origin
+	x <- as.integer(x)
+	class(x) <- "EDate"
+	return(x)
+}
+
+as.Date.EDate <- function(x, ...)
+{
+	x <- as.numeric(x - 719468L)
+	class(x) <- "Date"
+	return(x)
+}
+
+as.Date.IDate <- function(x, ...)
+{
+	x <- as.integer(x) - 719468L
+	class(x) <- c("IDate", "Date")
+	return(x)
+}
+
+
+c.EDate <- cut.EDate <- mean.EDate <- rep.EDate <-
+cut.EDate <- mean.EDate <- rep.EDate <- round.EDate <-
+seq.EDate <- split.EDate <- unique.EDate <- function(x, ...)
+{
+	as.EDate(NextMethod())
+}
+
+
+## extractions
 year <- function(x)
 {
-	x <- unclass(as.IDate(x)) + 719468L ##/*0001-03-00*/
-	return(.Call(Cyear, x))
+	.Call(Cyear, as.EDate(x))
 }
 
 yday <- function(x)
 {
-	x <- unclass(as.IDate(x)) + 719468L ##/*0001-03-00*/
-	return(.Call(Cyday, x))
+	.Call(Cyday, as.EDate(x))
 }
 
 month <- function(x)
 {
-	x <- unclass(as.IDate(x)) + 719468L ##/*0001-03-00*/
-	return(.Call(Cmonth, x))
+	.Call(Cmonth, as.EDate(x))
 }
 
 mday <- function(x)
 {
-	x <- unclass(as.IDate(x)) + 719468L ##/*0001-03-00*/
-	return(.Call(Cmday, x))
+	.Call(Cmday, as.EDate(x))
 }
 
 

@@ -1,7 +1,24 @@
 useDynLib(dateutils, .registration=TRUE)
 
-## for now
-import(data.table)
+import(methods)
+
+export(as.EDate)
+S3method(as.Date, EDate)
+S3method(as.Date, IDate)
+S3method(as.EDate, Date)
+S3method(as.EDate, IDate)
+S3method(as.EDate, POSIXct)
+S3method(as.EDate, default)
+S3method(as.EDate, numeric)
+
+S3method(c, EDate)
+S3method(cut, EDate)
+S3method(mean, EDate)
+S3method(rep, EDate)
+S3method(round, EDate)
+S3method(seq, EDate)
+S3method(split, EDate)
+S3method(unique, EDate)
 
 export(year)
 export(yday)

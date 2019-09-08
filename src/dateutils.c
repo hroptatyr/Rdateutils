@@ -9,14 +9,14 @@
 #include "dateutils.h"
 #include "nifty.h"
 
-static inline MDate
+static inline EDate
 _j00(unsigned int y)
 {
 	return y * 365U + y / 4U - y / 100U + y / 400U;
 }
 
 static inline unsigned int
-_year(MDate x)
+_year(EDate x)
 {
 	unsigned int guess = x / 365U;
 	guess -= _j00(guess) > x;
@@ -25,11 +25,19 @@ _year(MDate x)
 	return guess;
 }
 
-static inline int
-_yday(MDate x)
+static inline unsigned int
+_yday(EDate x)
 {
 	unsigned int y = _year(x);
-	return x - _j00(y) + 1;
+	return x - _j00(y) + 1U;
+}
+
+static inline unsigned int
+_yyd(EDate x)
+{
+	unsigned int y = _year(x);
+	unsigned int yd = x - _j00(y) + 1U;
+	return (y << 16U) ^ yd;
 }
 
 
@@ -44,7 +52,9 @@ year(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = INTEGER(x)[i];
-		INTEGER(ans)[i] = m != NA_INTEGER ? _year(m) : NA_INTEGER;
+		unsigned int yyd = _yyd(m);
+		unsigned int y = (yyd >> 16U) + ((yyd & 0xfffU) >= 307U);
+		INTEGER(ans)[i] = m != NA_INTEGER ? y : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -80,7 +90,7 @@ month(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = INTEGER(x)[i];
-		int yd = _yday(m) - 1;
+		unsigned int yd = _yday(m) - 1;
 		int pent = yd / 153;
 		int pend = yd % 153;
 		int mo = 2 * pend / 61;
@@ -102,7 +112,7 @@ mday(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = INTEGER(x)[i];
-		int yd = _yday(m) - 1;
+		unsigned int yd = _yday(m) - 1;
 		int pend = yd % 153;
 		int md = (2 * pend % 61) / 2;
 		INTEGER(ans)[i] = m != NA_INTEGER ? md + 1 : NA_INTEGER;
