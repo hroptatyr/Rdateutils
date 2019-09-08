@@ -108,3 +108,6 @@ print(microbenchmark(year(bigd)))
 print(microbenchmark(yday(bigd)))
 print(microbenchmark(month(bigd)))
 print(microbenchmark(mday(bigd)))
+
+print(microbenchmark(as.POSIXlt(bigd)))
+print(microbenchmark(as.POSIXlt(as.Date(bigd))))

@@ -10,6 +10,7 @@ S3method(as.EDate, IDate)
 S3method(as.EDate, POSIXct)
 S3method(as.EDate, default)
 S3method(as.EDate, numeric)
+S3method(as.POSIXlt, EDate)
 
 S3method(c, EDate)
 S3method(cut, EDate)

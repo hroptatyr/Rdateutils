@@ -49,6 +49,11 @@ as.Date.IDate <- function(x, ...)
 	return(x)
 }
 
+as.POSIXlt.EDate <- function(x, ...)
+{
+	.Call(Cas.POSIXlt.EDate, x);
+}
+
 
 c.EDate <- cut.EDate <- mean.EDate <- rep.EDate <-
 cut.EDate <- mean.EDate <- rep.EDate <- round.EDate <-

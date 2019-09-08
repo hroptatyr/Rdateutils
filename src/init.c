@@ -9,6 +9,7 @@ R_CallMethodDef callMethods[] = {
 	{"Cyday", (DL_FUNC)&yday, -1},
 	{"Cmonth", (DL_FUNC)&month, -1},
 	{"Cmday", (DL_FUNC)&mday, -1},
+	{"Cas.POSIXlt.EDate", (DL_FUNC)&as_POSIXlt_EDate, -1},
 	{NULL, NULL, 0}
 };
 
