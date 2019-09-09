@@ -102,6 +102,15 @@ print(all(!is.na(yday.d) & yday(d) == yday.d | is.na(yday(d))))
 print(all(!is.na(month.d) & month(d) == month.d | is.na(month(d))))
 print(all(!is.na(mday.d) & mday(d) == mday.d | is.na(mday(d))))
 
+print("")
+e <- d
+print(as.POSIXlt({year(e) <- 2000;e}))
+print(as.POSIXlt({year(e) <- 2001;e}))
+print("")
+e <- d
+print(as.POSIXlt({yday(e) <- 1;e}))
+print(as.POSIXlt({yday(e) <- 60;e}))
+
 bigd <- rep(as.EDate(d), 40000)
 library(microbenchmark)
 print(microbenchmark(year(bigd)))

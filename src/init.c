@@ -6,7 +6,9 @@
 static const
 R_CallMethodDef callMethods[] = {
 	{"Cyear", (DL_FUNC)&year, -1},
+	{"Cyear<-", (DL_FUNC)&year_bang, -1},
 	{"Cyday", (DL_FUNC)&yday, -1},
+	{"Cyday<-", (DL_FUNC)&yday_bang, -1},
 	{"Cmonth", (DL_FUNC)&month, -1},
 	{"Cmday", (DL_FUNC)&mday, -1},
 	{"Cas.POSIXlt.EDate", (DL_FUNC)&as_POSIXlt_EDate, -1},

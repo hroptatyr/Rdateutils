@@ -74,9 +74,19 @@ year <- function(x)
 	.Call(Cyear, as.EDate(x))
 }
 
+`year<-` <- function(x, value)
+{
+	.Call(`Cyear<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
+}
+
 yday <- function(x)
 {
 	.Call(Cyday, as.EDate(x))
+}
+
+`yday<-` <- function(x, value)
+{
+	.Call(`Cyday<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
 }
 
 month <- function(x)

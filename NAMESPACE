@@ -23,6 +23,8 @@ S3method(split, EDate)
 S3method(unique, EDate)
 
 export(year)
+export(`year<-`)
 export(yday)
+export(`yday<-`)
 export(month)
 export(mday)
