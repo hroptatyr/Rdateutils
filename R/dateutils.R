@@ -42,7 +42,7 @@ as.Date.EDate <- function(x, ...)
 	return(x)
 }
 
-as.Date.IDate <- function(x, ...)
+as.IDate.EDate <- function(x, ...)
 {
 	x <- as.integer(x) - 719468L
 	class(x) <- c("IDate", "Date")
@@ -52,6 +52,11 @@ as.Date.IDate <- function(x, ...)
 as.POSIXlt.EDate <- function(x, ...)
 {
 	.Call(Cas.POSIXlt.EDate, x);
+}
+
+as.POSIXct.EDate <- function(x, ...)
+{
+	return(as.POSIXct(as.Date(x)))
 }
 
 
