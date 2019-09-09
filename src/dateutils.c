@@ -47,7 +47,7 @@ _month(EDate x)
 	unsigned int pent = yd / 153U;
 	unsigned int pend = yd % 153U;
 	unsigned int mo = (2U * pend / 61U);
-	return 5U * pent + mo + 1U;
+	return (5U * pent + mo + 2U) % 12U + 1U;
 }
 
 static inline unsigned int
@@ -212,6 +212,59 @@ month(SEXP x)
 }
 
 SEXP
+month_bang(SEXP x, SEXP value)
+{
+	/* Mar-based */
+	static unsigned int moyd[] = {
+		307U, 338U, 1U, 32U, 62U, 93U,
+		123U, 154U, 185U, 215U, 246U, 276U, 307U,
+	};
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans;
+
+	PROTECT(ans = allocVector(INTSXP, n));
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = INTEGER(x)[i];
+		int m2b = INTEGER(value)[i] - 1;
+
+		if (m != NA_INTEGER && (unsigned int)m2b < 12U) {
+			unsigned int yyd = _yyd(m);
+			unsigned int y = (yyd >> 16U);
+			unsigned int yd = yyd & 0xffffU;
+			unsigned int pend = (yd - 1) % 153U;
+			unsigned int md = (2U * pend % 61U) / 2U;
+			int yd2b;
+
+			yd2b = moyd[m2b] + md;
+
+			/* massage y into Jan years */
+			y += yd >= 307U;
+			y -= yd2b >= 307U;
+
+			/* clamp to year's end */
+			yd2b = yd2b <= 365 ? yd2b : !_leapp(y+1) ? 365 : 366;
+			/* clamp to month's last */
+			yd2b -= m2b > 3U && yd2b >= moyd[m2b + 1U];
+
+			INTEGER(ans)[i] = _j00(y) + yd2b - 1;
+		} else {
+			INTEGER(ans)[i] = NA_INTEGER;
+		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
 mday(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
@@ -226,6 +279,55 @@ mday(SEXP x)
 	}
 
 	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+mday_bang(SEXP x, SEXP value)
+{
+	/* Mar-based */
+	static unsigned int mond[] = {
+		31U, 30U, 31U, 30U, 31U,
+		31U, 30U, 31U, 30U, 31U,
+		31U, 29U,
+	};
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans;
+
+	PROTECT(ans = allocVector(INTSXP, n));
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = INTEGER(x)[i];
+		int md2b = INTEGER(value)[i] - 1;
+
+		if (m != NA_INTEGER && (unsigned int)md2b <= 31U) {
+			unsigned int yyd = _yyd(m);
+			unsigned int y = (yyd >> 16U);
+			unsigned int yd = yyd & 0xffffU;
+			unsigned int pent = (yd - 1) / 153U;
+			unsigned int pend = (yd - 1) % 153U;
+			unsigned int mo = (2U * pend / 61U);
+			unsigned int md = (2U * pend % 61U) / 2U;
+			int yd2b;
+
+			mo += 5U * pent;
+			md2b = md2b < mond[mo] ? md2b : mond[mo] - 1;
+			yd2b = yd - md + md2b;
+			yd2b -= yd2b > 365 && !_leapp(y+1U);
+			INTEGER(ans)[i] = _j00(y) + yd2b - 1;
+		} else {
+			INTEGER(ans)[i] = NA_INTEGER;
+		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
 	return ans;
 }
 

@@ -94,9 +94,19 @@ month <- function(x)
 	.Call(Cmonth, as.EDate(x))
 }
 
+`month<-` <- function(x, value)
+{
+	.Call(`Cmonth<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
+}
+
 mday <- function(x)
 {
 	.Call(Cmday, as.EDate(x))
+}
+
+`mday<-` <- function(x, value)
+{
+	.Call(`Cmday<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
 }
 
 

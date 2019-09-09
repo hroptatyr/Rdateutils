@@ -60,10 +60,8 @@ yday.d <- c(
 	121L, 151L)
 
 month.d <- c(
-	11L, 11L,
-	12L, 12L, 12L,
-	1L, 1L,
-	2L, 2L,
+	01L, 01L,
+	02L, 02L, 02L,
 	3L, 3L,
 	4L, 4L,
 	5L, 5L,
@@ -74,9 +72,11 @@ month.d <- c(
 	10L, 10L,
 	11L, 11L,
 	12L, 12L,
-	1L, 1L,
-	2L, NA_integer_,
-	3L, 3L)
+	01L, 01L,
+	02L, 02L,
+	3L, 3L,
+	4L, NA_integer_,
+	5L, 5L)
 
 mday.d <- c(
 	1L, 31L,
@@ -110,6 +110,16 @@ print("")
 e <- d
 print(as.POSIXlt({yday(e) <- 1;e}))
 print(as.POSIXlt({yday(e) <- 60;e}))
+print("")
+e <- d
+print(as.POSIXlt({month(e) <- 2;e}))
+e <- d
+print(as.POSIXlt({month(e) <- 11;e}))
+print("")
+e <- d
+print(as.POSIXlt({mday(e) <- 15;e}))
+e <- d
+print(as.POSIXlt({mday(e) <- 31;e}))
 
 bigd <- rep(as.EDate(d), 40000)
 library(microbenchmark)
