@@ -89,7 +89,11 @@ year(SEXP x)
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = INTEGER(x)[i];
 		unsigned int yyd = _yyd(m);
-		unsigned int y = (yyd >> 16U) + ((yyd & 0xfffU) >= 307U);
+		unsigned int y = (yyd >> 16U);
+		unsigned int yd = yyd & 0xffffU;
+
+		/* massage y and yd into Jan years */
+		y += yd >= 307U;
 		INTEGER(ans)[i] = m != NA_INTEGER ? y : NA_INTEGER;
 	}
 
@@ -108,7 +112,14 @@ yday(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = INTEGER(x)[i];
-		INTEGER(ans)[i] = m != NA_INTEGER ? _yday(m) : NA_INTEGER;
+		unsigned int yyd = _yyd(m);
+		unsigned int y = (yyd >> 16U);
+		unsigned int yd = yyd & 0xffffU;
+
+		/* massage y and yd into Jan years */
+		y += yd >= 307U;
+		yd += yd < 307U ? 59U + _leapp(y) : -306U;
+		INTEGER(ans)[i] = m != NA_INTEGER ? yd : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
