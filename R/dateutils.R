@@ -109,7 +109,7 @@ mday <- function(x)
 	.Call(`Cmday<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
 }
 
-
+
 year1 <- function(x)
 {
 	x <- unclass(as.IDate(x)) + 719163L ##/*0001-01-00*/
@@ -168,4 +168,36 @@ mday2 <- function(x)
 	yd <- (yd - 153L * pent) * 2L
 	md <- yd %% 61L %/% 2L
 	return(md+1L)
+}
+
+as.FDate <- function(x, ...) UseMethod("as.FDate")
+
+#FDate <- function(year, mon, day)
+#{
+#	4L + (year - 1L) * 391L + (mon - 1L) * 32 + ((mon-1)%/%6L) + ((mon-1)%/%3L) + day
+#}
+
+FDate <- function(year, mon, day)
+{
+	.Call(CFDate, as.integer(year), rep.int(as.integer(mon), length(year)), rep.int(as.integer(day), length(year)))
+}
+
+as.FDate.character <- function(x)
+{
+	.Call(Cas.FDate.character, as.character(x))
+}
+
+format.FDate <- function(x, ...)
+{
+	.Call(Cformat.FDate, x)
+}
+
+print.FDate <- function(x, ...)
+{
+	print(format(x), ...)
+}
+
+as.POSIXlt.FDate <- function(x)
+{
+	.Call(Cas.POSIXlt.FDate, x)
 }

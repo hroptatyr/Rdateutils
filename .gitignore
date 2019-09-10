@@ -3,3 +3,5 @@
 build
 vignettes
 *.Rcheck
+core*
+r[0-9]*

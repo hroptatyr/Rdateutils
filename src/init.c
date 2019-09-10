@@ -14,6 +14,10 @@ R_CallMethodDef callMethods[] = {
 	{"Cmday", (DL_FUNC)&mday, -1},
 	{"Cmday<-", (DL_FUNC)&mday_bang, -1},
 	{"Cas.POSIXlt.EDate", (DL_FUNC)&as_POSIXlt_EDate, -1},
+	{"CFDate", (DL_FUNC)&CFDate, -1},
+	{"Cas.FDate.character", (DL_FUNC)&as_FDate_character, -1},
+	{"Cformat.FDate", (DL_FUNC)&format_FDate, -1},
+	{"Cas.POSIXlt.FDate", (DL_FUNC)&as_POSIXlt_FDate, -1},
 	{NULL, NULL, 0}
 };
 

@@ -1,8 +1,5 @@
 #include <unistd.h>
-#include <sys/socket.h>
-#include <sys/epoll.h>
-#include <netinet/in.h>
-#include <netdb.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <R.h>
@@ -74,6 +71,136 @@ static inline int
 _leapp(unsigned int y)
 {
 	return !((y % 4U) || !(y % 100U) && (y % 400U));
+}
+
+
+/* Financial calendar
+ * Y-A Y-S1 Y-Q1 Y-01 Y-01-01 ... Y-01-31
+ * Y-02 Y-02-01 ... Y-02-28 (Y-02-29) (Y-02-30) Y-02-31
+ * ...
+ * This means every year has exactly 391 = 12 * 32 + 4qrt + 2semi + 1full
+ * Congruencies mod 32, 97, 195
+ * years start at 1 */
+static inline FDate
+_mkFDate(unsigned int y, unsigned int m, int d)
+{
+	/* fast forward feb padding */
+	d = m != 2U || d < 29 + _leapp(y) ? d : 31;
+	/* operate 0 based */
+	y--, m--;
+	return 3U + y * 391U + m * 32U + (m / 6U) + (m / 3U) + d;
+}
+
+static FDate
+_rdFDate(const char *s)
+{
+	unsigned int y = 0U;
+	unsigned int m = 0U;
+	unsigned int d = 0U;
+
+	for (; ((unsigned char)*s ^ '0') < 10U; s++) {
+		y *= 10U;
+		y += (unsigned char)*s ^ '0';
+	}
+	switch (*s++) {
+	case '-':
+	case '/':
+		break;
+	case ' ':
+		break;
+	default:
+		goto nope;
+	}
+	switch (*s) {
+	case 'A':
+		d--;
+	case 'S':
+		d--;
+	case 'Q':
+		d--;
+		s++;
+		break;
+	default:
+		break;
+	}
+	for (; ((unsigned char)*s ^ '0') < 10U; s++) {
+		m *= 10U;
+		m += (unsigned char)*s ^ '0';
+	}
+	if (LIKELY(!d)) {
+		switch (*s++) {
+		case '\0':
+			s--;
+		case '-':
+		case '/':
+			break;
+		default:
+			goto nope;
+		}
+		for (; ((unsigned char)*s ^ '0') < 10U; s++) {
+			d *= 10;
+			d += (unsigned char)*s ^ '0';
+		}
+	} else if (m && d > -3U) {
+		m--;
+		m *= -d * 3;
+		m++;
+		m += !m;
+	} else if (!m) {
+		m = 1U;
+	} else {
+		goto nope;
+	}
+	if (*s || (m - 1U) >= 12U || (int)d >= 32) {
+		goto nope;
+	}
+	return _mkFDate(y, m, d);
+nope:
+	return (FDate)-1;
+}
+
+static size_t
+_prFDate(char *restrict buf, size_t bsz, FDate x)
+{
+	unsigned int y = x / 391U;
+	unsigned int yd = x % 391U;
+	int md = (yd + 192U) % 195U % 97U % 32U;
+	unsigned int mo = (yd - md) / 32U;
+	unsigned int qd = (yd % 97U - yd / 195U);
+	size_t z = 4U;
+
+	y++, mo++;
+	buf[3U] = (y % 10U) ^ '0', y /= 10U;
+	buf[2U] = (y % 10U) ^ '0', y /= 10U;
+	buf[1U] = (y % 10U) ^ '0', y /= 10U;
+	buf[0U] = (y % 10U) ^ '0';
+	buf[4U] = '-';
+	if (LIKELY(yd && md)) {
+		buf[6U] = (mo % 10U) ^ '0', mo /= 10U;
+		buf[5U] = (mo % 10U) ^ '0';
+		buf[7U] = '-';
+		buf[9U] = (md % 10U) ^ '0', md /= 10U;
+		buf[8U] = (md % 10U) ^ '0';
+		z = 10U;
+	} else {
+		static char qi[] = "ASQ0";
+		buf[5U] = qi[qd % 4U];
+		switch (qd % 4U) {
+		case 0U:
+			break;
+		case 1U:
+		case 2U:
+			buf[6U] = (yd / (195U / qd) + 1) ^ '0';
+			break;
+		case 3U:
+			buf[6U] = (mo % 10) ^ '0', mo /= 10U;
+			buf[5U] = (mo % 10) ^ '0';
+			break;
+		}
+		z = 7U - !qd;
+	}
+	buf[z] = '\0';
+	return z;
 }
 
 
@@ -373,6 +500,157 @@ as_POSIXlt_EDate(SEXP x)
 			INTEGER(VECTOR_ELT(ans, 6))[i] = (m + 3) % 7;
 			/* yday */
 			INTEGER(VECTOR_ELT(ans, 7))[i] = yd;
+			/* is dst */
+			INTEGER(VECTOR_ELT(ans, 8))[i] = -1;
+		} else {
+			REAL(VECTOR_ELT(ans, 0))[i] = NA_REAL;
+			INTEGER(VECTOR_ELT(ans, 1))[i] = NA_INTEGER;
+			INTEGER(VECTOR_ELT(ans, 2))[i] = NA_INTEGER;
+			/* mday */
+			INTEGER(VECTOR_ELT(ans, 3))[i] = NA_INTEGER;
+			/* mon */
+			INTEGER(VECTOR_ELT(ans, 4))[i] = NA_INTEGER;
+			/* year */
+			INTEGER(VECTOR_ELT(ans, 5))[i] = NA_INTEGER;
+			/* wday */
+			INTEGER(VECTOR_ELT(ans, 6))[i] = NA_INTEGER;
+			/* yday */
+			INTEGER(VECTOR_ELT(ans, 7))[i] = NA_INTEGER;
+			/* is dst */
+			INTEGER(VECTOR_ELT(ans, 8))[i] = -1;
+		}
+	}
+
+	with (SEXP names) {
+		PROTECT(names = allocVector(STRSXP, 9));
+		for (int i = 0; i < 9; i++) {
+			SET_STRING_ELT(names, i, mkChar(ltnames[i]));
+		}
+		namesgets(ans, names);
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("POSIXlt"));
+		SET_STRING_ELT(class, 1, mkChar("POSIXt"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(3);
+	return ans;
+}
+
+
+SEXP
+CFDate(SEXP y, SEXP m, SEXP d)
+{
+	R_xlen_t n = XLENGTH(y);
+	SEXP ans;
+
+	PROTECT(ans = allocVector(INTSXP, n));
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int xy = INTEGER(y)[i];
+		int xm = INTEGER(m)[i];
+		int xd = INTEGER(d)[i];
+		INTEGER(ans)[i] = _mkFDate(xy, xm, xd);
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+as_FDate_character(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans;
+
+	PROTECT(ans = allocVector(INTSXP, n));
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		SEXP s = STRING_ELT(x, i);
+		FDate d;
+
+		if (UNLIKELY(s == NA_STRING || !((d = _rdFDate(CHAR(s)))+1))) {
+			INTEGER(ans)[i] = NA_INTEGER;
+			continue;
+		}
+
+		INTEGER(ans)[i] = d;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+format_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans;
+
+	PROTECT(ans = allocVector(STRSXP, n));
+	/* no omp here as mkCharLen doesn't like it */
+	for (R_xlen_t i = 0; i < n; i++) {
+		int d = INTEGER(x)[i];
+		char buf[32U];
+
+		if (d != NA_INTEGER) {
+			SET_STRING_ELT(ans, i, mkCharLen(buf, _prFDate(buf, sizeof(buf), d)));
+		} else {
+			SET_STRING_ELT(ans, i, NA_STRING);
+		}
+	}
+	UNPROTECT(1);
+
+	return ans;
+}
+
+SEXP
+as_POSIXlt_FDate(SEXP x)
+{
+	static const char ltnames [][7] = {"sec", "min", "hour", "mday", "mon", "year", "wday", "yday", "isdst", "zone",  "gmtoff"};
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans;
+
+	PROTECT(ans = allocVector(VECSXP, 9));
+	SET_VECTOR_ELT(ans, 0, allocVector(REALSXP, n));
+	for (int i = 1; i < 9; i++) {
+		SET_VECTOR_ELT(ans, i, allocVector(INTSXP, n));
+	}
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = INTEGER(x)[i];
+
+		if (m != NA_INTEGER) {
+			unsigned int y = m / 391;
+			unsigned int yd = m % 391;
+			int md = (yd + 192) % 195 % 97 % 32;
+			unsigned int mo = (yd - md) / 32;
+
+			REAL(VECTOR_ELT(ans, 0))[i] = 0.;
+			INTEGER(VECTOR_ELT(ans, 1))[i] = 0;
+			INTEGER(VECTOR_ELT(ans, 2))[i] = 0;
+			/* mday */
+			INTEGER(VECTOR_ELT(ans, 3))[i] = md;
+			/* mon */
+			INTEGER(VECTOR_ELT(ans, 4))[i] = mo;
+			/* year */
+			INTEGER(VECTOR_ELT(ans, 5))[i] = y - 1899;
+			/* wday */
+			INTEGER(VECTOR_ELT(ans, 6))[i] = (m + 3) % 7;
+			/* yday */
+			INTEGER(VECTOR_ELT(ans, 7))[i] = 0;
 			/* is dst */
 			INTEGER(VECTOR_ELT(ans, 8))[i] = -1;
 		} else {

@@ -5,3 +5,4 @@
 ^.*\.tar.gz
 ^\.git
 ^.*\.Rcheck$
+^r[0-9]*hs$

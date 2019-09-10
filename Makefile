@@ -19,7 +19,7 @@ install: build
 
 .PHONY: test
 test:
-	$(R) --vanilla -e 'source("tests/main.R")'
+	$(R) --vanilla -e 'source("tests/FDate.R")'
 
 .PHONY: check
 check:
