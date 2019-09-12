@@ -1,5 +1,5 @@
-library(dateutils)
 library(data.table)
+library(dateutils)
 
 x <- c("2000-A", "2000-S1", "2000-Q1", "2000-01", "2000-01-01",
 	"2000-02-00", "2000-02-01", "2000-02-28", "2000-02-29", "2000-02-30", "2000-02-31",
@@ -10,6 +10,15 @@ x <- c("2000-A", "2000-S1", "2000-Q1", "2000-01", "2000-01-01",
 	"2002-05", "2002-06", "2002-07", "2002-08",
 	"2002-09", "2002-10", "2002-11", "2002-12")
 print(data.table(x, as.FDate(x)))
+
+y <- seq(as.FDate("2002-A"),as.FDate("2003-A"))
+y <- seq(as.FDate("2000-A"),as.FDate("2001-A"))
+class(y) <- "FDate"
+
+options(width=196)
+options(datatable.print.nrows=400)
+
+print(data.table(y, year=year(y), yday=yday(y), semi=semi(y), sday=sday(y), quarter=quarter(y), qday=qday(y), month=month(y), mday=mday(y)))
 
 library(microbenchmark)
 library(lubridate)

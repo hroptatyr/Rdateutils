@@ -1,3 +1,13 @@
+year <- function(x, ...) UseMethod("year")
+yday <- function(x, ...) UseMethod("yday")
+semi <- function(x, ...) UseMethod("semi")
+sday <- function(x, ...) UseMethod("sday")
+quarter <- function(x, ...) UseMethod("quarter")
+qday <- function(x, ...) UseMethod("qday")
+month <- function(x, ...) UseMethod("month")
+mday <- function(x, ...) UseMethod("mday")
+
+
 as.EDate <- function(x, ...) UseMethod("as.EDate")
 
 as.EDate.default <- function(x, ..., tz=attr(x, "tzone"))
@@ -59,7 +69,6 @@ as.POSIXct.EDate <- function(x, ...)
 	return(as.POSIXct(as.Date(x)))
 }
 
-
 c.EDate <- cut.EDate <- mean.EDate <- rep.EDate <-
 cut.EDate <- mean.EDate <- rep.EDate <- round.EDate <-
 seq.EDate <- split.EDate <- unique.EDate <- function(x, ...)
@@ -67,11 +76,10 @@ seq.EDate <- split.EDate <- unique.EDate <- function(x, ...)
 	as.EDate(NextMethod())
 }
 
-
-## extractions
-year <- function(x)
+## accessors
+year.EDate <- function(x)
 {
-	.Call(Cyear, as.EDate(x))
+	.Call(Cyear.EDate, x)
 }
 
 `year<-` <- function(x, value)
@@ -79,9 +87,9 @@ year <- function(x)
 	.Call(`Cyear<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
 }
 
-yday <- function(x)
+yday.EDate <- function(x)
 {
-	.Call(Cyday, as.EDate(x))
+	.Call(Cyday.EDate, x)
 }
 
 `yday<-` <- function(x, value)
@@ -89,9 +97,9 @@ yday <- function(x)
 	.Call(`Cyday<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
 }
 
-month <- function(x)
+month.EDate <- function(x)
 {
-	.Call(Cmonth, as.EDate(x))
+	.Call(Cmonth.EDate, x)
 }
 
 `month<-` <- function(x, value)
@@ -99,9 +107,9 @@ month <- function(x)
 	.Call(`Cmonth<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
 }
 
-mday <- function(x)
+mday.EDate <- function(x)
 {
-	.Call(Cmday, as.EDate(x))
+	.Call(Cmday.EDate, x)
 }
 
 `mday<-` <- function(x, value)
@@ -110,72 +118,7 @@ mday <- function(x)
 }
 
 
-year1 <- function(x)
-{
-	x <- unclass(as.IDate(x)) + 719163L ##/*0001-01-00*/
-	guess <- x %/% 365L
-	guess <- guess - (j00(guess) >= x)
-	guess <- guess - (j00(guess) >= x)
-	return(guess + 1L)
-}
-
-yday1 <- function(x)
-{
-	x <- unclass(as.IDate(x)) + 719163L ##/*0001-01-00*/
-	guess <- x %/% 365L
-	guess <- guess - (j00(guess) >= x)
-	guess <- guess - (j00(guess) >= x)
-	return(x - j00(guess))
-}
-
-
-## with -03-01 as start of year
-j002 <- function(x)
-{
-	x * 365L + x %/% 4L - x %/% 100L + x %/% 400L
-}
-
-year2 <- function(x)
-{
-	x <- unclass(as.IDate(x)) + 719468L ##/*0000-03-01*/
-	return(as.integer(trunc(x / 365.2425)))
-}
-
-yday2 <- function(x)
-{
-	x <- unclass(as.IDate(x)) + 719468L ##/*0000-03-01*/
-	y <- as.integer(trunc(x / 365.2425))
-	return(x - j002(y) + 1L)
-}
-
-month2 <- function(x)
-{
-## 31 30 31 30 31  31 30 31 30 31  31 28+
-## cumsum(c(0,31,30,31,30,31, 31,30,31,30,31, 31)+31L)%/%64L is 0,1,2,3,...
-	yd <- yday2(x) - 1L
-	pent <- as.integer(trunc(yd / 153))
-	yd <- (yd - 153L * pent) * 2L
-	mo <- yd %/% 61L
-	return(5L*pent+mo+1L)
-}
-
-mday2 <- function(x)
-{
-## 31 30 31 30 31  31 30 31 30 31  31 28+
-## cumsum(c(0,31,30,31,30,31, 31,30,31,30,31, 31)+31L)%/%64L is 0,1,2,3,...
-	yd <- yday2(x) - 1L
-	pent <- as.integer(trunc(yd / 153))
-	yd <- (yd - 153L * pent) * 2L
-	md <- yd %% 61L %/% 2L
-	return(md+1L)
-}
-
 as.FDate <- function(x, ...) UseMethod("as.FDate")
-
-#FDate <- function(year, mon, day)
-#{
-#	4L + (year - 1L) * 391L + (mon - 1L) * 32 + ((mon-1)%/%6L) + ((mon-1)%/%3L) + day
-#}
 
 FDate <- function(year, mon, day)
 {
@@ -185,6 +128,11 @@ FDate <- function(year, mon, day)
 as.FDate.character <- function(x)
 {
 	.Call(Cas.FDate.character, as.character(x))
+}
+
+as.FDate.FDate <- function(x, ...)
+{
+	return(x)
 }
 
 format.FDate <- function(x, ...)
@@ -200,4 +148,52 @@ print.FDate <- function(x, ...)
 as.POSIXlt.FDate <- function(x)
 {
 	.Call(Cas.POSIXlt.FDate, x)
+}
+
+c.FDate <- cut.FDate <- mean.FDate <- rep.FDate <-
+cut.FDate <- mean.FDate <- rep.FDate <- round.FDate <-
+seq.FDate <- split.FDate <- unique.FDate <- function(x, ...)
+{
+	as.FDate(NextMethod())
+}
+
+## accessors
+year.FDate <- function(x)
+{
+	.Call(Cyear.FDate, x)
+}
+
+yday.FDate <- function(x)
+{
+	.Call(Cyday.FDate, x)
+}
+
+semi.FDate <- function(x)
+{
+	.Call(Csemi.FDate, x)
+}
+
+sday.FDate <- function(x)
+{
+	.Call(Csday.FDate, x)
+}
+
+quarter.FDate <- function(x)
+{
+	.Call(Cquarter.FDate, x)
+}
+
+qday.FDate <- function(x)
+{
+	.Call(Cqday.FDate, x)
+}
+
+month.FDate <- function(x)
+{
+	.Call(Cmonth.FDate, x)
+}
+
+mday.FDate <- function(x)
+{
+	.Call(Cmday.FDate, x)
 }
