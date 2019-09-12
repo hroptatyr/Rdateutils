@@ -45,14 +45,26 @@ export(month.EDate)
 S3method(mday, EDate)
 export(mday.EDate)
 
+
 export(FDate)
 export(as.FDate)
 S3method(as.FDate, character)
 S3method(as.FDate, FDate)
-S3method(format, FDate)
-S3method(print, FDate)
+S3method(as.FDate, numeric)
 S3method(as.POSIXlt, FDate)
 export(as.POSIXlt.FDate)
+
+S3method(format, FDate)
+S3method(print, FDate)
+
+S3method(c, FDate)
+S3method(cut, FDate)
+S3method(mean, FDate)
+S3method(rep, FDate)
+S3method(round, FDate)
+S3method(seq, FDate)
+S3method(split, FDate)
+S3method(unique, FDate)
 
 S3method(year, FDate)
 export(year.FDate)

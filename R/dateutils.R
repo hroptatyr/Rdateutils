@@ -135,6 +135,14 @@ as.FDate.FDate <- function(x, ...)
 	return(x)
 }
 
+as.FDate.numeric <- function(x, ...)
+{
+## assume correct origin
+	x <- as.integer(x)
+	class(x) <- "FDate"
+	return(x)
+}
+
 format.FDate <- function(x, ...)
 {
 	.Call(Cformat.FDate, x)

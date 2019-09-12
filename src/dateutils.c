@@ -81,9 +81,10 @@ _leapp(unsigned int y)
  * This means every year has exactly 391 = 12 * 32 + 4qrt + 2semi + 1full
  * Congruencies mod 32, 97, 195
  * years start at 1 */
-static const int8_t yday_ad[] = {0,1,5,7,9,10,14,15,16,19,20,22};
+static const int8_t yday_ad[] = {0,1,5,7,9,10,14,15,16,19,20,22,23};
 static const int8_t qday_ad[] = {0,0,1,3};
 /* q*90=qday_ad can be calced as 97q-yday_ad[3q+!!q] */
+static const int16_t yday_eom[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
 
 static inline FDate
 _mkFDate(unsigned int y, unsigned int m, int d)
@@ -732,11 +733,20 @@ yday_FDate(SEXP x)
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32U;
 
-		/* massage y and yd into Jan years */
-		INTEGER(ans)[i] = m != NA_INTEGER
-			? yd && md
-			? yd - 3 - yday_ad[mo] + (mo-2U<10U && _leapp(y+1U)) : 0
-			: NA_INTEGER;
+		if (m != NA_INTEGER && yd && md) {
+			unsigned int eo = yday_eom[mo + 1U];
+
+			md += mo>2U && _leapp(y+1U);
+			eo += mo>1U && _leapp(y+1U);
+
+			yd = yday_eom[mo] + md;
+			yd = yd <= eo ? yd : eo;
+		} else if (m != NA_INTEGER) {
+			yd = 0;
+		} else {
+			yd = NA_INTEGER;
+		}
+		INTEGER(ans)[i] = yd;
 	}
 
 	UNPROTECT(1);
@@ -778,16 +788,23 @@ sday_FDate(SEXP x)
 		int m = INTEGER(x)[i];
 		unsigned int y = m / 391U;
 		unsigned int yd = m % 391U;
-		unsigned int q = (yd - 2 - (yd > 195U)) / 97U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32U;
-		/* q adjustments of yday are 0,90,91,92 = 0,90,181,273 */
 
-		INTEGER(ans)[i] = m != NA_INTEGER
-			? yd && md
-			? yd - 3 - yday_ad[mo] - ((yd > 195U)*2U*90U + qday_ad[(yd > 195U)*2U]) + (mo-2U<4U && _leapp(y+1U))
-			: 0
-			: NA_INTEGER;
+		if (m != NA_INTEGER && yd && md) {
+			unsigned int eo = yday_eom[mo + 1U] - yday_eom[6U*(yd>195U)];
+
+			md += mo>2U && _leapp(y+1U) && yd<=195U;
+			eo += mo>1U && _leapp(y+1U) && yd<=195U;
+
+			yd = yday_eom[mo] + md - yday_eom[6U*(yd>195U)];
+			yd = yd <= eo ? yd : eo;
+		} else if (m != NA_INTEGER) {
+			yd = 0;
+		} else {
+			yd = NA_INTEGER;
+		}
+		INTEGER(ans)[i] = yd;
 	}
 
 	UNPROTECT(1);
@@ -832,15 +849,24 @@ qday_FDate(SEXP x)
 		int m = INTEGER(x)[i];
 		unsigned int y = m / 391U;
 		unsigned int yd = m % 391U;
-		unsigned int q = (yd - 2 - (yd > 195U)) / 97U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32U;
+		unsigned int q = (yd - 2 - (yd > 195U)) / 97U;
 
-		INTEGER(ans)[i] = m != NA_INTEGER
-			? yd && md
-			? yd - 3 - yday_ad[mo] - (q*90U + qday_ad[q]) + (mo==2U && _leapp(y+1U))
-			: 0
-			: NA_INTEGER;
+		if (m != NA_INTEGER && yd && md) {
+			unsigned int eo = yday_eom[mo + 1U] - yday_eom[3U*q];
+
+			md += mo>2U && _leapp(y+1U) && !q;
+			eo += mo>1U && _leapp(y+1U) && !q;
+
+			yd = yday_eom[mo] + md - yday_eom[3U*q];
+			yd = yd <= eo ? yd : eo;
+		} else if (m != NA_INTEGER) {
+			yd = 0;
+		} else {
+			yd = NA_INTEGER;
+		}
+		INTEGER(ans)[i] = yd;
 	}
 
 	UNPROTECT(1);
@@ -883,10 +909,22 @@ mday_FDate(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = INTEGER(x)[i];
+		unsigned int y = m / 391U;
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
 
-		INTEGER(ans)[i] = m != NA_INTEGER ? yd ? md : 0 : NA_INTEGER;
+		if (m != NA_INTEGER && yd && md) {
+			unsigned int eo = yday_eom[mo + 1U] - yday_eom[mo];
+
+			eo += mo==1U && _leapp(y+1U);
+			yd = md <= eo ? md : eo;
+		} else if (m != NA_INTEGER) {
+			yd = 0;
+		} else {
+			yd = NA_INTEGER;
+		}
+		INTEGER(ans)[i] = yd;
 	}
 
 	UNPROTECT(1);

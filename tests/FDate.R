@@ -13,7 +13,6 @@ print(data.table(x, as.FDate(x)))
 
 y <- seq(as.FDate("2002-A"),as.FDate("2003-A"))
 y <- seq(as.FDate("2000-A"),as.FDate("2001-A"))
-class(y) <- "FDate"
 
 options(width=196)
 options(datatable.print.nrows=400)
@@ -21,6 +20,16 @@ options(datatable.print.nrows=400)
 print(data.table(y, year=year(y), yday=yday(y), semi=semi(y), sday=sday(y), quarter=quarter(y), qday=qday(y), month=month(y), mday=mday(y)))
 
 library(microbenchmark)
+
+print(length(bigy <- rep(y, 10000L)))
+print(class(bigy))
+gc(); gc()
+print("micro")
+print(microbenchmark(yday(bigy)))
+print(microbenchmark(sday(bigy)))
+print(microbenchmark(qday(bigy)))
+print(microbenchmark(mday(bigy)))
+
 library(lubridate)
 
 print(microbenchmark(as.FDate(rep("2000-02-29",100000L))))
