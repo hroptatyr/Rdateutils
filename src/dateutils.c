@@ -82,8 +82,8 @@ _leapp(unsigned int y)
  * Congruencies mod 32, 97, 195
  * years start at 1 */
 static const int8_t yday_ad[] = {0,1,5,7,9,10,14,15,16,19,20,22};
-static const int16_t qday_ad[] = {0,90,181,273};
-/* qday can be calced as 97q-yday_ad[3q+!!q] */
+static const int8_t qday_ad[] = {0,0,1,3};
+/* q*90=qday_ad can be calced as 97q-yday_ad[3q+!!q] */
 
 static inline FDate
 _mkFDate(unsigned int y, unsigned int m, int d)
@@ -778,14 +778,14 @@ sday_FDate(SEXP x)
 		int m = INTEGER(x)[i];
 		unsigned int y = m / 391U;
 		unsigned int yd = m % 391U;
-		unsigned int q = (yd + 95U) / 97U - 1U;
+		unsigned int q = (yd - 2 - (yd > 195U)) / 97U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32U;
 		/* q adjustments of yday are 0,90,91,92 = 0,90,181,273 */
 
 		INTEGER(ans)[i] = m != NA_INTEGER
 			? yd && md
-			? yd - 3 - yday_ad[mo] - qday_ad[(yd > 195U)*2U] + (mo-2U<4U && _leapp(y+1U))
+			? yd - 3 - yday_ad[mo] - ((yd > 195U)*2U*90U + qday_ad[(yd > 195U)*2U]) + (mo-2U<4U && _leapp(y+1U))
 			: 0
 			: NA_INTEGER;
 	}
@@ -838,7 +838,7 @@ qday_FDate(SEXP x)
 
 		INTEGER(ans)[i] = m != NA_INTEGER
 			? yd && md
-			? yd - 3 - yday_ad[mo] - qday_ad[q] + (mo==2U && _leapp(y+1U))
+			? yd - 3 - yday_ad[mo] - (q*90U + qday_ad[q]) + (mo==2U && _leapp(y+1U))
 			: 0
 			: NA_INTEGER;
 	}
