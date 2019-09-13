@@ -756,8 +756,8 @@ yday_FDate(SEXP x)
 		if (m != NA_INTEGER && yd && md) {
 			unsigned int eo = yday_eom[mo + 1U];
 
-			md += mo>2U && _leapp(y+1U);
-			eo += mo>1U && _leapp(y+1U);
+			md += mo>1U && _leapp(y+1U);
+			eo += mo>0U && _leapp(y+1U);
 
 			yd = yday_eom[mo] + md;
 			yd = yd <= eo ? yd : eo;
@@ -815,8 +815,8 @@ sday_FDate(SEXP x)
 		if (m != NA_INTEGER && yd && md) {
 			unsigned int eo = yday_eom[mo + 1U] - yday_eom[6U*(yd>195U)];
 
-			md += mo>2U && _leapp(y+1U) && yd<=195U;
-			eo += mo>1U && _leapp(y+1U) && yd<=195U;
+			md += mo>1U && _leapp(y+1U) && yd<=195U;
+			eo += mo>0U && _leapp(y+1U) && yd<=195U;
 
 			yd = yday_eom[mo] + md - yday_eom[6U*(yd>195U)];
 			yd = yd <= eo ? yd : eo;
@@ -878,8 +878,8 @@ qday_FDate(SEXP x)
 		if (m != NA_INTEGER && yd && md) {
 			unsigned int eo = yday_eom[mo + 1U] - yday_eom[3U*q];
 
-			md += mo>2U && _leapp(y+1U) && !q;
-			eo += mo>1U && _leapp(y+1U) && !q;
+			md += mo>1U && _leapp(y+1U) && !q;
+			eo += mo>0U && _leapp(y+1U) && !q;
 
 			yd = yday_eom[mo] + md - yday_eom[3U*q];
 			yd = yd <= eo ? yd : eo;
@@ -1014,8 +1014,8 @@ wday_FDate(SEXP x)
 			/* f00 is the wday of Jan-00 */
 			unsigned int f00 = y + y / 4U - y / 100U + y / 400U;
 
-			md += mo>2U && _leapp(y+1U);
-			eo += mo>1U && _leapp(y+1U);
+			md += mo>1U && _leapp(y+1U);
+			eo += mo>0U && _leapp(y+1U);
 
 			yd = yday_eom[mo] + md;
 			yd = yd <= eo ? yd : eo;
