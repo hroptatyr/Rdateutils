@@ -970,11 +970,11 @@ week_FDate(SEXP x)
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32U;
-		/* f01 is the wday of Jan-01, Sakamoto method */
-		unsigned int f01 = (y + y / 4U - y / 100U + y / 400U + 1U) % 7U;
 
 		if (m != NA_INTEGER && yd && md) {
 			unsigned int eo = yday_eom[mo + 1U];
+			/* f01 is the wday of Jan-01 */
+			unsigned int f01 = (y + y / 4U - y / 100U + y / 400U + 1U) % 7U;
 
 			md += mo>2U && _leapp(y+1U);
 			eo += mo>1U && _leapp(y+1U);
@@ -1002,10 +1002,6 @@ wday_FDate(SEXP x)
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		/* 0U, 3U, 2U, 5U, 0U, 3U, 5U, 1U, 4U, 6U, 2U, 4U */
-		const uint32_t adjb = 3U << 30U ^ 2U << 27U ^ 5U << 24U ^
-			0U << 21U ^ 3U << 18U ^ 5U << 15U ^ 1U << 12U ^
-			4U << 9U ^ 6U << 6U ^ 2U << 3U ^ 4U << 0U;
 		int m = xp[i];
 		unsigned int y = m / 391U;
 		unsigned int yd = m % 391U;
@@ -1014,17 +1010,17 @@ wday_FDate(SEXP x)
 		unsigned int wd;
 
 		if (m != NA_INTEGER && yd && md) {
-			unsigned int eo = yday_eom[mo + 1U] - yday_eom[mo];
+			unsigned int eo = yday_eom[mo + 1U];
+			/* f00 is the wday of Jan-00 */
+			unsigned int f00 = y + y / 4U - y / 100U + y / 400U;
 
-			eo += mo==1U && _leapp(y+1U);
-			md = md <= eo ? md : eo;
+			md += mo>2U && _leapp(y+1U);
+			eo += mo>1U && _leapp(y+1U);
 
-			y += mo >= 2U;
-			mo = 11U - mo;
-			wd = y + y / 4U - y / 100U + y / 400U;
-			wd += (adjb >> (mo * 2U)) >> mo & 0b111U;
-			wd += md;
-			wd %= 7U;
+			yd = yday_eom[mo] + md;
+			yd = yd <= eo ? yd : eo;
+
+			wd = (f00 + yd) % 7U;
 		} else {
 			wd = NA_INTEGER;
 		}
