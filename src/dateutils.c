@@ -81,10 +81,10 @@ _leapp(unsigned int y)
  * This means every year has exactly 391 = 12 * 32 + 4qrt + 2semi + 1full
  * Congruencies mod 32, 97, 195
  * years start at 1 */
-static const int8_t yday_ad[] = {0,1,5,7,9,10,14,15,16,19,20,22,23};
-static const int8_t qday_ad[] = {0,0,1,3};
+static const int_fast8_t yday_adj[] = {0,1,5,7,9,10,14,15,16,19,20,22,23};
+static const int_fast8_t qday_adj[] = {0,0,1,3};
 /* q*90=qday_ad can be calced as 97q-yday_ad[3q+!!q] */
-static const int16_t yday_eom[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
+static const int_fast16_t yday_eom[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
 
 static inline FDate
 _mkFDate(unsigned int y, unsigned int m, int d)
@@ -948,6 +948,87 @@ mday_FDate(SEXP x)
 			yd = NA_INTEGER;
 		}
 		ansp[i] = yd;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+week_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		static const int_fast8_t iso[] = {2, 1, 0, -1, -2, 4, 3, 2};
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+		/* f01 is the wday of Jan-01, Sakamoto method */
+		unsigned int f01 = (y + y / 4U - y / 100U + y / 400U + 1U) % 7U;
+
+		if (m != NA_INTEGER && yd && md) {
+			unsigned int eo = yday_eom[mo + 1U];
+
+			md += mo>2U && _leapp(y+1U);
+			eo += mo>1U && _leapp(y+1U);
+
+			yd = yday_eom[mo] + md;
+			yd = yd <= eo ? yd : eo;
+			yd = (7 + yd - iso[f01]) / 7;
+		} else {
+			yd = NA_INTEGER;
+		}
+		ansp[i] = yd;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+wday_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		/* 0U, 3U, 2U, 5U, 0U, 3U, 5U, 1U, 4U, 6U, 2U, 4U */
+		const uint32_t adjb = 3U << 30U ^ 2U << 27U ^ 5U << 24U ^
+			0U << 21U ^ 3U << 18U ^ 5U << 15U ^ 1U << 12U ^
+			4U << 9U ^ 6U << 6U ^ 2U << 3U ^ 4U << 0U;
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+		unsigned int wd;
+
+		if (m != NA_INTEGER && yd && md) {
+			unsigned int eo = yday_eom[mo + 1U] - yday_eom[mo];
+
+			eo += mo==1U && _leapp(y+1U);
+			md = md <= eo ? md : eo;
+
+			y += mo >= 2U;
+			mo = 11U - mo;
+			wd = y + y / 4U - y / 100U + y / 400U;
+			wd += (adjb >> (mo * 2U)) >> mo & 0b111U;
+			wd += md;
+			wd %= 7U;
+		} else {
+			wd = NA_INTEGER;
+		}
+		ansp[i] = wd;
 	}
 
 	UNPROTECT(1);

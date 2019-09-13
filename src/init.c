@@ -27,6 +27,9 @@ R_CallMethodDef callMethods[] = {
 	{"Cqday.FDate", (DL_FUNC)&qday_FDate, -1},
 	{"Cmonth.FDate", (DL_FUNC)&month_FDate, -1},
 	{"Cmday.FDate", (DL_FUNC)&mday_FDate, -1},
+	{"Cweek.FDate", (DL_FUNC)&week_FDate, -1},
+	{"Cwday.FDate", (DL_FUNC)&wday_FDate, -1},
+
 	{NULL, NULL, 0}
 };
 

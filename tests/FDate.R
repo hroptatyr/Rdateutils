@@ -11,13 +11,13 @@ x <- c("2000-A", "2000-S1", "2000-Q1", "2000-01", "2000-01-01",
 	"2002-09", "2002-10", "2002-11", "2002-12")
 print(data.table(x, as.FDate(x)))
 
-y <- seq(as.FDate("2002-A"),as.FDate("2003-A"))
 y <- seq(as.FDate("2000-A"),as.FDate("2001-A"))
+y <- seq(as.FDate("2002-A"),as.FDate("2003-A"))
 
 options(width=196)
 options(datatable.print.nrows=400)
 
-print(data.table(y, year=year(y), yday=yday(y), semi=semi(y), sday=sday(y), quarter=quarter(y), qday=qday(y), month=month(y), mday=mday(y)))
+print(data.table(y, year=year(y), yday=yday(y), semi=semi(y), sday=sday(y), quarter=quarter(y), qday=qday(y), month=month(y), mday=mday(y), week=week(y), wday=wday(y)))
 
 library(microbenchmark)
 
@@ -28,6 +28,7 @@ print(microbenchmark(yday(bigy)))
 print(microbenchmark(sday(bigy)))
 print(microbenchmark(qday(bigy)))
 print(microbenchmark(mday(bigy)))
+print(microbenchmark(wday(bigy)))
 
 library(lubridate)
 

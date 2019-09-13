@@ -6,6 +6,8 @@ quarter <- function(x, ...) UseMethod("quarter")
 qday <- function(x, ...) UseMethod("qday")
 month <- function(x, ...) UseMethod("month")
 mday <- function(x, ...) UseMethod("mday")
+week <- function(x, ...) UseMethod("week")
+wday <- function(x, ...) UseMethod("wday")
 
 
 as.EDate <- function(x, ...) UseMethod("as.EDate")
@@ -204,4 +206,14 @@ month.FDate <- function(x)
 mday.FDate <- function(x)
 {
 	.Call(Cmday.FDate, x)
+}
+
+week.FDate <- function(x)
+{
+	.Call(Cweek.FDate, x)
+}
+
+wday.FDate <- function(x)
+{
+	.Call(Cwday.FDate, x)
 }
