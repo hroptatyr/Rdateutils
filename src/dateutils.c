@@ -171,7 +171,7 @@ _prFDate(char *restrict buf, size_t bsz, FDate x)
 	unsigned int yd = x % 391U;
 	unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 	unsigned int mo = (yd - md) / 32U;
-	unsigned int qd = (yd % 97U - yd / 195U);
+	unsigned int qd = (yd % 97U - (yd > 195U));
 	size_t z = 4U;
 
 	y++, mo++;
@@ -636,12 +636,24 @@ as_POSIXlt_FDate(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = INTEGER(x)[i];
+		unsigned int y = m / 391;
+		unsigned int yd = m % 391;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32;
 
-		if (m != NA_INTEGER) {
-			unsigned int y = m / 391;
-			unsigned int yd = m % 391;
-			int md = (yd + 192) % 195 % 97 % 32;
-			unsigned int mo = (yd - md) / 32;
+		if (m != NA_INTEGER && yd && md) {
+			unsigned int eo;
+
+			/* embed yd */
+			eo = yday_eom[mo + 1U];
+			eo += mo>1U && _leapp(y+1U);
+			yd = yday_eom[mo] + md + (mo>2U && _leapp(y+1U));
+			yd = yd <= eo ? yd : eo;
+
+			/* embed md */
+			eo = yday_eom[mo + 1U] - yday_eom[mo];
+			eo += mo==1U && _leapp(y+1U);
+			md = md <= eo ? md : eo;
 
 			REAL(VECTOR_ELT(ans, 0))[i] = 0.;
 			INTEGER(VECTOR_ELT(ans, 1))[i] = 0;
@@ -655,7 +667,7 @@ as_POSIXlt_FDate(SEXP x)
 			/* wday */
 			INTEGER(VECTOR_ELT(ans, 6))[i] = (m + 3) % 7;
 			/* yday */
-			INTEGER(VECTOR_ELT(ans, 7))[i] = 0;
+			INTEGER(VECTOR_ELT(ans, 7))[i] = yd;
 			/* is dst */
 			INTEGER(VECTOR_ELT(ans, 8))[i] = -1;
 		} else {
@@ -741,7 +753,7 @@ yday_FDate(SEXP x)
 
 			yd = yday_eom[mo] + md;
 			yd = yd <= eo ? yd : eo;
-		} else if (m != NA_INTEGER) {
+		} else if (m != NA_INTEGER && !yd) {
 			yd = 0;
 		} else {
 			yd = NA_INTEGER;
@@ -790,6 +802,7 @@ sday_FDate(SEXP x)
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32U;
+		unsigned int qd = (yd % 97U - (yd > 195U));
 
 		if (m != NA_INTEGER && yd && md) {
 			unsigned int eo = yday_eom[mo + 1U] - yday_eom[6U*(yd>195U)];
@@ -799,7 +812,7 @@ sday_FDate(SEXP x)
 
 			yd = yday_eom[mo] + md - yday_eom[6U*(yd>195U)];
 			yd = yd <= eo ? yd : eo;
-		} else if (m != NA_INTEGER) {
+		} else if (m != NA_INTEGER && qd%4U == 1U) {
 			yd = 0;
 		} else {
 			yd = NA_INTEGER;
@@ -851,6 +864,7 @@ qday_FDate(SEXP x)
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32U;
+		unsigned int qd = (yd % 97U - (yd > 195U));
 		unsigned int q = (yd - 2 - (yd > 195U)) / 97U;
 
 		if (m != NA_INTEGER && yd && md) {
@@ -861,7 +875,7 @@ qday_FDate(SEXP x)
 
 			yd = yday_eom[mo] + md - yday_eom[3U*q];
 			yd = yd <= eo ? yd : eo;
-		} else if (m != NA_INTEGER) {
+		} else if (m != NA_INTEGER && qd%4U == 2U) {
 			yd = 0;
 		} else {
 			yd = NA_INTEGER;
@@ -913,13 +927,14 @@ mday_FDate(SEXP x)
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32U;
+		unsigned int qd = (yd % 97U - (yd > 195U));
 
 		if (m != NA_INTEGER && yd && md) {
 			unsigned int eo = yday_eom[mo + 1U] - yday_eom[mo];
 
 			eo += mo==1U && _leapp(y+1U);
 			yd = md <= eo ? md : eo;
-		} else if (m != NA_INTEGER) {
+		} else if (m != NA_INTEGER && qd%4U == 3U) {
 			yd = 0;
 		} else {
 			yd = NA_INTEGER;
