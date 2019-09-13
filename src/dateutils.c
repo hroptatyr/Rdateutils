@@ -89,8 +89,6 @@ static const int16_t yday_eom[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 
 static inline FDate
 _mkFDate(unsigned int y, unsigned int m, int d)
 {
-	/* fast forward feb padding */
-	d = m != 2U || d < 29 + _leapp(y) ? d : 31;
 	/* operate 0 based */
 	y--, m--;
 	return 3U + y * 391U + m * 32U + (m / 6U) + (m / 3U) + d;
