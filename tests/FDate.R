@@ -21,9 +21,8 @@ print(data.table(y, year=year(y), yday=yday(y), semi=semi(y), sday=sday(y), quar
 
 library(microbenchmark)
 
-print(length(bigy <- rep(y, 10000L)))
+print(length(bigy <- rep(y, 100000L)))
 print(class(bigy))
-gc(); gc()
 print("micro")
 print(microbenchmark(yday(bigy)))
 print(microbenchmark(sday(bigy)))

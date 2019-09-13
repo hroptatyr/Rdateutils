@@ -211,20 +211,20 @@ SEXP
 year_EDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		unsigned int yyd = _yyd(m);
 		unsigned int y = (yyd >> 16U);
 		unsigned int yd = yyd & 0xffffU;
 
 		/* massage y and yd into Jan years */
 		y += yd >= 307U;
-		INTEGER(ans)[i] = m != NA_INTEGER ? y : NA_INTEGER;
+		ansp[i] = m != NA_INTEGER ? y : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -235,13 +235,13 @@ SEXP
 year_bang(SEXP x, SEXP value)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		int y2b = INTEGER(value)[i];
 		unsigned int yyd = _yyd(m);
 		unsigned int y = (yyd >> 16U);
@@ -250,7 +250,7 @@ year_bang(SEXP x, SEXP value)
 		/* massage y and yd into Jan years */
 		yd -= yd > 365U && !_leapp(y2b);
 		y2b -= yd >= 307U;
-		INTEGER(ans)[i] = m != NA_INTEGER ? _j00(y2b) + yd - 1 : NA_INTEGER;
+		ansp[i] = m != NA_INTEGER ? _j00(y2b) + yd - 1 : NA_INTEGER;
 	}
 
 	with (SEXP class) {
@@ -267,13 +267,13 @@ SEXP
 yday_EDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		unsigned int yyd = _yyd(m);
 		unsigned int y = (yyd >> 16U);
 		unsigned int yd = yyd & 0xffffU;
@@ -281,7 +281,7 @@ yday_EDate(SEXP x)
 		/* massage y and yd into Jan years */
 		y += yd >= 307U;
 		yd += yd < 307U ? 59U + _leapp(y) : -306U;
-		INTEGER(ans)[i] = m != NA_INTEGER ? yd : NA_INTEGER;
+		ansp[i] = m != NA_INTEGER ? yd : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -292,13 +292,13 @@ SEXP
 yday_bang(SEXP x, SEXP value)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		int yd2b = INTEGER(value)[i];
 		unsigned int yyd = _yyd(m);
 		unsigned int y = (yyd >> 16U);
@@ -310,7 +310,7 @@ yday_bang(SEXP x, SEXP value)
 		yd2b = yd2b <= 365 ? yd2b : !_leapp(y) ? 365 : 366;
 		yd2b = yd2b >= -364 ? yd2b : !_leapp(y-1) ? -364 : -365;
 		yd2b -= 59 + _leapp(y);
-		INTEGER(ans)[i] = m != NA_INTEGER ? _j00(y) + yd2b - 1 : NA_INTEGER;
+		ansp[i] = m != NA_INTEGER ? _j00(y) + yd2b - 1 : NA_INTEGER;
 	}
 
 	with (SEXP class) {
@@ -327,14 +327,14 @@ SEXP
 month_EDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
-		INTEGER(ans)[i] = m != NA_INTEGER ? _month(m) : NA_INTEGER;
+		int m = xp[i];
+		ansp[i] = m != NA_INTEGER ? _month(m) : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -350,13 +350,13 @@ month_bang(SEXP x, SEXP value)
 		123U, 154U, 185U, 215U, 246U, 276U, 307U,
 	};
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		int m2b = INTEGER(value)[i] - 1;
 
 		if (m != NA_INTEGER && (unsigned int)m2b < 12U) {
@@ -378,9 +378,9 @@ month_bang(SEXP x, SEXP value)
 			/* clamp to month's last */
 			yd2b -= m2b > 3U && yd2b >= moyd[m2b + 1U];
 
-			INTEGER(ans)[i] = _j00(y) + yd2b - 1;
+			ansp[i] = _j00(y) + yd2b - 1;
 		} else {
-			INTEGER(ans)[i] = NA_INTEGER;
+			ansp[i] = NA_INTEGER;
 		}
 	}
 
@@ -398,14 +398,14 @@ SEXP
 mday_EDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
-		INTEGER(ans)[i] = m != NA_INTEGER ? _mday(m) : NA_INTEGER;
+		int m = xp[i];
+		ansp[i] = m != NA_INTEGER ? _mday(m) : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -422,13 +422,13 @@ mday_bang(SEXP x, SEXP value)
 		31U, 29U,
 	};
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		int md2b = INTEGER(value)[i] - 1;
 
 		if (m != NA_INTEGER && (unsigned int)md2b <= 31U) {
@@ -445,9 +445,9 @@ mday_bang(SEXP x, SEXP value)
 			md2b = md2b < mond[mo] ? md2b : mond[mo] - 1;
 			yd2b = yd - md + md2b;
 			yd2b -= yd2b > 365 && !_leapp(y+1U);
-			INTEGER(ans)[i] = _j00(y) + yd2b - 1;
+			ansp[i] = _j00(y) + yd2b - 1;
 		} else {
-			INTEGER(ans)[i] = NA_INTEGER;
+			ansp[i] = NA_INTEGER;
 		}
 	}
 
@@ -466,17 +466,22 @@ as_POSIXlt_EDate(SEXP x)
 {
 	static const char ltnames [][7] = {"sec", "min", "hour", "mday", "mon", "year", "wday", "yday", "isdst", "zone",  "gmtoff"};
 	R_xlen_t n = XLENGTH(x);
+	const int *xp = INTEGER(x);
+	double *restrict ansp0U;
+	int *restrict ansp[9U];
 	SEXP ans;
 
 	PROTECT(ans = allocVector(VECSXP, 9));
 	SET_VECTOR_ELT(ans, 0, allocVector(REALSXP, n));
+	ansp0U = REAL(VECTOR_ELT(ans, 0));
 	for (int i = 1; i < 9; i++) {
 		SET_VECTOR_ELT(ans, i, allocVector(INTSXP, n));
+		ansp[i] = INTEGER(VECTOR_ELT(ans, i));
 	}
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 
 		if (m != NA_INTEGER) {
 			unsigned int yyd = _yyd(m);
@@ -490,37 +495,37 @@ as_POSIXlt_EDate(SEXP x)
 			y += yd >= 307U;
 			yd += yd < 307U ? 58U + _leapp(y) : -307U;
 
-			REAL(VECTOR_ELT(ans, 0))[i] = 0.;
-			INTEGER(VECTOR_ELT(ans, 1))[i] = 0;
-			INTEGER(VECTOR_ELT(ans, 2))[i] = 0;
+			ansp0U[i] = 0.;
+			ansp[1U][i] = 0;
+			ansp[2U][i] = 0;
 			/* mday */
-			INTEGER(VECTOR_ELT(ans, 3))[i] = md;
+			ansp[3U][i] = md;
 			/* mon */
-			INTEGER(VECTOR_ELT(ans, 4))[i] = (mo + 1U) % 12U;
+			ansp[4U][i] = (mo + 1U) % 12U;
 			/* year */
-			INTEGER(VECTOR_ELT(ans, 5))[i] = y - 1900;
+			ansp[5U][i] = y - 1900;
 			/* wday */
-			INTEGER(VECTOR_ELT(ans, 6))[i] = (m + 3) % 7;
+			ansp[6U][i] = (m + 3) % 7;
 			/* yday */
-			INTEGER(VECTOR_ELT(ans, 7))[i] = yd;
+			ansp[7U][i] = yd;
 			/* is dst */
-			INTEGER(VECTOR_ELT(ans, 8))[i] = -1;
+			ansp[8U][i] = -1;
 		} else {
-			REAL(VECTOR_ELT(ans, 0))[i] = NA_REAL;
-			INTEGER(VECTOR_ELT(ans, 1))[i] = NA_INTEGER;
-			INTEGER(VECTOR_ELT(ans, 2))[i] = NA_INTEGER;
+			ansp0U[i] = NA_REAL;
+			ansp[1U][i] = NA_INTEGER;
+			ansp[2U][i] = NA_INTEGER;
 			/* mday */
-			INTEGER(VECTOR_ELT(ans, 3))[i] = NA_INTEGER;
+			ansp[3U][i] = NA_INTEGER;
 			/* mon */
-			INTEGER(VECTOR_ELT(ans, 4))[i] = NA_INTEGER;
+			ansp[4U][i] = NA_INTEGER;
 			/* year */
-			INTEGER(VECTOR_ELT(ans, 5))[i] = NA_INTEGER;
+			ansp[5U][i] = NA_INTEGER;
 			/* wday */
-			INTEGER(VECTOR_ELT(ans, 6))[i] = NA_INTEGER;
+			ansp[6U][i] = NA_INTEGER;
 			/* yday */
-			INTEGER(VECTOR_ELT(ans, 7))[i] = NA_INTEGER;
+			ansp[7U][i] = NA_INTEGER;
 			/* is dst */
-			INTEGER(VECTOR_ELT(ans, 8))[i] = -1;
+			ansp[8U][i] = -1;
 		}
 	}
 
@@ -548,16 +553,18 @@ SEXP
 CFDate(SEXP y, SEXP m, SEXP d)
 {
 	R_xlen_t n = XLENGTH(y);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *yp = INTEGER(y);
+	const int *mp = INTEGER(m);
+	const int *dp = INTEGER(d);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int xy = INTEGER(y)[i];
-		int xm = INTEGER(m)[i];
-		int xd = INTEGER(d)[i];
-		INTEGER(ans)[i] = _mkFDate(xy, xm, xd);
+		int xy = yp[i];
+		int xm = mp[i];
+		int xd = dp[i];
+		ansp[i] = _mkFDate(xy, xm, xd);
 	}
 
 	UNPROTECT(1);
@@ -568,9 +575,8 @@ SEXP
 as_FDate_character(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
@@ -578,11 +584,11 @@ as_FDate_character(SEXP x)
 		FDate d;
 
 		if (UNLIKELY(s == NA_STRING || !((d = _rdFDate(CHAR(s)))+1))) {
-			INTEGER(ans)[i] = NA_INTEGER;
+			ansp[i] = NA_INTEGER;
 			continue;
 		}
 
-		INTEGER(ans)[i] = d;
+		ansp[i] = d;
 	}
 
 	with (SEXP class) {
@@ -599,12 +605,12 @@ SEXP
 format_FDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
+	SEXP ans = PROTECT(allocVector(STRSXP, n));
+	const int *xp = INTEGER(x);
 
-	PROTECT(ans = allocVector(STRSXP, n));
 	/* no omp here as mkCharLen doesn't like it */
 	for (R_xlen_t i = 0; i < n; i++) {
-		int d = INTEGER(x)[i];
+		int d = xp[i];
 		char buf[32U];
 
 		if (d != NA_INTEGER) {
@@ -623,17 +629,22 @@ as_POSIXlt_FDate(SEXP x)
 {
 	static const char ltnames [][7] = {"sec", "min", "hour", "mday", "mon", "year", "wday", "yday", "isdst", "zone",  "gmtoff"};
 	R_xlen_t n = XLENGTH(x);
+	const int *xp = INTEGER(x);
+	double *restrict ansp0U;
+	int *restrict ansp[9U];
 	SEXP ans;
 
-	PROTECT(ans = allocVector(VECSXP, 9));
+	PROTECT(ans = allocVector(VECSXP, 9U));
 	SET_VECTOR_ELT(ans, 0, allocVector(REALSXP, n));
+	ansp0U = REAL(VECTOR_ELT(ans, 0));
 	for (int i = 1; i < 9; i++) {
 		SET_VECTOR_ELT(ans, i, allocVector(INTSXP, n));
+		ansp[i] = INTEGER(VECTOR_ELT(ans, i));
 	}
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		unsigned int y = m / 391;
 		unsigned int yd = m % 391;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
@@ -653,37 +664,37 @@ as_POSIXlt_FDate(SEXP x)
 			eo += mo==1U && _leapp(y+1U);
 			md = md <= eo ? md : eo;
 
-			REAL(VECTOR_ELT(ans, 0))[i] = 0.;
-			INTEGER(VECTOR_ELT(ans, 1))[i] = 0;
-			INTEGER(VECTOR_ELT(ans, 2))[i] = 0;
+			ansp0U[i] = 0.;
+			ansp[1U][i] = 0;
+			ansp[2U][i] = 0;
 			/* mday */
-			INTEGER(VECTOR_ELT(ans, 3))[i] = md;
+			ansp[3U][i] = md;
 			/* mon */
-			INTEGER(VECTOR_ELT(ans, 4))[i] = mo;
+			ansp[4U][i] = mo;
 			/* year */
-			INTEGER(VECTOR_ELT(ans, 5))[i] = y - 1899;
+			ansp[5U][i] = y - 1899;
 			/* wday */
-			INTEGER(VECTOR_ELT(ans, 6))[i] = (m + 3) % 7;
+			ansp[6U][i] = (m + 3) % 7;
 			/* yday */
-			INTEGER(VECTOR_ELT(ans, 7))[i] = yd;
+			ansp[7U][i] = yd;
 			/* is dst */
-			INTEGER(VECTOR_ELT(ans, 8))[i] = -1;
+			ansp[8U][i] = -1;
 		} else {
-			REAL(VECTOR_ELT(ans, 0))[i] = NA_REAL;
-			INTEGER(VECTOR_ELT(ans, 1))[i] = NA_INTEGER;
-			INTEGER(VECTOR_ELT(ans, 2))[i] = NA_INTEGER;
+			ansp0U[i] = NA_REAL;
+			ansp[1U][i] = NA_INTEGER;
+			ansp[2U][i] = NA_INTEGER;
 			/* mday */
-			INTEGER(VECTOR_ELT(ans, 3))[i] = NA_INTEGER;
+			ansp[3U][i] = NA_INTEGER;
 			/* mon */
-			INTEGER(VECTOR_ELT(ans, 4))[i] = NA_INTEGER;
+			ansp[4U][i] = NA_INTEGER;
 			/* year */
-			INTEGER(VECTOR_ELT(ans, 5))[i] = NA_INTEGER;
+			ansp[5U][i] = NA_INTEGER;
 			/* wday */
-			INTEGER(VECTOR_ELT(ans, 6))[i] = NA_INTEGER;
+			ansp[6U][i] = NA_INTEGER;
 			/* yday */
-			INTEGER(VECTOR_ELT(ans, 7))[i] = NA_INTEGER;
+			ansp[7U][i] = NA_INTEGER;
 			/* is dst */
-			INTEGER(VECTOR_ELT(ans, 8))[i] = -1;
+			ansp[8U][i] = -1;
 		}
 	}
 
@@ -710,17 +721,16 @@ SEXP
 year_FDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		unsigned int y = m / 391U;
 
-		/* massage y and yd into Jan years */
-		INTEGER(ans)[i] = m != NA_INTEGER ? y + 1 : NA_INTEGER;
+		ansp[i] = m != NA_INTEGER ? y + 1 : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -731,13 +741,13 @@ SEXP
 yday_FDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		unsigned int y = m / 391U;
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
@@ -756,7 +766,7 @@ yday_FDate(SEXP x)
 		} else {
 			yd = NA_INTEGER;
 		}
-		INTEGER(ans)[i] = yd;
+		ansp[i] = yd;
 	}
 
 	UNPROTECT(1);
@@ -767,16 +777,16 @@ SEXP
 semi_FDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		unsigned int yd = m % 391U;
 
-		INTEGER(ans)[i] = m != NA_INTEGER
+		ansp[i] = m != NA_INTEGER
 			? (yd > 0U) + (yd > 195U)
 			: NA_INTEGER;
 	}
@@ -789,13 +799,13 @@ SEXP
 sday_FDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		unsigned int y = m / 391U;
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
@@ -815,7 +825,7 @@ sday_FDate(SEXP x)
 		} else {
 			yd = NA_INTEGER;
 		}
-		INTEGER(ans)[i] = yd;
+		ansp[i] = yd;
 	}
 
 	UNPROTECT(1);
@@ -826,19 +836,19 @@ SEXP
 quarter_FDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int qd = (yd % 97U - (yd > 195U));
 		unsigned int q = (yd + 95U - (yd > 195U)) / 97U;
 
-		INTEGER(ans)[i] = m != NA_INTEGER
+		ansp[i] = m != NA_INTEGER
 			? yd && md || qd%4U/2U ? q : 0
 			: NA_INTEGER;
 	}
@@ -851,13 +861,13 @@ SEXP
 qday_FDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		unsigned int y = m / 391U;
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
@@ -878,7 +888,7 @@ qday_FDate(SEXP x)
 		} else {
 			yd = NA_INTEGER;
 		}
-		INTEGER(ans)[i] = yd;
+		ansp[i] = yd;
 	}
 
 	UNPROTECT(1);
@@ -889,19 +899,19 @@ SEXP
 month_FDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int qd = (yd % 97U - (yd > 195U));
 		unsigned int mo = (yd - md) / 32U;
 
-		INTEGER(ans)[i] = m != NA_INTEGER
+		ansp[i] = m != NA_INTEGER
 			? yd && md || !((qd+1U)%4U) ? mo + 1 : 0
 			: NA_INTEGER;
 	}
@@ -914,13 +924,13 @@ SEXP
 mday_FDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
-	SEXP ans;
-
-	PROTECT(ans = allocVector(INTSXP, n));
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		int m = INTEGER(x)[i];
+		int m = xp[i];
 		unsigned int y = m / 391U;
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
@@ -937,7 +947,7 @@ mday_FDate(SEXP x)
 		} else {
 			yd = NA_INTEGER;
 		}
-		INTEGER(ans)[i] = yd;
+		ansp[i] = yd;
 	}
 
 	UNPROTECT(1);
