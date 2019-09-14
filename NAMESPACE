@@ -48,7 +48,6 @@ S3method(mday, EDate)
 export(mday.EDate)
 
 
-export(FDate)
 export(as.FDate)
 S3method(as.FDate, character)
 S3method(as.FDate, FDate)

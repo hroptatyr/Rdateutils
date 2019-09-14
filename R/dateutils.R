@@ -122,11 +122,6 @@ mday.EDate <- function(x)
 
 as.FDate <- function(x, ...) UseMethod("as.FDate")
 
-FDate <- function(year, mon, day)
-{
-	.Call(CFDate, as.integer(year), rep.int(as.integer(mon), length(year)), rep.int(as.integer(day), length(year)))
-}
-
 as.FDate.character <- function(x)
 {
 	.Call(Cas.FDate.character, as.character(x))

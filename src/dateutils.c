@@ -550,28 +550,6 @@ as_POSIXlt_EDate(SEXP x)
 
 
 SEXP
-CFDate(SEXP y, SEXP m, SEXP d)
-{
-	R_xlen_t n = XLENGTH(y);
-	SEXP ans = PROTECT(allocVector(INTSXP, n));
-	int *restrict ansp = INTEGER(ans);
-	const int *yp = INTEGER(y);
-	const int *mp = INTEGER(m);
-	const int *dp = INTEGER(d);
-
-	#pragma omp parallel for
-	for (R_xlen_t i = 0; i < n; i++) {
-		int xy = yp[i];
-		int xm = mp[i];
-		int xd = dp[i];
-		ansp[i] = _mkFDate(xy, xm, xd);
-	}
-
-	UNPROTECT(1);
-	return ans;
-}
-
-SEXP
 as_FDate_character(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
