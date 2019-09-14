@@ -17,9 +17,14 @@ as.EDate.default <- function(x, ..., tz=attr(x, "tzone"))
 	as.EDate(as.Date(x, tz=if(!is.null(tz)) tz else "UTC", ...))
 }
 
+as.EDate.character <- function(x)
+{
+	.Call(Cas.EDate.character, as.character(x))
+}
+
 as.EDate.Date <- as.EDate.IDate <- function(x, ...)
 {
-	x <- as.integer(x) + 719468L ##/*0000-03-00*/
+	x <- as.integer(x) + 719469L ##/*0000-03-00*/
 	class(x) <- "EDate"
 	return(x)
 }
@@ -49,14 +54,14 @@ as.EDate.numeric <- function(x, ...)
 
 as.Date.EDate <- function(x, ...)
 {
-	x <- as.numeric(x - 719468L)
+	x <- as.numeric(x - 719469L)
 	class(x) <- "Date"
 	return(x)
 }
 
 as.IDate.EDate <- function(x, ...)
 {
-	x <- as.integer(x) - 719468L
+	x <- as.integer(x) - 719469L
 	class(x) <- c("IDate", "Date")
 	return(x)
 }
@@ -69,6 +74,16 @@ as.POSIXlt.EDate <- function(x, ...)
 as.POSIXct.EDate <- function(x, ...)
 {
 	return(as.POSIXct(as.Date(x)))
+}
+
+format.EDate <- function(x, ...)
+{
+	.Call(Cformat.EDate, x)
+}
+
+print.EDate <- function(x, ...)
+{
+	print(format.EDate(x), ...)
 }
 
 c.EDate <- cut.EDate <- mean.EDate <- rep.EDate <-
@@ -147,7 +162,7 @@ format.FDate <- function(x, ...)
 
 print.FDate <- function(x, ...)
 {
-	print(format(x), ...)
+	print(format.FDate(x), ...)
 }
 
 as.POSIXlt.FDate <- function(x)

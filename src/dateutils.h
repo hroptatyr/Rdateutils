@@ -4,6 +4,10 @@
 typedef unsigned int EDate;
 typedef unsigned int FDate;
 
+SEXP as_EDate_character(SEXP x);
+SEXP format_EDate(SEXP x);
+SEXP as_POSIXlt_EDate(SEXP x);
+
 SEXP year_EDate(SEXP x);
 SEXP year_bang(SEXP x, SEXP value);
 SEXP yday_EDate(SEXP x);
@@ -12,8 +16,6 @@ SEXP month_EDate(SEXP x);
 SEXP month_bang(SEXP x, SEXP value);
 SEXP mday_EDate(SEXP x);
 SEXP mday_bang(SEXP x, SEXP value);
-
-SEXP as_POSIXlt_EDate(SEXP x);
 
 SEXP as_FDate_character(SEXP x);
 SEXP format_FDate(SEXP x);

@@ -16,8 +16,8 @@ static inline unsigned int
 _year(EDate x)
 {
 	unsigned int guess = x / 365U;
-	guess -= _j00(guess) > x;
-	guess -= _j00(guess) > x;
+	guess -= _j00(guess) >= x;
+	guess -= _j00(guess) >= x;
 	/* more corrections in the year 3000 or so */
 	return guess;
 }
@@ -26,21 +26,21 @@ static inline unsigned int
 _yday(EDate x)
 {
 	unsigned int y = _year(x);
-	return x - _j00(y) + 1U;
+	return x - _j00(y);
 }
 
 static inline unsigned int
 _yyd(EDate x)
 {
 	unsigned int y = _year(x);
-	unsigned int yd = x - _j00(y) + 1U;
+	unsigned int yd = x - _j00(y);
 	return (y << 16U) ^ yd;
 }
 
 static inline unsigned int
 _month(EDate x)
 {
-	unsigned int yd = _yday(x) - 1;
+	unsigned int yd = _yday(x);
 	unsigned int pent = yd / 153U;
 	unsigned int pend = yd % 153U;
 	unsigned int mo = (2U * pend / 61U);
@@ -50,7 +50,7 @@ _month(EDate x)
 static inline unsigned int
 _mday(EDate x)
 {
-	unsigned int yd = _yday(x) - 1U;
+	unsigned int yd = _yday(x);
 	unsigned int pend = yd % 153U;
 	unsigned int md = (2U * pend % 61U) / 2U;
 	return md + 1U;
@@ -85,6 +85,88 @@ static const int_fast8_t yday_adj[] = {0,1,5,7,9,10,14,15,16,19,20,22,23};
 static const int_fast8_t qday_adj[] = {0,0,1,3};
 /* q*90=qday_ad can be calced as 97q-yday_ad[3q+!!q] */
 static const int_fast16_t yday_eom[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
+static const int_fast16_t yday_Eom[] = {0, 31, 61, 92, 122, 153, 184, 214, 245, 275, 306, 337, 365};
+
+static inline EDate
+_mkEDate(unsigned int y, unsigned int m, int d)
+{
+	unsigned int yd;
+	unsigned int eo;
+
+	/* Mar is 0 */
+	m += 9U/*==-3*/, m %= 12U;
+	yd = yday_Eom[m + 0U] + d;
+	eo = yday_Eom[m + 1U];
+	eo += m==11U && _leapp(y);
+	return _j00(y - (m >= 10U)) + (yd <= eo ? yd : eo);
+}
+
+static FDate
+_rdEDate(const char *s)
+{
+	unsigned int y = 0U;
+	unsigned int m = 0U;
+	unsigned int d = 0U;
+	char sep = '\0';
+
+	for (; ((unsigned char)*s ^ '0') < 10U; s++) {
+		y *= 10U;
+		y += (unsigned char)*s ^ '0';
+	}
+	switch ((sep = *s++)) {
+	case '-':
+	case '/':
+	case ' ':
+		break;
+	default:
+		goto nope;
+	}
+	for (; ((unsigned char)*s ^ '0') < 10U; s++) {
+		m *= 10U;
+		m += (unsigned char)*s ^ '0';
+	}
+	if (UNLIKELY(*s++ != sep)) {
+		goto nope;
+	}
+	for (; ((unsigned char)*s ^ '0') < 10U; s++) {
+		d *= 10;
+		d += (unsigned char)*s ^ '0';
+	}
+	if (*s || (m - 1U) >= 12U || d >= 32U) {
+		goto nope;
+	}
+	return _mkEDate(y, m, d);
+nope:
+	return (EDate)0U;
+}
+
+static size_t
+_prEDate(char *restrict buf, size_t bsz, EDate x)
+{
+	unsigned int y = _year(x);
+	unsigned int yd = x - _j00(y) - 1;
+	unsigned int pent = yd / 153U;
+	unsigned int pend = yd % 153U;
+	unsigned int mo = (2U * pend / 61U);
+	unsigned int md = (2U * pend % 61U) / 2U;
+
+	y += yd >= 306U;
+	mo = (5U * pent + mo + 2U) % 12U + 1U;
+	md++;
+
+	buf[3U] = (y % 10U) ^ '0', y /= 10U;
+	buf[2U] = (y % 10U) ^ '0', y /= 10U;
+	buf[1U] = (y % 10U) ^ '0', y /= 10U;
+	buf[0U] = (y % 10U) ^ '0';
+	buf[4U] = '-';
+	buf[6U] = (mo % 10U) ^ '0', mo /= 10U;
+	buf[5U] = (mo % 10U) ^ '0';
+	buf[7U] = '-';
+	buf[9U] = (md % 10U) ^ '0', md /= 10U;
+	buf[8U] = (md % 10U) ^ '0';
+	buf[10U] = '\0';
+	return 10U;
+}
 
 static inline FDate
 _mkFDate(unsigned int y, unsigned int m, int d)
@@ -100,12 +182,13 @@ _rdFDate(const char *s)
 	unsigned int y = 0U;
 	unsigned int m = 0U;
 	unsigned int d = 0U;
+	char sep = '\0';
 
 	for (; ((unsigned char)*s ^ '0') < 10U; s++) {
 		y *= 10U;
 		y += (unsigned char)*s ^ '0';
 	}
-	switch (*s++) {
+	switch ((sep = *s++)) {
 	case '-':
 	case '/':
 		break;
@@ -131,18 +214,21 @@ _rdFDate(const char *s)
 		m += (unsigned char)*s ^ '0';
 	}
 	if (LIKELY(!d)) {
-		switch (*s++) {
+		switch (*s) {
 		case '\0':
-			s--;
+			break;
 		case '-':
 		case '/':
+			if (UNLIKELY(*s++ != sep)) {
+				goto nope;
+			}
+			for (; ((unsigned char)*s ^ '0') < 10U; s++) {
+				d *= 10;
+				d += (unsigned char)*s ^ '0';
+			}
 			break;
 		default:
 			goto nope;
-		}
-		for (; ((unsigned char)*s ^ '0') < 10U; s++) {
-			d *= 10;
-			d += (unsigned char)*s ^ '0';
 		}
 	} else if (m && d > -3U) {
 		m--;
@@ -207,6 +293,60 @@ _prFDate(char *restrict buf, size_t bsz, FDate x)
 }
 
 
+SEXP
+as_EDate_character(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const SEXP *xp = STRING_PTR_RO(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		SEXP s =xp[i];
+		EDate d;
+
+		if (UNLIKELY(s == NA_STRING || !(d = _rdEDate(CHAR(s))))) {
+			ansp[i] = NA_INTEGER;
+			continue;
+		}
+
+		ansp[i] = d;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+format_EDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(STRSXP, n));
+	const int *xp = INTEGER(x);
+
+	/* no omp here as mkCharLen doesn't like it */
+	for (R_xlen_t i = 0; i < n; i++) {
+		int d = xp[i];
+		char buf[32U];
+
+		if (d != NA_INTEGER) {
+			SET_STRING_ELT(ans, i, mkCharLen(buf, _prEDate(buf, sizeof(buf), d)));
+		} else {
+			SET_STRING_ELT(ans, i, NA_STRING);
+		}
+	}
+	UNPROTECT(1);
+
+	return ans;
+}
+
 SEXP
 year_EDate(SEXP x)
 {
@@ -555,10 +695,11 @@ as_FDate_character(SEXP x)
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
+	const SEXP *xp = STRING_PTR_RO(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		SEXP s = STRING_ELT(x, i);
+		SEXP s =xp[i];
 		FDate d;
 
 		if (UNLIKELY(s == NA_STRING || !((d = _rdFDate(CHAR(s)))+1))) {
