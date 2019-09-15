@@ -62,6 +62,8 @@ S3method(week, EDate)
 export(week.EDate)
 S3method(wday, EDate)
 export(wday.EDate)
+S3method(months, EDate)
+S3method(weekdays, EDate)
 
 
 export(as.FDate)
@@ -103,3 +105,5 @@ S3method(week, FDate)
 export(week.FDate)
 S3method(wday, FDate)
 export(wday.FDate)
+S3method(months, FDate)
+S3method(weekdays, FDate)

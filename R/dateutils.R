@@ -257,3 +257,27 @@ wday.FDate <- function(x)
 {
 	.Call(Cwday.FDate, x)
 }
+
+
+## integrate with base
+weekdays.FDate <- weekdays.EDate <- function(x, abbreviate=FALSE)
+{
+	wd <- list(
+		c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"),
+		c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"),
+		c("S","M","T","W","R","F","A")
+	)
+	wd[[abbreviate+1L]][wday(x) + 1L]
+}
+
+months.FDate <- months.EDate <- function(x, abbreviate=FALSE)
+{
+	ms <- list(
+		c("January", "February", "March", "April", "May", "June",
+			"July", "August", "September", "October", "November", "December"),
+		c("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+			"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"),
+		c("F","G","H","J","K","M","N","Q","U","V","X","Z")
+	)
+	ms[[abbreviate+1L]][month(x)]
+}
