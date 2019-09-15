@@ -114,6 +114,26 @@ yday.EDate <- function(x)
 	.Call(`Cyday<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
 }
 
+semi.EDate <- function(x)
+{
+	.Call(Csemi.EDate, x)
+}
+
+sday.EDate <- function(x)
+{
+	.Call(Csday.EDate, x)
+}
+
+quarter.EDate <- function(x)
+{
+	.Call(Cquarter.EDate, x)
+}
+
+qday.EDate <- function(x)
+{
+	.Call(Cqday.EDate, x)
+}
+
 month.EDate <- function(x)
 {
 	.Call(Cmonth.EDate, x)
@@ -132,6 +152,16 @@ mday.EDate <- function(x)
 `mday<-` <- function(x, value)
 {
 	.Call(`Cmday<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
+}
+
+week.EDate <- function(x)
+{
+	.Call(Cweek.EDate, x)
+}
+
+wday.EDate <- function(x)
+{
+	.Call(Cwday.EDate, x)
 }
 
 

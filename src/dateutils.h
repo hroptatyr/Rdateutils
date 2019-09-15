@@ -12,10 +12,16 @@ SEXP year_EDate(SEXP x);
 SEXP year_bang(SEXP x, SEXP value);
 SEXP yday_EDate(SEXP x);
 SEXP yday_bang(SEXP x, SEXP value);
+SEXP semi_EDate(SEXP x);
+SEXP sday_EDate(SEXP x);
+SEXP quarter_EDate(SEXP x);
+SEXP qday_EDate(SEXP x);
 SEXP month_EDate(SEXP x);
 SEXP month_bang(SEXP x, SEXP value);
 SEXP mday_EDate(SEXP x);
 SEXP mday_bang(SEXP x, SEXP value);
+SEXP week_EDate(SEXP x);
+SEXP wday_EDate(SEXP x);
 
 SEXP as_FDate_character(SEXP x);
 SEXP format_FDate(SEXP x);
