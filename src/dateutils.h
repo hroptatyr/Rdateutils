@@ -37,3 +37,9 @@ SEXP month_FDate(SEXP x);
 SEXP mday_FDate(SEXP x);
 SEXP week_FDate(SEXP x);
 SEXP wday_FDate(SEXP x);
+
+SEXP as_ddur_character(SEXP x);
+SEXP as_ddur_numeric(SEXP x);
+SEXP format_ddur(SEXP x);
+
+SEXP plus_EDate(SEXP x, SEXP y);

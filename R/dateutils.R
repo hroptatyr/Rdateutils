@@ -19,7 +19,7 @@ as.EDate.default <- function(x, ..., tz=attr(x, "tzone"))
 
 as.EDate.character <- function(x)
 {
-	.Call(Cas.EDate.character, as.character(x))
+	.Call(Cas.EDate.character, x)
 }
 
 as.EDate.Date <- as.EDate.IDate <- function(x, ...)
@@ -169,7 +169,7 @@ as.FDate <- function(x, ...) UseMethod("as.FDate")
 
 as.FDate.character <- function(x)
 {
-	.Call(Cas.FDate.character, as.character(x))
+	.Call(Cas.FDate.character, x)
 }
 
 as.FDate.FDate <- function(x, ...)
@@ -280,4 +280,40 @@ months.FDate <- months.EDate <- function(x, abbreviate=FALSE)
 		c("F","G","H","J","K","M","N","Q","U","V","X","Z")
 	)
 	ms[[abbreviate+1L]][month(x)]
+}
+
+
+as.ddur <- function(x, ...) UseMethod("as.ddur")
+
+as.ddur.ddur <- function(x, ...)
+{
+	return(x)
+}
+
+as.ddur.character <- function(x)
+{
+	.Call(Cas.ddur.character, x)
+}
+
+as.ddur.numeric <- function(x)
+{
+}
+
+format.ddur <- function(x, ...)
+{
+	.Call(Cformat.ddur, x)
+}
+
+print.ddur <- function(x, ...)
+{
+	print(format.ddur(x), ...)
+}
+
+
+`+.EDate` <- function(x, y)
+{
+	if (nargs() == 1L) {
+		return(x)
+	}
+	return(.Call(`C+.EDate`, x, as.ddur(y)))
 }

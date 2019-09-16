@@ -6,6 +6,29 @@
 #include "dateutils.h"
 #include "nifty.h"
 
+typedef struct {
+	int d;
+	int m;
+} ddur;
+
+static size_t
+itostr(char *restrict buf, size_t bsz, int v)
+{
+	unsigned int u = v >= 0 ? v : -v;
+	size_t z = 0U;
+
+	buf[z] = '-', z += v < 0;
+	do {
+		buf[z++] = (unsigned char)(u % 10U) ^ '0';
+	} while (z < bsz && (u /= 10U));
+	for (size_t i = v < 0; i < z / 2U; i++) {
+		char x = buf[i];
+		buf[i] = buf[z - i - 1U];
+		buf[z - i - 1U] = x;
+	}
+	return z;
+}
+
 
 static inline EDate
 _j00(unsigned int y)
@@ -242,6 +265,72 @@ _prFDate(char *restrict buf, size_t bsz, FDate x)
 			break;
 		}
 		z = 7U - !qd;
+	}
+	buf[z] = '\0';
+	return z;
+}
+
+static ddur
+_rdddur(const char *s)
+{
+	ddur r = {0, 0};
+	int neg;
+	int tmp;
+
+	if (*s++ != 'P') {
+		goto nope;
+	}
+more:
+	tmp = 0;
+	if (!*s) {
+		goto out;
+	}
+	s += neg = *s == '-';
+	for (; ((unsigned char)*s ^ '0') < 10U; s++) {
+		tmp *= 10;
+		tmp += (unsigned char)*s ^ '0';
+	}
+	switch (*s++) {
+	case 'Y':
+		tmp *= 12;
+	case 'M':
+		r.m += !neg ? tmp : -tmp;
+		goto more;
+	case 'W':
+		tmp *= 7;
+	case 'D':
+		r.d += !neg ? tmp : -tmp;
+		goto more;
+	case '\0':
+		if (!r.m && !r.d) {
+			break;
+		}
+	default:
+		goto nope;
+	}
+out:
+	return r;	
+nope:
+	return (ddur){NA_INTEGER, NA_INTEGER};
+}
+
+static size_t
+_prddur(char *restrict buf, size_t bsz, const ddur d)
+{
+	int z = 0;
+
+	buf[z++] = 'P';
+	if (d.m) {
+		z += itostr(buf + z, bsz - z, d.m);
+		buf[z++] = 'M';
+	}
+	if (d.d) {
+		z += itostr(buf + z, bsz - z, d.d);
+		buf[z++] = 'D';
+	}
+	if (!d.m && !d.d) {
+		buf[z++] = '0';
+		buf[z++] = 'D';
 	}
 	buf[z] = '\0';
 	return z;
@@ -1287,4 +1376,85 @@ wday_FDate(SEXP x)
 
 	UNPROTECT(1);
 	return ans;
+}
+
+
+static inline double
+DDUR_AS_REAL(ddur d)
+{
+	union {
+		ddur d;
+		double r;
+	} r = {d};
+	return r.r;
+}
+
+static inline ddur
+REAL_AS_DDUR(double x)
+{
+	union {
+		double r;
+		ddur d;
+	} r = {x};
+	return r.d;
+}
+
+SEXP
+as_ddur_character(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(REALSXP, n));
+	double *restrict ansp = REAL(ans);
+	const SEXP *xp = STRING_PTR_RO(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		SEXP s =xp[i];
+		ddur d;
+
+		if (UNLIKELY(s == NA_STRING ||
+			     (d = _rdddur(CHAR(s))).d == NA_INTEGER)) {
+			ansp[i] = NA_REAL;
+			continue;
+		}
+
+		ansp[i] = DDUR_AS_REAL(d);
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+format_ddur(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(STRSXP, n));
+	const double *xp = REAL(x);
+
+	/* no omp here as mkCharLen doesn't like it */
+	for (R_xlen_t i = 0; i < n; i++) {
+		double r = xp[i];
+		char buf[64U];
+
+		if (!R_IsNA(r)) {
+			SET_STRING_ELT(ans, i, mkCharLen(buf, _prddur(buf, sizeof(buf), REAL_AS_DDUR(r))));
+		} else {
+			SET_STRING_ELT(ans, i, NA_STRING);
+		}
+	}
+	UNPROTECT(1);
+
+	return ans;
+}
+
+SEXP
+plus_EDate(SEXP x, SEXP y)
+{
 }
