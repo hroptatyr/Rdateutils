@@ -841,12 +841,6 @@ mday_EDate(SEXP x)
 SEXP
 mday_bang(SEXP x, SEXP value)
 {
-	/* Mar-based */
-	static unsigned int mond[] = {
-		31U, 30U, 31U, 30U, 31U,
-		31U, 30U, 31U, 30U, 31U,
-		31U, 29U,
-	};
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
@@ -856,7 +850,7 @@ mday_bang(SEXP x, SEXP value)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = xp[i];
-		int md2b = vp[i] - 1;
+		int md2b = vp[i];
 
 		if (m != NA_INTEGER && (unsigned int)md2b <= 31U) {
 			unsigned int y = _year(m);
@@ -865,12 +859,14 @@ mday_bang(SEXP x, SEXP value)
 			unsigned int pend = yd % 153U;
 			unsigned int mo = (2U * pend / 61U);
 			unsigned int md = (2U * pend % 61U) / 2U;
+			unsigned int mz;
 			int yd2b;
 
 			mo += 5U * pent;
-			md2b = md2b < mond[mo] ? md2b : mond[mo] - 1;
+			mz = yday_Eom[mo + 1U] - yday_Eom[mo];
+			mz += mo >= 11U && _leapp(y+1U);
+			md2b = md2b <= mz ? md2b : mz;
 			yd2b = yd - md + md2b;
-			yd2b -= yd2b > 365 && !_leapp(y+1U);
 			ansp[i] = _j00(y) + yd2b;
 		} else {
 			ansp[i] = NA_INTEGER;

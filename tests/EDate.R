@@ -31,6 +31,17 @@ month(f) <- 12
 print(f)
 
 print("")
+f <- as.EDate("2000-02-29")
+year(f) <- 2001
+print(f)
+f <- as.EDate("2000-01-01")
+year(f) <- 2001
+print(f)
+f <- as.EDate("2000-12-31")
+year(f) <- 2001
+print(f)
+
+print("")
 f <- as.EDate("2000-01-01")
 month(f) <- 1
 print(f)
@@ -39,6 +50,22 @@ print(f)
 month(f) <- 3
 print(f)
 month(f) <- 12
+print(f)
+
+print("")
+f <- as.EDate("2000-02-29")
+mday(f) <- 20
+print(f)
+mday(f) <- 31
+print(f)
+mday(f) <- 29
+print(f)
+f <- as.EDate("2000-04-29")
+mday(f) <- 31
+print(f)
+mday(f) <- 01
+print(f)
+mday(f) <- 29
 print(f)
 
 print("")
