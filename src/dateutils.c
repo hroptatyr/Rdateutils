@@ -17,16 +17,18 @@ itostr(char *restrict buf, size_t bsz, int v)
 	unsigned int u = v >= 0 ? v : -v;
 	size_t z = 0U;
 
-	buf[z] = '-', z += v < 0;
+	*buf = '-';
+	buf += v < 0, bsz -= v < 0;
 	do {
 		buf[z++] = (unsigned char)(u % 10U) ^ '0';
 	} while (z < bsz && (u /= 10U));
-	for (size_t i = v < 0; i < z / 2U; i++) {
+	for (size_t i = 0U; i < z / 2U; i++) {
 		char x = buf[i];
 		buf[i] = buf[z - i - 1U];
 		buf[z - i - 1U] = x;
 	}
-	return z;
+	buf[z] = '!';
+	return z + (v < 0);
 }
 
 
