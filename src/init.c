@@ -39,8 +39,11 @@ R_CallMethodDef callMethods[] = {
 
 	{"Cas.ddur.character", (DL_FUNC)&as_ddur_character, -1},
 	{"Cformat.ddur", (DL_FUNC)&format_ddur, -1},
+	{"C+.ddur", (DL_FUNC)&plus_ddur, -1},
+	{"Cneg.ddur", (DL_FUNC)&neg_ddur, -1},
 
 	{"C+.EDate", (DL_FUNC)&plus_EDate, -1},
+	{"C-.EDate", (DL_FUNC)&minus_EDate, -1},
 	{NULL, NULL, 0}
 };
 

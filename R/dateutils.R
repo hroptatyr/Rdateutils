@@ -44,14 +44,6 @@ as.EDate.EDate <- function(x, ...)
 	return(x)
 }
 
-as.EDate.numeric <- function(x, ...)
-{
-## assume correct origin
-	x <- as.integer(x)
-	class(x) <- "EDate"
-	return(x)
-}
-
 as.Date.EDate <- function(x, ...)
 {
 	x <- as.numeric(x - 719469L)
@@ -90,7 +82,9 @@ c.EDate <- cut.EDate <- mean.EDate <- rep.EDate <-
 cut.EDate <- mean.EDate <- rep.EDate <- round.EDate <-
 seq.EDate <- split.EDate <- unique.EDate <- function(x, ...)
 {
-	as.EDate(NextMethod())
+	x <- NextMethod()
+	class(x) <- "EDate"
+	return(x)
 }
 
 ## accessors
@@ -177,14 +171,6 @@ as.FDate.FDate <- function(x, ...)
 	return(x)
 }
 
-as.FDate.numeric <- function(x, ...)
-{
-## assume correct origin
-	x <- as.integer(x)
-	class(x) <- "FDate"
-	return(x)
-}
-
 format.FDate <- function(x, ...)
 {
 	.Call(Cformat.FDate, x)
@@ -204,7 +190,9 @@ c.FDate <- cut.FDate <- mean.FDate <- rep.FDate <-
 cut.FDate <- mean.FDate <- rep.FDate <- round.FDate <-
 seq.FDate <- split.FDate <- unique.FDate <- function(x, ...)
 {
-	as.FDate(NextMethod())
+	x <- NextMethod()
+	class(x) <- "FDate"
+	x
 }
 
 ## accessors
@@ -309,11 +297,49 @@ print.ddur <- function(x, ...)
 	print(format.ddur(x), ...)
 }
 
-
-`+.EDate` <- function(x, y)
+c.ddur <- cut.ddur <- mean.ddur <- rep.ddur <-
+cut.ddur <- mean.ddur <- rep.ddur <- round.ddur <-
+seq.ddur <- split.ddur <- unique.ddur <- function(x, ...)
 {
+	x <- NextMethod()
+	class(x) <- "ddur"
+	x
+}
+
+
+`+.ddur` <- function(x, y)
+{
+## pretend it's a multidispatch
 	if (nargs() == 1L) {
 		return(x)
 	}
-	return(.Call(`C+.EDate`, x, as.ddur(y)))
+	if (inherits(x, "ddur") && inherits(y, "ddur")) {
+		return(.Call(`C+.ddur`, x, y))
+	}
+	if (inherits(x, "EDate") && inherits(y, "ddur")) {
+		return(.Call(`C+.EDate`, x, rep.int(y, length(x))))
+	}
+	stop("no method found to add ",class(y)," to ",class(x))
+}
+
+`-.ddur` <- function(x, y)
+{
+	if (nargs() == 1L) {
+		return(.Call(Cneg.ddur, x))
+	}
+	if (inherits(y, "ddur")) {
+		return(`+.ddur`(x, .Call(Cneg.ddur, y)))
+	}
+	stop("no method found to subtract ",class(y)," from ",class(x))
+}
+
+`-.EDate` <- function(x, y)
+{
+	if (nargs() == 1L) {
+		stop("unary minus is undefined for EDate")
+	}
+	if (!inherits(x, "EDate") || !inherits(y, "EDate")) {
+		stop("no method found to subtract ",class(y)," from ",class(x))
+	}
+	.Call(`C-.EDate`, x, rep.int(y, length(x)))
 }

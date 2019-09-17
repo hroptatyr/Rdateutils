@@ -26,7 +26,6 @@ S3method(as.EDate, IDate)
 S3method(as.EDate, EDate)
 S3method(as.EDate, POSIXct)
 S3method(as.EDate, default)
-S3method(as.EDate, numeric)
 S3method(as.POSIXlt, EDate)
 S3method(as.POSIXct, EDate)
 
@@ -69,7 +68,6 @@ S3method(weekdays, EDate)
 export(as.FDate)
 S3method(as.FDate, character)
 S3method(as.FDate, FDate)
-S3method(as.FDate, numeric)
 S3method(as.POSIXlt, FDate)
 export(as.POSIXlt.FDate)
 
@@ -117,3 +115,17 @@ S3method(as.ddur, numeric)
 
 S3method(format, ddur)
 S3method(print, ddur)
+
+S3method(c, ddur)
+S3method(cut, ddur)
+S3method(mean, ddur)
+S3method(rep, ddur)
+S3method(round, ddur)
+S3method(seq, ddur)
+S3method(split, ddur)
+S3method(unique, ddur)
+
+## these ones do arithmetic with EDates and FDates as well
+S3method(`+`, ddur)
+S3method(`-`, ddur)
+S3method(`-`, EDate)

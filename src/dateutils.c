@@ -30,6 +30,19 @@ itostr(char *restrict buf, size_t bsz, int v)
 }
 
 
+/* Financial calendar
+ * Y-A Y-S1 Y-Q1 Y-01 Y-01-01 ... Y-01-31
+ * Y-02 Y-02-01 ... Y-02-28 (Y-02-29) (Y-02-30) Y-02-31
+ * ...
+ * This means every year has exactly 391 = 12 * 32 + 4qrt + 2semi + 1full
+ * Congruencies mod 32, 97, 195
+ * years start at 1 */
+static const int_fast8_t yday_adj[] = {0,1,5,7,9,10,14,15,16,19,20,22,23};
+static const int_fast8_t qday_adj[] = {0,0,1,3};
+/* q*90=qday_ad can be calced as 97q-yday_ad[3q+!!q] */
+static const int_fast16_t yday_eom[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
+static const int_fast16_t yday_Eom[] = {0, 31, 61, 92, 122, 153, 184, 214, 245, 275, 306, 337, 365};
+
 static inline EDate
 _j00(unsigned int y)
 {
@@ -51,19 +64,6 @@ _leapp(unsigned int y)
 {
 	return !((y % 4U) || !(y % 100U) && (y % 400U));
 }
-
-/* Financial calendar
- * Y-A Y-S1 Y-Q1 Y-01 Y-01-01 ... Y-01-31
- * Y-02 Y-02-01 ... Y-02-28 (Y-02-29) (Y-02-30) Y-02-31
- * ...
- * This means every year has exactly 391 = 12 * 32 + 4qrt + 2semi + 1full
- * Congruencies mod 32, 97, 195
- * years start at 1 */
-static const int_fast8_t yday_adj[] = {0,1,5,7,9,10,14,15,16,19,20,22,23};
-static const int_fast8_t qday_adj[] = {0,0,1,3};
-/* q*90=qday_ad can be calced as 97q-yday_ad[3q+!!q] */
-static const int_fast16_t yday_eom[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
-static const int_fast16_t yday_Eom[] = {0, 31, 61, 92, 122, 153, 184, 214, 245, 275, 306, 337, 365};
 
 static inline EDate
 _mkEDate(unsigned int y, unsigned int m, int d)
@@ -334,6 +334,26 @@ _prddur(char *restrict buf, size_t bsz, const ddur d)
 	}
 	buf[z] = '\0';
 	return z;
+}
+
+static inline double
+DDUR_AS_REAL(ddur d)
+{
+	union {
+		ddur d;
+		double r;
+	} r = {d};
+	return r.r;
+}
+
+static inline ddur
+REAL_AS_DDUR(double x)
+{
+	union {
+		double r;
+		ddur d;
+	} r = {x};
+	return r.d;
 }
 
 
@@ -747,9 +767,8 @@ SEXP
 month_bang(SEXP x, SEXP value)
 {
 	/* Mar-based */
-	static unsigned int moyd[] = {
-		307U, 338U, 1U, 32U, 62U, 93U,
-		123U, 154U, 185U, 215U, 246U, 276U, 307U,
+	static const int_fast16_t moyd[] = {
+		307, 338, 1, 32, 62, 93, 123, 154, 185, 215, 246, 276, 307
 	};
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
@@ -776,7 +795,7 @@ month_bang(SEXP x, SEXP value)
 			y -= yd2b >= 306U;
 
 			/* clamp to year's end */
-			yd2b = yd2b <= 365 ? yd2b : !_leapp(y+1) ? 365 : 366;
+			yd2b = yd2b <= 365 ? yd2b : !_leapp(y+1U) ? 365 : 366;
 			/* clamp to month's last */
 			yd2b -= m2b > 3U && yd2b >= moyd[m2b + 1U];
 
@@ -913,6 +932,69 @@ wday_EDate(SEXP x)
 	}
 
 	UNPROTECT(1);
+	return ans;
+}
+
+
+/* EDate arith */
+SEXP
+plus_EDate(SEXP x, SEXP y)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+	const double *yp = REAL(y);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		ddur d = REAL_AS_DDUR(yp[i]);
+
+		if (UNLIKELY(m == NA_INTEGER)) {
+			ansp[i] = NA_INTEGER;
+			continue;
+		}
+		if (!d.m || d.d < 0) {
+			/* negative day periods take precedence
+			 * this is to make subtraction somewhat inverse to addition:
+			 * X + PiMjD - PiMjD = X + PiMjD + P-iM-jD
+			 * = X + PiM + PjD + P-jD + P-iM  = X */
+			m += d.d;
+		}
+		if (d.m) {
+			unsigned int y = _year(m);
+			unsigned int yd = m - _j00(y) - 1;
+			unsigned int pent = yd / 153U;
+			unsigned int pend = yd % 153U;
+			unsigned int mo = (2U * pend / 61U);
+			unsigned int md = (2U * pend % 61U) / 2U;
+			int mm = (5U * pent + mo) % 12U;
+			unsigned int eo;
+
+			y += (mm + d.m) / 12;
+			mm = (mm + d.m) % 12;
+			/* make sure residues are non-negative */
+			y -= mm < 0;
+			mm = (mm + 12) % 12;
+
+			/* stay within month bounds */
+			eo = yday_Eom[mm + 1U] + (mm >= 11U && _leapp(y+1U));
+			yd = yday_Eom[mm] + md + 1U;
+			yd = yd < eo ? yd : eo;
+
+			m = _j00(y) + yd + (d.d > 0 ? d.d : 0);
+		}
+		ansp[i] = m;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
 	return ans;
 }
 
@@ -1379,26 +1461,6 @@ wday_FDate(SEXP x)
 }
 
 
-static inline double
-DDUR_AS_REAL(ddur d)
-{
-	union {
-		ddur d;
-		double r;
-	} r = {d};
-	return r.r;
-}
-
-static inline ddur
-REAL_AS_DDUR(double x)
-{
-	union {
-		double r;
-		ddur d;
-	} r = {x};
-	return r.d;
-}
-
 SEXP
 as_ddur_character(SEXP x)
 {
@@ -1450,11 +1512,105 @@ format_ddur(SEXP x)
 		}
 	}
 	UNPROTECT(1);
-
 	return ans;
 }
 
 SEXP
-plus_EDate(SEXP x, SEXP y)
+plus_ddur(SEXP x, SEXP y)
 {
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(REALSXP, n));
+	double *restrict ansp = REAL(ans);
+	const double *xp = REAL(x);
+	const double *yp = REAL(y);
+
+	/* no omp here as mkCharLen doesn't like it */
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur dx = REAL_AS_DDUR(xp[i]);
+		ddur dy = REAL_AS_DDUR(yp[i]);
+
+		dx.m += dy.m;
+		dx.d += dy.d;
+		ansp[i] = DDUR_AS_REAL(dx);
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+neg_ddur(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(REALSXP, n));
+	double *restrict ansp = REAL(ans);
+	const double *xp = REAL(x);
+
+	/* no omp here as mkCharLen doesn't like it */
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur d = REAL_AS_DDUR(xp[i]);
+		d.m = -d.m;
+		d.d = -d.d;
+		ansp[i] = DDUR_AS_REAL(d);
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+minus_EDate(SEXP x, SEXP y)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(REALSXP, n));
+	double *restrict ansp = REAL(ans);
+	const int *xp = INTEGER(x);
+	const int *yp = INTEGER(y);
+
+	/* no omp here as mkCharLen doesn't like it */
+	for (R_xlen_t i = 0; i < n; i++) {
+		int u = xp[i];
+		int v = yp[i];
+#if 0
+		unsigned int uy = _year(u);
+		unsigned int uyd = u - _j00(uy) - 1;
+		unsigned int upent = uyd / 153U;
+		unsigned int upend = uyd % 153U;
+		unsigned int umo = (2U * upend / 61U);
+		unsigned int umd = (2U * upend % 61U) / 2U;
+		unsigned int umm = (5U * upent + umo + 2U) % 12U;
+		unsigned int vy = _year(v);
+		unsigned int vyd = v - _j00(vy) - 1;
+		unsigned int vpent = vyd / 153U;
+		unsigned int vpend = vyd % 153U;
+		unsigned int vmo = (2U * vpend / 61U);
+		unsigned int vmd = (2U * vpend % 61U) / 2U;
+		unsigned int vmm = (5U * vpent + vmo + 2U) % 12U;
+		ddur d = {umd - vmd, (uy - vy) * 12 + (umm - vmm)};
+#else
+		ddur d = {u - v};
+#endif
+		ansp[i] = u != NA_INTEGER && v != NA_INTEGER ? DDUR_AS_REAL(d) : NA_REAL;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
 }
