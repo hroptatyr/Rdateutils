@@ -1579,25 +1579,55 @@ minus_EDate(SEXP x, SEXP y)
 	for (R_xlen_t i = 0; i < n; i++) {
 		int u = xp[i];
 		int v = yp[i];
-#if 0
-		unsigned int uy = _year(u);
-		unsigned int uyd = u - _j00(uy) - 1;
-		unsigned int upent = uyd / 153U;
-		unsigned int upend = uyd % 153U;
-		unsigned int umo = (2U * upend / 61U);
-		unsigned int umd = (2U * upend % 61U) / 2U;
-		unsigned int umm = (5U * upent + umo + 2U) % 12U;
-		unsigned int vy = _year(v);
-		unsigned int vyd = v - _j00(vy) - 1;
-		unsigned int vpent = vyd / 153U;
-		unsigned int vpend = vyd % 153U;
-		unsigned int vmo = (2U * vpend / 61U);
-		unsigned int vmd = (2U * vpend % 61U) / 2U;
-		unsigned int vmm = (5U * vpent + vmo + 2U) % 12U;
-		ddur d = {umd - vmd, (uy - vy) * 12 + (umm - vmm)};
-#else
-		ddur d = {u - v};
-#endif
+
+		if (u != NA_INTEGER && v != NA_INTEGER) {
+			unsigned int uy = _year(u);
+			unsigned int uyd = u - _j00(uy) - 1;
+			unsigned int upent = uyd / 153U;
+			unsigned int upend = uyd % 153U;
+			unsigned int umo = (2U * upend / 61U);
+			unsigned int umd = (2U * upend % 61U) / 2U;
+			unsigned int umm = 5U * upent + umo;
+			unsigned int vy = _year(v);
+			unsigned int vyd = v - _j00(vy) - 1;
+			unsigned int vpent = vyd / 153U;
+			unsigned int vpend = vyd % 153U;
+			unsigned int vmo = (2U * vpend / 61U);
+			unsigned int vmd = (2U * vpend % 61U) / 2U;
+			unsigned int vmm = 5U * vpent + vmo;
+			ddur d = {umd - vmd, (uy - vy) * 12 + (umm - vmm)};
+
+			ansp[i] = DDUR_AS_REAL(d);
+		} else {
+			ansp[i] = NA_REAL;
+		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+ddur_EDate(SEXP x, SEXP y)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(REALSXP, n));
+	double *restrict ansp = REAL(ans);
+	const int *xp = INTEGER(x);
+	const int *yp = INTEGER(y);
+
+	/* no omp here as mkCharLen doesn't like it */
+	for (R_xlen_t i = 0; i < n; i++) {
+		int u = xp[i];
+		int v = yp[i];
+		ddur d = {v - u};
+
 		ansp[i] = u != NA_INTEGER && v != NA_INTEGER ? DDUR_AS_REAL(d) : NA_REAL;
 	}
 

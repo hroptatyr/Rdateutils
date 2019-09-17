@@ -116,6 +116,7 @@ S3method(as.ddur, character)
 S3method(as.ddur, ddur)
 export(as.ddur.character)
 S3method(as.ddur, numeric)
+export(ddur)
 
 S3method(format, ddur)
 S3method(print, ddur)

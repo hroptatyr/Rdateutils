@@ -45,3 +45,4 @@ SEXP neg_ddur(SEXP x);
 
 SEXP plus_EDate(SEXP x, SEXP y);
 SEXP minus_EDate(SEXP x, SEXP y);
+SEXP ddur_EDate(SEXP x, SEXP y);

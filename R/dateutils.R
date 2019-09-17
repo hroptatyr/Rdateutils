@@ -307,6 +307,15 @@ round.ddur <- unique.ddur <- function(x, ...)
 	x
 }
 
+ddur <- function(x, y)
+{
+## actual (day) duration from x to y
+	if (inherits(x, "EDate")) {
+		return(.Call(Cddur.EDate, x, rep.int(as.EDate(y), length(x))))
+	}
+	stop("no method found to obtain duration between ",class(x)," and ",class(y))
+}
+
 
 `+.ddur` <- function(x, y)
 {

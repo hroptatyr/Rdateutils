@@ -47,3 +47,8 @@ print(as.EDate("2000-2-29") - as.EDate("2000-3-10"))
 print(as.EDate("2000-3-10") - as.EDate("2000-2-29"))
 print(as.EDate("2000-2-29") - as.EDate("2001-1-32"))
 print(as.EDate(NA_character_) - as.EDate("2001-1-20"))
+
+print("")
+print(ddur(as.EDate("2000-2-29"),as.EDate("2000-3-10")))
+print(ddur(as.EDate("2000-3-10"),as.EDate("2000-2-29")))
+print(ddur(as.EDate(NA_character_), as.EDate("2001-1-20")))
