@@ -768,10 +768,6 @@ month_EDate(SEXP x)
 SEXP
 month_bang(SEXP x, SEXP value)
 {
-	/* Mar-based */
-	static const int_fast16_t moyd[] = {
-		307, 338, 1, 32, 62, 93, 123, 154, 185, 215, 246, 276, 307
-	};
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
@@ -785,21 +781,23 @@ month_bang(SEXP x, SEXP value)
 
 		if (m != NA_INTEGER && (unsigned int)m2b < 12U) {
 			unsigned int y = _year(m);
-			unsigned int yd = m - _j00(y) - 1;
-			unsigned int pend = yd % 153U;
+			unsigned int yd = m - _j00(y);
+			unsigned int pend = (yd - 1) % 153U;
 			unsigned int md = (2U * pend % 61U) / 2U;
+			unsigned int eo;
 			int yd2b;
 
-			yd2b = moyd[m2b] + md;
-
+			m2b += 10U;
+			m2b %= 12U;
+			yd2b = yday_Eom[m2b] + md + 1U;
 			/* massage y into Jan years */
-			y += yd >= 306U;
-			y -= yd2b >= 306U;
+			y += yd >= 307U;
+			y -= yd2b >= 307U;
 
-			/* clamp to year's end */
-			yd2b = yd2b <= 365 ? yd2b : !_leapp(y+1U) ? 365 : 366;
 			/* clamp to month's last */
-			yd2b -= m2b > 3U && yd2b >= moyd[m2b + 1U];
+			eo = yday_Eom[m2b + 1U];
+			eo += m2b >= 11U && _leapp(y+1U);
+			yd2b = yd2b <= eo ? yd2b : eo;
 
 			ansp[i] = _j00(y) + yd2b;
 		} else {

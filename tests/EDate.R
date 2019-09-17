@@ -20,6 +20,28 @@ month(f) <- 12
 print(f)
 
 print("")
+f <- as.EDate("1999-03-31")
+month(f) <- 1
+print(f)
+month(f) <- 4
+print(f)
+month(f) <- 2
+print(f)
+month(f) <- 12
+print(f)
+
+print("")
+f <- as.EDate("2000-01-01")
+month(f) <- 1
+print(f)
+month(f) <- 2
+print(f)
+month(f) <- 3
+print(f)
+month(f) <- 12
+print(f)
+
+print("")
 x <- as.EDate(c("2014-01-02", "2013-02-02","2015-01-06"))
 print(min(x))
 print(max(x))
