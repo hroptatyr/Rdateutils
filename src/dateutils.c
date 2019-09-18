@@ -279,15 +279,28 @@ _rdddur(const char *s)
 	int neg;
 	int tmp;
 
-	if (*s++ != 'P') {
-		goto nope;
-	}
+	s += *s == 'P';
 more:
 	tmp = 0;
-	if (!*s) {
-		goto out;
-	}
 	s += neg = *s == '-';
+	/* capture spots and junk*/
+	switch (*s) {
+	case 'S':
+		tmp++;
+	case 'T':
+		tmp++;
+	case 'O':
+		tmp++;
+		if (s[1U] != 'N' || s[2U] != '\0') {
+			goto nope;
+		}
+		r.d = !neg ? tmp : -tmp;
+		goto out;
+	case '\0':
+		goto out;
+	default:
+		break;
+	}
 	for (; ((unsigned char)*s ^ '0') < 10U; s++) {
 		tmp *= 10;
 		tmp += (unsigned char)*s ^ '0';
