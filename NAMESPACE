@@ -70,6 +70,7 @@ S3method(weekdays, EDate)
 export(as.FDate)
 S3method(as.FDate, character)
 S3method(as.FDate, FDate)
+S3method(as.EDate, FDate)
 S3method(as.POSIXlt, FDate)
 export(as.POSIXlt.FDate)
 

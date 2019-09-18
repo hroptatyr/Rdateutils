@@ -944,7 +944,6 @@ wday_EDate(SEXP x)
 	return ans;
 }
 
-
 /* EDate arith */
 SEXP
 plus_EDate(SEXP x, SEXP y)
@@ -1059,6 +1058,39 @@ format_FDate(SEXP x)
 	}
 	UNPROTECT(1);
 
+	return ans;
+}
+
+SEXP
+as_EDate_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	const int *xp = INTEGER(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int y = m / 391;
+		unsigned int yd = m % 391;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32;
+
+		if (m != NA_INTEGER && yd && md) {
+			ansp[i] = _mkEDate(y+1U, mo+1U, md);
+		} else {
+			ansp[i] = NA_INTEGER;
+		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
 	return ans;
 }
 

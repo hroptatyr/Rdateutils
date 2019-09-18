@@ -25,6 +25,7 @@ SEXP wday_EDate(SEXP x);
 
 SEXP as_FDate_character(SEXP x);
 SEXP format_FDate(SEXP x);
+SEXP as_EDate_FDate(SEXP x);
 SEXP as_POSIXlt_FDate(SEXP x);
 
 SEXP year_FDate(SEXP x);

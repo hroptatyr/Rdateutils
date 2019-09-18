@@ -182,6 +182,11 @@ print.FDate <- function(x, ...)
 	print(format.FDate(x), ...)
 }
 
+as.EDate.FDate <- function(x)
+{
+	.Call(Cas.EDate.FDate, x)
+}
+
 as.POSIXlt.FDate <- function(x)
 {
 	.Call(Cas.POSIXlt.FDate, x)
