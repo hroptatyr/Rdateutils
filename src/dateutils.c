@@ -1585,19 +1585,26 @@ plus_ddur(SEXP x, SEXP y)
 	return ans;
 }
 
+
 SEXP
-neg_ddur(SEXP x)
+as_ddur_character(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(REALSXP, n));
 	double *restrict ansp = REAL(ans);
-	const double *xp = REAL(x);
+	const SEXP *xp = STRING_PTR_RO(x);
 
-	/* no omp here as mkCharLen doesn't like it */
+	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		ddur d = REAL_AS_DDUR(xp[i]);
-		d.m = -d.m;
-		d.d = -d.d;
+		SEXP s =xp[i];
+		ddur d;
+
+		if (UNLIKELY(s == NA_STRING ||
+			     (d = _rdddur(CHAR(s))).d == NA_INTEGER)) {
+			ansp[i] = NA_REAL;
+			continue;
+		}
+
 		ansp[i] = DDUR_AS_REAL(d);
 	}
 
@@ -1612,40 +1619,43 @@ neg_ddur(SEXP x)
 }
 
 SEXP
-minus_EDate(SEXP x, SEXP y)
+as_ddur_numeric(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(REALSXP, n));
 	double *restrict ansp = REAL(ans);
-	const int *xp = INTEGER(x);
-	const int *yp = INTEGER(y);
 
-	/* no omp here as mkCharLen doesn't like it */
-	for (R_xlen_t i = 0; i < n; i++) {
-		int u = xp[i];
-		int v = yp[i];
+	switch (TYPEOF(x)) {
+	case REALSXP: {
+		const double *xp = REAL(x);
 
-		if (u != NA_INTEGER && v != NA_INTEGER) {
-			unsigned int uy = _year(u);
-			unsigned int uyd = u - _j00(uy) - 1;
-			unsigned int upent = uyd / 153U;
-			unsigned int upend = uyd % 153U;
-			unsigned int umo = (2U * upend / 61U);
-			unsigned int umd = (2U * upend % 61U) / 2U;
-			unsigned int umm = 5U * upent + umo;
-			unsigned int vy = _year(v);
-			unsigned int vyd = v - _j00(vy) - 1;
-			unsigned int vpent = vyd / 153U;
-			unsigned int vpend = vyd % 153U;
-			unsigned int vmo = (2U * vpend / 61U);
-			unsigned int vmd = (2U * vpend % 61U) / 2U;
-			unsigned int vmm = 5U * vpent + vmo;
-			ddur d = {umd - vmd, (uy - vy) * 12 + (umm - vmm)};
+		#pragma omp parallel for
+		for (R_xlen_t i = 0; i < n; i++) {
+			double v =xp[i];
+			ddur d = {(int)v};
 
-			ansp[i] = DDUR_AS_REAL(d);
-		} else {
+			ansp[i] = !R_IsNA(v) ? DDUR_AS_REAL(d) : NA_REAL;
+		}
+		break;
+	}
+	case INTSXP: {
+		const int *xp = INTEGER(x);
+
+		#pragma omp parallel for
+		for (R_xlen_t i = 0; i < n; i++) {
+			int v =xp[i];
+			ddur d = {v};
+
+			ansp[i] = v != NA_INTEGER ? DDUR_AS_REAL(d) : NA_REAL;
+		}
+		break;
+	}
+	default:
+		#pragma omp parallel for
+		for (R_xlen_t i = 0; i < n; i++) {
 			ansp[i] = NA_REAL;
 		}
+		break;
 	}
 
 	with (SEXP class) {
@@ -1659,21 +1669,70 @@ minus_EDate(SEXP x, SEXP y)
 }
 
 SEXP
-ddur_EDate(SEXP x, SEXP y)
+format_ddur(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(STRSXP, n));
+	const double *xp = REAL(x);
+
+	/* no omp here as mkCharLen doesn't like it */
+	for (R_xlen_t i = 0; i < n; i++) {
+		double r = xp[i];
+		char buf[64U];
+
+		if (!R_IsNA(r)) {
+			SET_STRING_ELT(ans, i, mkCharLen(buf, _prddur(buf, sizeof(buf), REAL_AS_DDUR(r))));
+		} else {
+			SET_STRING_ELT(ans, i, NA_STRING);
+		}
+	}
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+plus_ddur(SEXP x, SEXP y)
 {
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(REALSXP, n));
 	double *restrict ansp = REAL(ans);
-	const int *xp = INTEGER(x);
-	const int *yp = INTEGER(y);
+	const double *xp = REAL(x);
+	const double *yp = REAL(y);
 
 	/* no omp here as mkCharLen doesn't like it */
 	for (R_xlen_t i = 0; i < n; i++) {
-		int u = xp[i];
-		int v = yp[i];
-		ddur d = {v - u};
+		ddur dx = REAL_AS_DDUR(xp[i]);
+		ddur dy = REAL_AS_DDUR(yp[i]);
 
-		ansp[i] = u != NA_INTEGER && v != NA_INTEGER ? DDUR_AS_REAL(d) : NA_REAL;
+		ansp[i] = !R_IsNA(xp[i]) && !R_IsNA(yp[i])
+			? DDUR_AS_REAL((ddur){dx.d+dy.d, dx.m+dy.m})
+			: NA_REAL;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+neg_ddur(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(REALSXP, n));
+	double *restrict ansp = REAL(ans);
+	const double *xp = REAL(x);
+
+	/* no omp here as mkCharLen doesn't like it */
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur d = REAL_AS_DDUR(xp[i]);
+		d.m = -d.m;
+		d.d = -d.d;
+		ansp[i] = DDUR_AS_REAL(d);
 	}
 
 	with (SEXP class) {

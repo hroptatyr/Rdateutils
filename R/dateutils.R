@@ -292,6 +292,7 @@ as.ddur.character <- function(x)
 
 as.ddur.numeric <- function(x)
 {
+	.Call(Cas.ddur.numeric, x)
 }
 
 format.ddur <- function(x, ...)
@@ -315,6 +316,9 @@ round.ddur <- unique.ddur <- function(x, ...)
 ddur <- function(x, y)
 {
 ## actual (day) duration from x to y
+	if (missing(y)) {
+		return(as.ddur(x))
+	}
 	if (inherits(x, "EDate")) {
 		return(.Call(Cddur.EDate, x, rep.int(as.EDate(y), length(x))))
 	}

@@ -37,6 +37,8 @@ print(as.ddur("P-1D") + as.ddur("P2M"))
 print(as.ddur("P2D") - as.ddur("P2D"))
 print(as.ddur("P2D") - as.ddur("P2M"))
 print(-as.ddur("P-2M2D"))
+print(as.ddur("AA") + as.ddur("P2M"))
+print(as.ddur("TN") + as.ddur("XN"))
 
 print("")
 print(as.EDate("2000-2-29") - as.EDate("2000-1-20"))

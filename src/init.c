@@ -39,6 +39,7 @@ R_CallMethodDef callMethods[] = {
 	{"Cwday.FDate", (DL_FUNC)&wday_FDate, -1},
 
 	{"Cas.ddur.character", (DL_FUNC)&as_ddur_character, -1},
+	{"Cas.ddur.numeric", (DL_FUNC)&as_ddur_numeric, -1},
 	{"Cformat.ddur", (DL_FUNC)&format_ddur, -1},
 	{"C+.ddur", (DL_FUNC)&plus_ddur, -1},
 	{"Cneg.ddur", (DL_FUNC)&neg_ddur, -1},

@@ -114,9 +114,8 @@ S3method(weekdays, FDate)
 
 export(as.ddur)
 S3method(as.ddur, character)
-S3method(as.ddur, ddur)
-export(as.ddur.character)
 S3method(as.ddur, numeric)
+S3method(as.ddur, ddur)
 export(ddur)
 
 S3method(format, ddur)
