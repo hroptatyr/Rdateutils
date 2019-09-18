@@ -128,5 +128,6 @@ S3method(unique, ddur)
 
 ## these ones do arithmetic with EDates and FDates as well
 S3method(`+`, ddur)
-S3method(`-`, ddur)
+##S3method(`-`, ddur)
 S3method(`-`, EDate)
+S3method(`-`, FDate)

@@ -47,6 +47,9 @@ R_CallMethodDef callMethods[] = {
 	{"C+.EDate", (DL_FUNC)&plus_EDate, -1},
 	{"C-.EDate", (DL_FUNC)&minus_EDate, -1},
 	{"Cddur.EDate", (DL_FUNC)&ddur_EDate, -1},
+	{"C+.FDate", (DL_FUNC)&plus_FDate, -1},
+	{"C-.FDate", (DL_FUNC)&minus_FDate, -1},
+	{"Cddur.FDate", (DL_FUNC)&ddur_FDate, -1},
 	{NULL, NULL, 0}
 };
 

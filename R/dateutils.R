@@ -338,6 +338,9 @@ ddur <- function(x, y)
 	if (inherits(x, "EDate") && inherits(y, "ddur")) {
 		return(.Call(`C+.EDate`, x, rep.int(y, length(x))))
 	}
+	if (inherits(x, "FDate") && inherits(y, "ddur")) {
+		return(.Call(`C+.FDate`, x, rep.int(y, length(x))))
+	}
 	stop("no method found to add ",class(y)," to ",class(x))
 }
 
@@ -357,8 +360,25 @@ ddur <- function(x, y)
 	if (nargs() == 1L) {
 		stop("unary minus is undefined for EDate")
 	}
-	if (!inherits(x, "EDate") || !inherits(y, "EDate")) {
-		stop("no method found to subtract ",class(y)," from ",class(x))
+	if (inherits(y, "EDate")) {
+		return(.Call(`C-.EDate`, x, rep.int(y, length(x))))
 	}
-	.Call(`C-.EDate`, x, rep.int(y, length(x)))
+	if (inherits(y, "ddur")) {
+		return(`+.ddur`(x, .Call(Cneg.ddur, y)))
+	}
+	stop("no method found to subtract ",class(y)," from ",class(x))
+}
+
+`-.FDate` <- function(x, y)
+{
+	if (nargs() == 1L) {
+		stop("unary minus is undefined for FDate")
+	}
+	if (inherits(y, "FDate")) {
+		return(.Call(`C-.FDate`, x, rep.int(y, length(x))))
+	}
+	if (inherits(y, "ddur")) {
+		return(`+.ddur`(x, .Call(Cneg.ddur, y)))
+	}
+	stop("no method found to subtract ",class(y)," from ",class(x))
 }
