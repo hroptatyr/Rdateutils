@@ -8,6 +8,7 @@ month <- function(x, ...) UseMethod("month")
 mday <- function(x, ...) UseMethod("mday")
 week <- function(x, ...) UseMethod("week")
 wday <- function(x, ...) UseMethod("wday")
+dday <- function(x, ...) UseMethod("dday")
 
 
 as.EDate <- function(x, ...) UseMethod("as.EDate")
@@ -323,6 +324,37 @@ ddur <- function(x, y)
 		return(.Call(Cddur.EDate, x, rep.int(as.EDate(y), length(x))))
 	}
 	stop("no method found to obtain duration between ",class(x)," and ",class(y))
+}
+
+## accessors
+year.ddur <- function(x)
+{
+	.Call(Cyear.ddur, x)
+}
+
+semi.ddur <- function(x)
+{
+	.Call(Csemi.ddur, x)
+}
+
+quarter.ddur <- function(x)
+{
+	.Call(Cquarter.ddur, x)
+}
+
+month.ddur <- function(x)
+{
+	.Call(Cmonth.ddur, x)
+}
+
+week.ddur <- function(x)
+{
+	.Call(Cweek.ddur, x)
+}
+
+dday.ddur <- function(x)
+{
+	.Call(Cdday.ddur, x)
 }
 
 

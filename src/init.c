@@ -44,6 +44,13 @@ R_CallMethodDef callMethods[] = {
 	{"C+.ddur", (DL_FUNC)&plus_ddur, -1},
 	{"Cneg.ddur", (DL_FUNC)&neg_ddur, -1},
 
+	{"Cyear.ddur", (DL_FUNC)&year_ddur, -1},
+	{"Csemi.ddur", (DL_FUNC)&semi_ddur, -1},
+	{"Cquarter.ddur", (DL_FUNC)&quarter_ddur, -1},
+	{"Cmonth.ddur", (DL_FUNC)&month_ddur, -1},
+	{"Cweek.ddur", (DL_FUNC)&week_ddur, -1},
+	{"Cdday.ddur", (DL_FUNC)&dday_ddur, -1},
+
 	{"C+.EDate", (DL_FUNC)&plus_EDate, -1},
 	{"C-.EDate", (DL_FUNC)&minus_EDate, -1},
 	{"Cddur.EDate", (DL_FUNC)&ddur_EDate, -1},

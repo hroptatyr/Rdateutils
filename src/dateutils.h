@@ -45,6 +45,13 @@ SEXP format_ddur(SEXP x);
 SEXP plus_ddur(SEXP x, SEXP y);
 SEXP neg_ddur(SEXP x);
 
+SEXP year_ddur(SEXP x);
+SEXP semi_ddur(SEXP x);
+SEXP quarter_ddur(SEXP x);
+SEXP month_ddur(SEXP x);
+SEXP week_ddur(SEXP x);
+SEXP dday_ddur(SEXP x);
+
 SEXP plus_EDate(SEXP x, SEXP y);
 SEXP minus_EDate(SEXP x, SEXP y);
 SEXP ddur_EDate(SEXP x, SEXP y);

@@ -1766,6 +1766,7 @@ ddur_FDate(SEXP x, SEXP y)
 		int v = yp[i];
 		ddur d = {v - u};
 
+		fputs("Warning: raw result ... fixme", stderr);
 		ansp[i] = u != NA_INTEGER && v != NA_INTEGER ? DDUR_AS_REAL(d) : NA_REAL;
 	}
 
@@ -1880,6 +1881,108 @@ format_ddur(SEXP x)
 			SET_STRING_ELT(ans, i, NA_STRING);
 		}
 	}
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+year_ddur(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const double *xp = REAL(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).m / 12 : NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+semi_ddur(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const double *xp = REAL(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).m / 6 : NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+quarter_ddur(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const double *xp = REAL(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).m / 3 : NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+month_ddur(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const double *xp = REAL(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).m : NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+week_ddur(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const double *xp = REAL(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).d / 7 : NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+dday_ddur(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const double *xp = REAL(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).d : NA_INTEGER;
+	}
+
 	UNPROTECT(1);
 	return ans;
 }
