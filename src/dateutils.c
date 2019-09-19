@@ -1156,7 +1156,11 @@ as_EDate_FDate(SEXP x)
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32;
 
-		if (m != NA_INTEGER && yd && md) {
+		if (m != NA_INTEGER) {
+			/* round to EDate boundaries */
+			md += !md;
+			md &= !yd - !!yd;
+			mo &= -!!yd;
 			ansp[i] = _mkEDate(y+1U, mo+1U, md);
 		} else {
 			ansp[i] = NA_INTEGER;
