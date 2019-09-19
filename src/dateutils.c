@@ -1726,6 +1726,13 @@ minus_FDate(SEXP x, SEXP y)
 			int vmd = (vyd + 192U) % 195U % 97U % 32U;
 			int vmo = (vyd - vmd) / 32U;
 
+			umo &= -!!uyd;
+			vmo &= -!!vyd;
+			umd &= -!!uyd;
+			vmd &= -!!vyd;
+			/* upgrade to ordinary date when at least 1 is ordinary */
+			umd += !umd && !!vmd;
+			vmd += !vmd && !!umd;
 			d.m = 12 * (uy - vy) + (umo - vmo);
 			d.d = umd - vmd;
 			ansp[i] = DDUR_AS_REAL(d);
