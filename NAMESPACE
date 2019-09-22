@@ -18,6 +18,7 @@ export(week)
 export(wday)
 
 export(as.EDate)
+export(is.EDate)
 S3method(as.Date, EDate)
 export(as.IDate.EDate)
 S3method(as.EDate, character)
@@ -68,6 +69,7 @@ S3method(weekdays, EDate)
 
 
 export(as.FDate)
+export(is.FDate)
 S3method(as.FDate, character)
 S3method(as.FDate, FDate)
 S3method(as.EDate, FDate)
@@ -113,6 +115,7 @@ S3method(weekdays, FDate)
 
 
 export(as.ddur)
+export(is.ddur)
 S3method(as.ddur, character)
 S3method(as.ddur, numeric)
 S3method(as.ddur, ddur)

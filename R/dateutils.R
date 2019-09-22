@@ -12,6 +12,10 @@ dday <- function(x, ...) UseMethod("dday")
 
 
 as.EDate <- function(x, ...) UseMethod("as.EDate")
+is.EDate <- function(x)
+{
+	inherits(x, "EDate")
+}
 
 as.EDate.default <- function(x, ..., tz=attr(x, "tzone"))
 {
@@ -162,6 +166,10 @@ wday.EDate <- function(x)
 
 
 as.FDate <- function(x, ...) UseMethod("as.FDate")
+is.FDate <- function(x)
+{
+	inherits(x, "FDate")
+}
 
 as.FDate.character <- function(x)
 {
@@ -280,6 +288,10 @@ months.FDate <- months.EDate <- function(x, abbreviate=FALSE)
 
 
 as.ddur <- function(x, ...) UseMethod("as.ddur")
+is.ddur <- function(x)
+{
+	inherits(x, "ddur")
+}
 
 as.ddur.ddur <- function(x, ...)
 {
