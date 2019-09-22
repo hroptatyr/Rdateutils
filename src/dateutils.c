@@ -1340,7 +1340,7 @@ semi_FDate(SEXP x)
 		unsigned int yd = m % 391U;
 
 		ansp[i] = m != NA_INTEGER
-			? (yd > 0U) + (yd > 195U)
+			? (yd > 0U) ? (yd > 195U) : NA_INTEGER
 			: NA_INTEGER;
 	}
 
@@ -1364,6 +1364,7 @@ sday_FDate(SEXP x)
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32U;
 		unsigned int qd = (yd % 97U - (yd > 195U));
+		unsigned int sd;
 
 		if (m != NA_INTEGER && yd && md) {
 			unsigned int eo = yday_eom[mo + 1U] - yday_eom[6U*(yd>195U)];
@@ -1372,13 +1373,13 @@ sday_FDate(SEXP x)
 			eo += mo>0U && _leapp(y+1U) && yd<=195U;
 
 			yd = yday_eom[mo] + md - yday_eom[6U*(yd>195U)];
-			yd = yd <= eo ? yd : eo;
+			sd = yd <= eo ? yd : eo;
 		} else if (m != NA_INTEGER && qd%4U == 1U) {
-			yd = 0;
+			sd = 0;
 		} else {
-			yd = NA_INTEGER;
+			sd = NA_INTEGER;
 		}
-		ansp[i] = yd;
+		ansp[i] = sd;
 	}
 
 	UNPROTECT(1);
@@ -1402,7 +1403,7 @@ quarter_FDate(SEXP x)
 		unsigned int q = (yd + 95U - (yd > 195U)) / 97U;
 
 		ansp[i] = m != NA_INTEGER
-			? yd && md || qd%4U/2U ? q : 0
+			? yd && md || qd%4U/2U ? q : NA_INTEGER
 			: NA_INTEGER;
 	}
 
@@ -1435,13 +1436,13 @@ qday_FDate(SEXP x)
 			eo += mo>0U && _leapp(y+1U) && !q;
 
 			yd = yday_eom[mo] + md - yday_eom[3U*q];
-			yd = yd <= eo ? yd : eo;
+			qd = yd <= eo ? yd : eo;
 		} else if (m != NA_INTEGER && qd%4U == 2U) {
-			yd = 0;
+			qd = 0;
 		} else {
-			yd = NA_INTEGER;
+			qd = NA_INTEGER;
 		}
-		ansp[i] = yd;
+		ansp[i] = qd;
 	}
 
 	UNPROTECT(1);
@@ -1465,7 +1466,7 @@ month_FDate(SEXP x)
 		unsigned int mo = (yd - md) / 32U;
 
 		ansp[i] = m != NA_INTEGER
-			? yd && md || !((qd+1U)%4U) ? mo + 1 : 0
+			? yd && md || !((qd+1U)%4U) ? mo + 1 : NA_INTEGER
 			: NA_INTEGER;
 	}
 
@@ -1494,13 +1495,13 @@ mday_FDate(SEXP x)
 			unsigned int eo = yday_eom[mo + 1U] - yday_eom[mo];
 
 			eo += mo==1U && _leapp(y+1U);
-			yd = md <= eo ? md : eo;
+			md = md <= eo ? md : eo;
 		} else if (m != NA_INTEGER && qd%4U == 3U) {
-			yd = 0;
+			md = 0;
 		} else {
-			yd = NA_INTEGER;
+			md = NA_INTEGER;
 		}
-		ansp[i] = yd;
+		ansp[i] = md;
 	}
 
 	UNPROTECT(1);
