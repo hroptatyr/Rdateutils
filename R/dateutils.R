@@ -323,6 +323,9 @@ ddur <- function(x, y)
 	if (inherits(x, "EDate")) {
 		return(.Call(Cddur.EDate, x, rep.int(as.EDate(y), length(x))))
 	}
+	if (inherits(x, "FDate")) {
+		return(.Call(Cddur.FDate, x, rep.int(as.FDate(y), length(x))))
+	}
 	stop("no method found to obtain duration between ",class(x)," and ",class(y))
 }
 

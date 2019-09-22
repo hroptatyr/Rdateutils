@@ -1764,10 +1764,31 @@ ddur_FDate(SEXP x, SEXP y)
 	for (R_xlen_t i = 0; i < n; i++) {
 		int u = xp[i];
 		int v = yp[i];
-		ddur d = {v - u};
 
-		fputs("Warning: raw result ... fixme", stderr);
-		ansp[i] = u != NA_INTEGER && v != NA_INTEGER ? DDUR_AS_REAL(d) : NA_REAL;
+		if (LIKELY(u != NA_INTEGER && v != NA_INTEGER)) {
+			unsigned int uy = u / 391U;
+			unsigned int uyd = u % 391U;
+			int umd = (uyd + 192U) % 195U % 97U % 32U;
+			int umo = (uyd - umd) / 32U;
+			unsigned int vy = v / 391U;
+			unsigned int vyd = v % 391U;
+			int vmd = (vyd + 192U) % 195U % 97U % 32U;
+			int vmo = (vyd - vmd) / 32U;
+			EDate ud, vd;
+
+			umo &= -!!uyd;
+			vmo &= -!!vyd;
+			umd &= -!!uyd;
+			vmd &= -!!vyd;
+			/* upgrade to ordinary date when at least 1 is ordinary */
+			umd += !umd && !!vmd;
+			vmd += !vmd && !!umd;
+			ud = _mkEDate(uy+1U, umo+1U, umd);
+			vd = _mkEDate(vy+1U, vmo+1U, vmd);
+			ansp[i] = DDUR_AS_REAL((ddur){vd - ud});
+		} else {
+			ansp[i] = NA_REAL;
+		}
 	}
 
 	with (SEXP class) {
