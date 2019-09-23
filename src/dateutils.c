@@ -81,7 +81,7 @@ _mkEDate(unsigned int y, unsigned int m, int d)
 	return _j00(y - (m >= 10U)) + (yd <= eo ? yd : eo);
 }
 
-static FDate
+static EDate
 _rdEDate(const char *s)
 {
 	unsigned int y = 0U;
@@ -98,6 +98,14 @@ _rdEDate(const char *s)
 	case '/':
 	case ' ':
 		break;
+	case '\0':
+		/* could be 20190202 */
+		m = y % 10000U;
+		y /= 10000U;
+		d = m % 100U;
+		m /= 100U;
+		s--;
+		goto chk;
 	default:
 		goto nope;
 	}
@@ -112,12 +120,28 @@ _rdEDate(const char *s)
 		d *= 10;
 		d += (unsigned char)*s ^ '0';
 	}
+chk:
 	if (*s || (m - 1U) >= 12U || d >= 32U) {
 		goto nope;
 	}
 	return _mkEDate(y, m, d);
 nope:
 	return (EDate)0U;
+}
+
+static EDate
+_rdEDate_int(int x)
+{
+	unsigned int y, m, d;
+
+	y = x / 10000;
+	m = x % 10000;
+	d = m % 100;
+	m /= 100;
+	if (UNLIKELY((m - 1U) >= 12U || d >= 32U)) {
+		return (EDate)0U;
+	}
+	return _mkEDate(y, m, d);
 }
 
 static size_t
@@ -178,6 +202,13 @@ _rdFDate(const char *s)
 		if (y < 10000U) {
 			return _mkFDate(y, 1, -3);
 		}
+		/* could be 20190202 */
+		m = y % 10000U;
+		y /= 10000U;
+		d = m % 100U;
+		m /= 100U;
+		s--;
+		goto chk;
 	default:
 		goto nope;
 	}
@@ -224,12 +255,28 @@ _rdFDate(const char *s)
 	} else {
 		goto nope;
 	}
+chk:
 	if (*s || (m - 1U) >= 12U || (int)d >= 32) {
 		goto nope;
 	}
 	return _mkFDate(y, m, d);
 nope:
 	return (FDate)-1;
+}
+
+static FDate
+_rdFDate_int(int x)
+{
+	unsigned int y, m, d;
+
+	y = x / 10000;
+	m = x % 10000;
+	d = m % 100;
+	m /= 100;
+	if (UNLIKELY((m - 1U) >= 12U || d >= 32U)) {
+		return (FDate)-1;
+	}
+	return _mkFDate(y, m, d);
 }
 
 static size_t
@@ -386,10 +433,41 @@ as_EDate_character(SEXP x)
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		SEXP s =xp[i];
+		SEXP s = xp[i];
 		EDate d;
 
 		if (UNLIKELY(s == NA_STRING || !(d = _rdEDate(CHAR(s))))) {
+			ansp[i] = NA_INTEGER;
+			continue;
+		}
+
+		ansp[i] = d;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+as_EDate_integer(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		EDate d;
+
+		if (UNLIKELY(m == NA_INTEGER || !(d = _rdEDate_int(m)))) {
 			ansp[i] = NA_INTEGER;
 			continue;
 		}
@@ -1096,10 +1174,41 @@ as_FDate_character(SEXP x)
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		SEXP s =xp[i];
+		SEXP s = xp[i];
 		FDate d;
 
 		if (UNLIKELY(s == NA_STRING || !((d = _rdFDate(CHAR(s)))+1))) {
+			ansp[i] = NA_INTEGER;
+			continue;
+		}
+
+		ansp[i] = d;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+as_FDate_integer(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		FDate d;
+
+		if (UNLIKELY(m == NA_INTEGER || !((d = _rdFDate_int(m))+1))) {
 			ansp[i] = NA_INTEGER;
 			continue;
 		}
@@ -1339,8 +1448,8 @@ semi_FDate(SEXP x)
 		int m = xp[i];
 		unsigned int yd = m % 391U;
 
-		ansp[i] = m != NA_INTEGER
-			? (yd > 0U) ? (yd > 195U) : NA_INTEGER
+		ansp[i] = m != NA_INTEGER && (yd > 0U)
+			? 1U + (yd > 195U)
 			: NA_INTEGER;
 	}
 
@@ -1813,7 +1922,7 @@ as_ddur_character(SEXP x)
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		SEXP s =xp[i];
+		SEXP s = xp[i];
 		ddur d;
 
 		if (UNLIKELY(s == NA_STRING ||
@@ -1848,7 +1957,7 @@ as_ddur_numeric(SEXP x)
 
 		#pragma omp parallel for
 		for (R_xlen_t i = 0; i < n; i++) {
-			double v =xp[i];
+			double v = xp[i];
 			ddur d = {(int)v};
 
 			ansp[i] = !R_IsNA(v) ? DDUR_AS_REAL(d) : NA_REAL;
@@ -1860,7 +1969,7 @@ as_ddur_numeric(SEXP x)
 
 		#pragma omp parallel for
 		for (R_xlen_t i = 0; i < n; i++) {
-			int v =xp[i];
+			int v = xp[i];
 			ddur d = {v};
 
 			ansp[i] = v != NA_INTEGER ? DDUR_AS_REAL(d) : NA_REAL;

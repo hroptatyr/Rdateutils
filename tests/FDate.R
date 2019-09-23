@@ -19,6 +19,17 @@ options(datatable.print.nrows=400)
 
 print(data.table(y, year=year(y), yday=yday(y), semi=semi(y), sday=sday(y), quarter=quarter(y), qday=qday(y), month=month(y), mday=mday(y), week=week(y), wday=wday(y)))
 
+print("")
+print(as.FDate("20140102"))
+print(as.FDate("20140132"))
+print(as.FDate("20141302"))
+print(as.FDate("2010402"))
+print(as.FDate(20140102L))
+print(as.FDate(20140132L))
+print(as.FDate(20141302L))
+print(as.FDate(2010402L))
+
+if (FALSE) {
 library(microbenchmark)
 
 print(length(bigy <- rep(y, 100000L)))
@@ -42,3 +53,4 @@ x <- ymd(rep("2000-02-29",100000L))
 print(microbenchmark(format(x)))
 x <- as.Date(rep("2000-02-29",100000L))
 print(microbenchmark(format(x)))
+}

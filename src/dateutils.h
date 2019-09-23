@@ -5,6 +5,7 @@ typedef unsigned int EDate;
 typedef unsigned int FDate;
 
 SEXP as_EDate_character(SEXP x);
+SEXP as_EDate_integer(SEXP x);
 SEXP format_EDate(SEXP x);
 SEXP as_POSIXlt_EDate(SEXP x);
 
@@ -24,6 +25,7 @@ SEXP week_EDate(SEXP x);
 SEXP wday_EDate(SEXP x);
 
 SEXP as_FDate_character(SEXP x);
+SEXP as_FDate_integer(SEXP x);
 SEXP format_FDate(SEXP x);
 SEXP as_EDate_FDate(SEXP x);
 SEXP as_POSIXlt_FDate(SEXP x);

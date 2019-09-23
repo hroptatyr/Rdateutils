@@ -49,6 +49,11 @@ as.EDate.EDate <- function(x, ...)
 	return(x)
 }
 
+as.EDate.integer <- function(x)
+{
+	.Call(Cas.EDate.integer, x);
+}
+
 as.Date.EDate <- function(x, ...)
 {
 	x <- as.numeric(x - 719469L)
@@ -179,6 +184,11 @@ as.FDate.character <- function(x)
 as.FDate.FDate <- function(x, ...)
 {
 	return(x)
+}
+
+as.FDate.integer <- function(x)
+{
+	.Call(Cas.FDate.integer, x);
 }
 
 format.FDate <- function(x, ...)
