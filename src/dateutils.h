@@ -24,6 +24,8 @@ SEXP mday_bang(SEXP x, SEXP value);
 SEXP week_EDate(SEXP x);
 SEXP wday_EDate(SEXP x);
 
+SEXP seq_EDate(SEXP from, SEXP till, SEXP by);
+
 SEXP as_FDate_character(SEXP x);
 SEXP as_FDate_integer(SEXP x);
 SEXP format_FDate(SEXP x);
@@ -43,6 +45,7 @@ SEXP wday_FDate(SEXP x);
 
 SEXP as_ddur_character(SEXP x);
 SEXP as_ddur_numeric(SEXP x);
+SEXP is_na_ddur(SEXP x);
 SEXP format_ddur(SEXP x);
 SEXP plus_ddur(SEXP x, SEXP y);
 SEXP neg_ddur(SEXP x);

@@ -1,0 +1,10 @@
+library(dateutils)
+
+print(seq(as.EDate(20000101L), "2000-02-29"))
+print(seq(as.EDate(20000101L), "2000-02-29", by=7L))
+print(seq(as.EDate("2000-02-29"), 20000101L))
+print("")
+print(seq.EDate("2000-01-01","2000-12-23",by="1M"))
+print(seq.EDate("2000-01-01","2000-12-23",by="-1M"))
+print(seq.EDate("2000-12-23","2000-01-01",by="1M"))
+print(seq.EDate("2000-12-23","2000-01-01",by="-1M"))

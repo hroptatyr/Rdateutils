@@ -89,13 +89,40 @@ print.EDate <- function(x, ...)
 }
 
 c.EDate <- cut.EDate <- mean.EDate <-
-cut.EDate <- mean.EDate <- rep.EDate <- round.EDate <-
-seq.EDate <- split.EDate <- unique.EDate <-
+cut.EDate <- mean.EDate <- rep.EDate <-
+round.EDate <- split.EDate <- unique.EDate <-
 min.EDate <- max.EDate <- function(x, ...)
 {
 	x <- NextMethod()
 	class(x) <- "EDate"
 	return(x)
+}
+
+seq.EDate <- function(from, till, by=ddur(1L), from.last=F)
+{
+## follow dateseq(1) semantics
+	if (length(from) != 1L) {
+		stop("FROM must be of length 1")
+	} else if (!is.finite(from <- as.EDate(from))) {
+		stop("FROM must be finite")
+	}
+	if (length(till) != 1L) {
+		stop("TILL must be of length 1")
+	} else if (!is.finite(till <- as.EDate(till))) {
+		stop("TILL must be finite")
+	}
+	if (length(by) != 1L) {
+		stop("BY must be of length 1")
+	} else if (is.na(by <- as.ddur(by))) {
+		stop("BY must be non-NA")
+	}
+	if (from == till) {
+		## regardless of BY
+		return(from)
+	} else if (!by) {
+		stop("BY must be non-zero")
+	}
+	.Call(Cseq.EDate, from, till, by)
 }
 
 ## accessors
@@ -212,13 +239,17 @@ as.POSIXlt.FDate <- function(x)
 }
 
 c.FDate <- cut.FDate <- mean.FDate <-
-cut.FDate <- mean.FDate <- rep.FDate <- round.FDate <-
-seq.FDate <- split.FDate <- unique.FDate <-
+cut.FDate <- mean.FDate <- rep.FDate <-
+round.FDate <- split.FDate <- unique.FDate <-
 min.FDate <- max.FDate <- function(x, ...)
 {
 	x <- NextMethod()
 	class(x) <- "FDate"
 	x
+}
+
+seq.FDate <- function(from, to, by)
+{
 }
 
 ## accessors

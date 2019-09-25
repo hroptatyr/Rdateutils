@@ -3,12 +3,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <R.h>
+#include <Rdefines.h>
 #include "dateutils.h"
 #include "nifty.h"
 
-typedef struct {
-	int d;
-	int m;
+typedef union {
+	struct {
+		/* assume ieee floats */
+		int d:30;
+		int m:30;
+	};
+	uint64_t x;
 } ddur;
 
 static size_t
@@ -29,6 +34,13 @@ itostr(char *restrict buf, size_t bsz, int v)
 	}
 	buf[z] = '!';
 	return z + (v < 0);
+}
+
+static inline int
+cmp(unsigned int a, unsigned int b)
+{
+	/* calc cmp where -1 means A < B, 0 means A == B, and 1 means A > B */
+	return (a < b) - (b < a);
 }
 
 
@@ -402,6 +414,12 @@ _prddur(char *restrict buf, size_t bsz, const ddur d)
 	return z;
 }
 
+static inline int
+_is_na_ddur(ddur x)
+{
+	return !(x.x+1ULL);
+}
+
 static inline double
 DDUR_AS_REAL(ddur d)
 {
@@ -410,16 +428,6 @@ DDUR_AS_REAL(ddur d)
 		double r;
 	} r = {d};
 	return r.r;
-}
-
-static inline ddur
-REAL_AS_DDUR(double x)
-{
-	union {
-		double r;
-		ddur d;
-	} r = {x};
-	return r.d;
 }
 
 
@@ -1026,6 +1034,78 @@ wday_EDate(SEXP x)
 	return ans;
 }
 
+SEXP
+seq_EDate(SEXP from, SEXP till, SEXP by)
+{
+	EDate fd = INTEGER_ELT(from, 0U);
+	EDate td = INTEGER_ELT(till, 0U);
+	ddur d = ((ddur*)DATAPTR_RO(by))[0U];
+	SEXP ans;
+	unsigned int m = fd < td ? td - fd : fd - td;
+	EDate *tmp = Calloc(m + 1U, EDate);
+	size_t z = 0U;
+	const int c = cmp(fd, td);
+
+	if (cmp) {
+		unsigned int negdd = d.d < 0 ? -d.d : 0;
+		unsigned int posdd = d.d > 0 ? d.d : 0;
+		EDate old = fd;
+
+		do {
+			tmp[z++] = fd;
+
+			fd -= negdd;
+			/* dm is assumed to be != 0 */
+			if (d.m) {
+				unsigned int y = _year(fd);
+				unsigned int yd = fd - _j00(y) - 1;
+				unsigned int pent = yd / 153U;
+				unsigned int pend = yd % 153U;
+				unsigned int mo = (2U * pend / 61U);
+				unsigned int md = (2U * pend % 61U) / 2U;
+				int mm = (5U * pent + mo) % 12U;
+				unsigned int eo;
+
+				y += (mm + d.m) / 12;
+				mm = (mm + d.m) % 12;
+				/* make sure residues are non-negative */
+				y -= mm < 0;
+				mm = (mm + 12) % 12;
+
+				/* stay within month bounds */
+				eo = yday_Eom[mm + 1U] + (mm >= 11U && _leapp(y+1U));
+				yd = yday_Eom[mm] + md + 1U;
+				yd = yd < eo ? yd : eo;
+
+				fd = _j00(y) + yd;
+			}
+			fd += posdd;
+			/* the exit condition is equivalent to
+			 * old < fd < td  if the original fd < td  and
+			 * old > fd > td  if the original fd > td
+			 * equality is handled after this if-block */
+		} while (cmp(fd, td) == c && cmp(old, fd) == c);
+		/* make sure we deal with empty sums */
+		z -= cmp(fd, old) == c;
+	}
+	/* seq is inclusive, so finalise tmp if they're equal */
+	tmp[z] = fd;
+	z += fd == td;
+
+	/* now for real */
+	ans = PROTECT(allocVector(INTSXP, z));
+	memcpy(INTEGER(ans), tmp, z * sizeof(*tmp));
+	Free(tmp);
+
+	with (SEXP class = PROTECT(allocVector(STRSXP, 1))) {
+		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
 /* EDate arith */
 SEXP
 plus_EDate(SEXP x, SEXP y)
@@ -1034,14 +1114,14 @@ plus_EDate(SEXP x, SEXP y)
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
 	const int *xp = INTEGER(x);
-	const double *yp = REAL(y);
+	const ddur *yp = DATAPTR_RO(y);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = xp[i];
-		ddur d = REAL_AS_DDUR(yp[i]);
+		ddur d = yp[i];
 
-		if (UNLIKELY(m == NA_INTEGER || R_IsNA(yp[i]))) {
+		if (UNLIKELY(m == NA_INTEGER || _is_na_ddur(d))) {
 			ansp[i] = NA_INTEGER;
 			continue;
 		}
@@ -1702,18 +1782,18 @@ plus_FDate(SEXP x, SEXP y)
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
 	const int *xp = INTEGER(x);
-	const double *yp = REAL(y);
+	const ddur *yp = DATAPTR_RO(y);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		unsigned int m = xp[i];
-		ddur d = REAL_AS_DDUR(yp[i]);
+		ddur d = yp[i];
 		unsigned int y = m / 391U;
 		unsigned int yd = m % 391U;
 		int md = (yd + 192U) % 195U % 97U % 32U;
 		int mo = (yd - md) / 32U;
 
-		if (UNLIKELY(m == NA_INTEGER || R_IsNA(yp[i]) || !(yd && md) && d.d)) {
+		if (UNLIKELY(m == NA_INTEGER || _is_na_ddur(d) || !(yd && md) && d.d)) {
 		nope:
 			ansp[i] = NA_INTEGER;
 			continue;
@@ -1995,19 +2075,35 @@ as_ddur_numeric(SEXP x)
 }
 
 SEXP
+is_na_ddur(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(LGLSXP, n));
+	int *restrict ansp = LOGICAL(ans);
+	const ddur *xp = DATAPTR_RO(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ansp[i] = _is_na_ddur(xp[i]);
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
 format_ddur(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(STRSXP, n));
-	const double *xp = REAL(x);
+	const ddur *xp = DATAPTR_RO(x);
 
 	/* no omp here as mkCharLen doesn't like it */
 	for (R_xlen_t i = 0; i < n; i++) {
-		double r = xp[i];
 		char buf[64U];
 
-		if (!R_IsNA(r)) {
-			SET_STRING_ELT(ans, i, mkCharLen(buf, _prddur(buf, sizeof(buf), REAL_AS_DDUR(r))));
+		if (!_is_na_ddur(xp[i])) {
+			SET_STRING_ELT(ans, i, mkCharLen(buf, _prddur(buf, sizeof(buf), xp[i])));
 		} else {
 			SET_STRING_ELT(ans, i, NA_STRING);
 		}
@@ -2022,11 +2118,11 @@ year_ddur(SEXP x)
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
-	const double *xp = REAL(x);
+	const ddur *xp = DATAPTR_RO(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).m / 12 : NA_INTEGER;
+		ansp[i] = !_is_na_ddur(xp[i]) ? xp[i].m / 12 : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -2039,11 +2135,11 @@ semi_ddur(SEXP x)
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
-	const double *xp = REAL(x);
+	const ddur *xp = DATAPTR_RO(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).m / 6 : NA_INTEGER;
+		ansp[i] = !_is_na_ddur(xp[i]) ? xp[i].m / 6 : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -2056,11 +2152,11 @@ quarter_ddur(SEXP x)
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
-	const double *xp = REAL(x);
+	const ddur *xp = DATAPTR_RO(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).m / 3 : NA_INTEGER;
+		ansp[i] = !_is_na_ddur(xp[i]) ? xp[i].m / 3 : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -2073,11 +2169,11 @@ month_ddur(SEXP x)
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
-	const double *xp = REAL(x);
+	const ddur *xp = DATAPTR_RO(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).m : NA_INTEGER;
+		ansp[i] = !_is_na_ddur(xp[i]) ? xp[i].m : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -2090,11 +2186,11 @@ week_ddur(SEXP x)
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
-	const double *xp = REAL(x);
+	const ddur *xp = DATAPTR_RO(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).d / 7 : NA_INTEGER;
+		ansp[i] = !_is_na_ddur(xp[i]) ? xp[i].d / 7 : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -2107,11 +2203,11 @@ dday_ddur(SEXP x)
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
-	const double *xp = REAL(x);
+	const ddur *xp = DATAPTR_RO(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
-		ansp[i] = !R_IsNA(xp[i]) ? REAL_AS_DDUR(xp[i]).d : NA_INTEGER;
+		ansp[i] = !_is_na_ddur(xp[i]) ? xp[i].d : NA_INTEGER;
 	}
 
 	UNPROTECT(1);
@@ -2124,15 +2220,15 @@ plus_ddur(SEXP x, SEXP y)
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(REALSXP, n));
 	double *restrict ansp = REAL(ans);
-	const double *xp = REAL(x);
-	const double *yp = REAL(y);
+	const ddur *xp = DATAPTR_RO(x);
+	const ddur *yp = DATAPTR_RO(y);
 
 	/* no omp here as mkCharLen doesn't like it */
 	for (R_xlen_t i = 0; i < n; i++) {
-		ddur dx = REAL_AS_DDUR(xp[i]);
-		ddur dy = REAL_AS_DDUR(yp[i]);
+		ddur dx = xp[i];
+		ddur dy = yp[i];
 
-		ansp[i] = !R_IsNA(xp[i]) && !R_IsNA(yp[i])
+		ansp[i] = !_is_na_ddur(xp[i]) && !_is_na_ddur(yp[i])
 			? DDUR_AS_REAL((ddur){dx.d+dy.d, dx.m+dy.m})
 			: NA_REAL;
 	}
@@ -2153,11 +2249,11 @@ neg_ddur(SEXP x)
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(REALSXP, n));
 	double *restrict ansp = REAL(ans);
-	const double *xp = REAL(x);
+	const ddur *xp = DATAPTR_RO(x);
 
 	/* no omp here as mkCharLen doesn't like it */
 	for (R_xlen_t i = 0; i < n; i++) {
-		ddur d = REAL_AS_DDUR(xp[i]);
+		ddur d = xp[i];
 		d.m = -d.m;
 		d.d = -d.d;
 		ansp[i] = DDUR_AS_REAL(d);
