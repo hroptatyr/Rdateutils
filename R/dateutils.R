@@ -56,7 +56,7 @@ as.EDate.integer <- function(x)
 
 as.Date.EDate <- function(x, ...)
 {
-	x <- as.numeric(x - 719469L)
+	x <- as.numeric(x) - 719469L
 	class(x) <- "Date"
 	return(x)
 }
@@ -88,7 +88,7 @@ print.EDate <- function(x, ...)
 	print(format.EDate(x), ...)
 }
 
-c.EDate <- cut.EDate <- mean.EDate <-
+c.EDate <- rev.EDate <- cut.EDate <- mean.EDate <-
 cut.EDate <- mean.EDate <- rep.EDate <-
 round.EDate <- split.EDate <- unique.EDate <-
 min.EDate <- max.EDate <- function(x, ...)
@@ -238,7 +238,7 @@ as.POSIXlt.FDate <- function(x)
 	.Call(Cas.POSIXlt.FDate, x)
 }
 
-c.FDate <- cut.FDate <- mean.FDate <-
+c.FDate <- rev.FDate <- cut.FDate <- mean.FDate <-
 cut.FDate <- mean.FDate <- rep.FDate <-
 round.FDate <- split.FDate <- unique.FDate <-
 min.FDate <- max.FDate <- function(x, ...)
@@ -359,7 +359,7 @@ print.ddur <- function(x, ...)
 	print(format.ddur(x), ...)
 }
 
-c.ddur <- rep.ddur <-
+c.ddur <- rev.ddur <- rep.ddur <-
 round.ddur <- unique.ddur <- function(x, ...)
 {
 	x <- NextMethod()
