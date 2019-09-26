@@ -1768,6 +1768,193 @@ wday_FDate(SEXP x)
 	return ans;
 }
 
+SEXP
+seq_FDate(SEXP from, SEXP till, SEXP by)
+{
+	FDate fd = INTEGER_ELT(from, 0U);
+	FDate td = INTEGER_ELT(till, 0U);
+	ddur d = DDUR_ELT(by, 0U);
+	SEXP ans;
+	FDate *tmp;
+	size_t z = 0U;
+	const int c = cmp(fd, td);
+	/* decomp */
+	FDate old = fd;
+	unsigned int y = fd / 391U;
+	unsigned int yd = fd % 391U;
+	int md = (yd + 192U) % 195U % 97U % 32U;
+	int mo = (yd - md) / 32U;
+
+	if (UNLIKELY(!(yd && md) && d.d)) {
+	nope:
+		error("duration incompatible with start or end date");
+	} else if (!(yd && md)) {
+		/* special dates, only allowed for d.d == 0 */
+		unsigned int qd = (yd % 97U - (yd > 195U));
+
+		switch (qd%4U) {
+		case 0U:
+			if (d.m % 12) {
+				goto nope;
+			}
+			break;
+		case 1U:
+			if (d.m % 6) {
+				goto nope;
+			}
+			break;
+		case 2U:
+			if (d.m % 3) {
+				goto nope;
+			}
+			break;
+		case 3U:
+			break;
+		}
+
+		/* we use at least month steps */
+		with (unsigned int m = fd < td ? td - fd : fd - td) {
+			m >>= 5U;
+			tmp = Calloc(m + 1U, FDate);
+		}
+		if (cmp) {
+			do {
+				/* what we've got in the last round */
+				tmp[z++] = fd;
+
+				switch (qd%4U) {
+				case 0U:
+					mo = 0, md = -3;
+					break;
+				case 1U:
+					md = -2;
+					break;
+				case 2U:
+					md = -1;
+					break;
+				case 3U:
+					break;
+				}
+				y += (mo + d.m) / 12;
+				mo = (mo + d.m) % 12;
+				/* make sure residues are non-negative */
+				y -= mo < 0;
+				mo = (mo + 12) % 12;
+
+				/* calculate next date */
+				fd = _mkFDate(y+1U, mo+1U, md);
+
+				/* redo the decomp */
+				y = fd / 391U;
+				yd = fd % 391U;
+				md = (yd + 192U) % 195U % 97U % 32U;
+				mo = (yd - md) / 32U;
+				qd = (yd % 97U - (yd > 195U));
+
+				/* the exit condition is equivalent to
+				 * old < fd < td  if the original fd < td  and
+				 * old > fd > td  if the original fd > td
+				 * equality is handled after this if-block */
+			} while (cmp(fd, td) == c && cmp(old, fd) == c);
+			/* make sure we deal with empty sums */
+			z -= cmp(fd, old) == c;
+		}
+	} else if (cmp) {
+		with (unsigned int m = fd < td ? td - fd : fd - td) {
+			/* if only month steps, save on allocation */
+			m >>= !d.d * 5U;
+			tmp = Calloc(m + 1U, FDate);
+		}
+		do {
+			/* what we've got in the last round */
+			tmp[z++] = fd;
+
+			if (d.d < 0) {
+				/* negative day periods take precedence
+				 * this is to make subtraction somewhat inverse to addition:
+				 * X + PiMjD - PiMjD = X + PiMjD + P-iM-jD
+				 * = X + PiM + PjD + P-jD + P-iM  = X */
+				unsigned int eo;
+
+				/* stay within month bounds */
+				eo = yday_eom[mo + 1U] - yday_eom[mo];
+				eo += mo==1U && _leapp(y+1U);
+				md = md <= eo ? md : eo;
+
+				md += d.d;
+				while (md <= 0) {
+					y -= !mo;
+					mo = mo > 0U ? mo - 1U : 11U;
+
+					eo = yday_eom[mo + 1U] - yday_eom[mo];
+					eo += mo==1U && _leapp(y+1U);
+					md += eo;
+				}
+			}
+			if (d.m) {
+				y += (mo + d.m) / 12;
+				mo = (mo + d.m) % 12;
+				/* make sure residues are non-negative */
+				y -= mo < 0;
+				mo = (mo + 12) % 12;
+			}
+			if (d.d > 0) {
+				unsigned int eo;
+
+				/* stay within month bounds */
+				eo = yday_eom[mo + 1U] - yday_eom[mo];
+				eo += mo==1U && _leapp(y+1U);
+				md = md <= eo ? md : eo;
+
+				md += d.d;
+				while (md > eo) {
+					md -= eo;
+					mo++;
+					y += mo >= 12U;
+					mo = mo < 12U ? mo : 0U;
+
+					eo = yday_eom[mo + 1U] - yday_eom[mo];
+					eo += mo==1U && _leapp(y+1U);
+				}
+			}
+
+			/* next candidate */
+			fd = _mkFDate(y+1U, mo+1U, md);
+
+			/* redo the decomp */
+			y = fd / 391U;
+			yd = fd % 391U;
+			md = (yd + 192U) % 195U % 97U % 32U;
+			mo = (yd - md) / 32U;
+
+			/* the exit condition is equivalent to
+			 * old < fd < td  if the original fd < td  and
+			 * old > fd > td  if the original fd > td
+			 * equality is handled after this if-block */
+		} while (cmp(fd, td) == c && cmp(old, fd) == c);
+		/* make sure we deal with empty sums */
+		z -= cmp(fd, old) == c;
+	} else {
+		tmp = Calloc(1U, FDate);
+	}
+	/* seq is inclusive, so finalise tmp if they're equal */
+	tmp[z] = fd;
+	z += fd == td;
+
+	/* now for real */
+	ans = PROTECT(allocVector(INTSXP, z));
+	memcpy(INTEGER(ans), tmp, z * sizeof(*tmp));
+	Free(tmp);
+
+	with (SEXP class = PROTECT(allocVector(STRSXP, 1))) {
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
 /* date arith */
 SEXP
 plus_FDate(SEXP x, SEXP y)

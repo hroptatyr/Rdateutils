@@ -122,6 +122,10 @@ seq.EDate <- function(from, till, by=ddur(1L), from.last=F)
 	} else if (!by) {
 		stop("BY must be non-zero")
 	}
+	if (from.last) {
+		x <- .Call(Cseq.EDate, till, from, -by)
+		return(rev(x))
+	}
 	.Call(Cseq.EDate, from, till, by)
 }
 
@@ -248,8 +252,35 @@ min.FDate <- max.FDate <- function(x, ...)
 	x
 }
 
-seq.FDate <- function(from, to, by)
+seq.FDate <- function(from, till, by=ddur(1L), from.last=F)
 {
+## follow dateseq(1) semantics
+	if (length(from) != 1L) {
+		stop("FROM must be of length 1")
+	} else if (!is.finite(from <- as.FDate(from))) {
+		stop("FROM must be finite")
+	}
+	if (length(till) != 1L) {
+		stop("TILL must be of length 1")
+	} else if (!is.finite(till <- as.FDate(till))) {
+		stop("TILL must be finite")
+	}
+	if (length(by) != 1L) {
+		stop("BY must be of length 1")
+	} else if (is.na(by <- as.ddur(by))) {
+		stop("BY must be non-NA")
+	}
+	if (from == till) {
+		## regardless of BY
+		return(from)
+	} else if (!by) {
+		stop("BY must be non-zero")
+	}
+	if (from.last) {
+		x <- .Call(Cseq.FDate, till, from, -by)
+		return(rev(x))
+	}
+	.Call(Cseq.FDate, from, till, by)
 }
 
 ## accessors
