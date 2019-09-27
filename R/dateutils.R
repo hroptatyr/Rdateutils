@@ -91,7 +91,7 @@ print.EDate <- function(x, ...)
 c.EDate <- rev.EDate <- cut.EDate <- mean.EDate <-
 cut.EDate <- mean.EDate <- rep.EDate <-
 round.EDate <- split.EDate <- unique.EDate <-
-min.EDate <- max.EDate <- function(x, ...)
+min.EDate <- max.EDate <- "[.EDate" <- function(x, ...)
 {
 	x <- NextMethod()
 	class(x) <- "EDate"
@@ -256,7 +256,7 @@ as.POSIXlt.FDate <- function(x)
 c.FDate <- rev.FDate <- cut.FDate <- mean.FDate <-
 cut.FDate <- mean.FDate <- rep.FDate <-
 round.FDate <- split.FDate <- unique.FDate <-
-min.FDate <- max.FDate <- function(x, ...)
+min.FDate <- max.FDate <- "[.FDate" <- function(x, ...)
 {
 	x <- NextMethod()
 	class(x) <- "FDate"
@@ -402,7 +402,7 @@ print.ddur <- function(x, ...)
 }
 
 c.ddur <- rev.ddur <- rep.ddur <-
-round.ddur <- unique.ddur <- function(x, ...)
+round.ddur <- unique.ddur <- "[.ddur" <- function(x, ...)
 {
 	x <- NextMethod()
 	class(x) <- "ddur"
