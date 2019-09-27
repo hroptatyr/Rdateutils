@@ -27,6 +27,7 @@ R_CallMethodDef callMethods[] = {
 
 	{"Cas.FDate.character", (DL_FUNC)&as_FDate_character, -1},
 	{"Cas.FDate.integer", (DL_FUNC)&as_FDate_integer, -1},
+	{"Cas.FDate.EDate", (DL_FUNC)&as_FDate_EDate, -1},
 	{"Cformat.FDate", (DL_FUNC)&format_FDate, -1},
 	{"Cas.EDate.FDate", (DL_FUNC)&as_EDate_FDate, -1},
 	{"Cas.POSIXlt.FDate", (DL_FUNC)&as_POSIXlt_FDate, -1},

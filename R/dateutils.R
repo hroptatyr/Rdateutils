@@ -222,6 +222,17 @@ as.FDate.integer <- function(x)
 	.Call(Cas.FDate.integer, x);
 }
 
+as.FDate.EDate <- function(x)
+{
+	.Call(Cas.FDate.EDate, x)
+}
+
+as.FDate.default <- function(x)
+{
+## go through EDates
+	.Call(Cas.FDate.EDate, as.EDate(x))
+}
+
 format.FDate <- function(x, ...)
 {
 	.Call(Cformat.FDate, x)

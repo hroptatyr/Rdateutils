@@ -28,6 +28,7 @@ SEXP seq_EDate(SEXP from, SEXP till, SEXP by);
 
 SEXP as_FDate_character(SEXP x);
 SEXP as_FDate_integer(SEXP x);
+SEXP as_FDate_EDate(SEXP x);
 SEXP format_FDate(SEXP x);
 SEXP as_EDate_FDate(SEXP x);
 SEXP as_POSIXlt_FDate(SEXP x);

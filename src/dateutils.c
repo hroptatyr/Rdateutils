@@ -512,6 +512,43 @@ format_EDate(SEXP x)
 }
 
 SEXP
+as_FDate_EDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+
+		if (LIKELY(m != NA_INTEGER)) {
+			unsigned int y = _year(m);
+			unsigned int yd = m - _j00(y) - 1;
+			unsigned int pent = yd / 153U;
+			unsigned int pend = yd % 153U;
+			unsigned int mo = (2U * pend / 61U);
+			unsigned int md = (2U * pend % 61U) / 2U;
+			unsigned int mm = (5U * pent + mo + 2U) % 12U;
+
+			ansp[i] = _mkFDate(y, mm+1U, md+1U);
+		} else {
+			ansp[i] = NA_INTEGER;
+		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 1));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
 as_POSIXlt_EDate(SEXP x)
 {
 	static const char ltnames [][7] = {"sec", "min", "hour", "mday", "mon", "year", "wday", "yday", "isdst", "zone",  "gmtoff"};
@@ -1334,12 +1371,13 @@ as_EDate_FDate(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = xp[i];
-		unsigned int y = m / 391;
-		unsigned int yd = m % 391;
-		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
-		unsigned int mo = (yd - md) / 32;
 
-		if (m != NA_INTEGER) {
+		if (LIKELY(m != NA_INTEGER)) {
+			unsigned int y = m / 391;
+			unsigned int yd = m % 391;
+			unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+			unsigned int mo = (yd - md) / 32;
+
 			/* round to EDate boundaries */
 			md += !md;
 			md &= !yd - !!yd;
