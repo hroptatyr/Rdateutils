@@ -10,6 +10,47 @@ week <- function(x, ...) UseMethod("week")
 wday <- function(x, ...) UseMethod("wday")
 dday <- function(x, ...) UseMethod("dday")
 
+year.default <- function(x)
+{
+	as.POSIXlt(x)$year + 1900L
+}
+
+yday.default <- function(x)
+{
+	as.POSIXlt(x)$yday + 1L
+}
+
+semi.default <- function(x)
+{
+	as.POSIXlt(x)$mon %/% 6L + 1L
+}
+
+quarter.default <- function(x)
+{
+	as.POSIXlt(x)$mon %/% 3L + 1L
+}
+
+month.default <- function(x)
+{
+	as.POSIXlt(x)$mon + 1L
+}
+
+mday.default <- function(x)
+{
+	as.POSIXlt(x)$mday
+}
+
+week.default <- function(x)
+{
+	z <- as.POSIXlt(x)
+	(z$yday - (z$wday-1L)%%7L + 10L) %/% 7L
+}
+
+wday.default <- function(x)
+{
+	as.POSIXlt(x)$wday
+}
+
 
 as.EDate <- function(x, ...) UseMethod("as.EDate")
 is.EDate <- function(x)
@@ -132,7 +173,7 @@ seq.EDate <- function(from, till, by=ddur(1L), from.last=F)
 ## accessors
 year.EDate <- function(x)
 {
-	.Call(Cyear.EDate, x)
+	.Call(Cyear.EDate, as.EDate(x))
 }
 
 `year<-` <- function(x, value)
@@ -142,7 +183,7 @@ year.EDate <- function(x)
 
 yday.EDate <- function(x)
 {
-	.Call(Cyday.EDate, x)
+	.Call(Cyday.EDate, as.EDate(x))
 }
 
 `yday<-` <- function(x, value)
@@ -152,27 +193,27 @@ yday.EDate <- function(x)
 
 semi.EDate <- function(x)
 {
-	.Call(Csemi.EDate, x)
+	.Call(Csemi.EDate, as.EDate(x))
 }
 
 sday.EDate <- function(x)
 {
-	.Call(Csday.EDate, x)
+	.Call(Csday.EDate, as.EDate(x))
 }
 
 quarter.EDate <- function(x)
 {
-	.Call(Cquarter.EDate, x)
+	.Call(Cquarter.EDate, as.EDate(x))
 }
 
 qday.EDate <- function(x)
 {
-	.Call(Cqday.EDate, x)
+	.Call(Cqday.EDate, as.EDate(x))
 }
 
 month.EDate <- function(x)
 {
-	.Call(Cmonth.EDate, x)
+	.Call(Cmonth.EDate, as.EDate(x))
 }
 
 `month<-` <- function(x, value)
@@ -182,7 +223,7 @@ month.EDate <- function(x)
 
 mday.EDate <- function(x)
 {
-	.Call(Cmday.EDate, x)
+	.Call(Cmday.EDate, as.EDate(x))
 }
 
 `mday<-` <- function(x, value)
@@ -192,12 +233,12 @@ mday.EDate <- function(x)
 
 week.EDate <- function(x)
 {
-	.Call(Cweek.EDate, x)
+	.Call(Cweek.EDate, as.EDate(x))
 }
 
 wday.EDate <- function(x)
 {
-	.Call(Cwday.EDate, x)
+	.Call(Cwday.EDate, as.EDate(x))
 }
 
 
@@ -297,52 +338,52 @@ seq.FDate <- function(from, till, by=ddur(1L), from.last=F)
 ## accessors
 year.FDate <- function(x)
 {
-	.Call(Cyear.FDate, x)
+	.Call(Cyear.FDate, as.FDate(x))
 }
 
 yday.FDate <- function(x)
 {
-	.Call(Cyday.FDate, x)
+	.Call(Cyday.FDate, as.FDate(x))
 }
 
 semi.FDate <- function(x)
 {
-	.Call(Csemi.FDate, x)
+	.Call(Csemi.FDate, as.FDate(x))
 }
 
 sday.FDate <- function(x)
 {
-	.Call(Csday.FDate, x)
+	.Call(Csday.FDate, as.FDate(x))
 }
 
 quarter.FDate <- function(x)
 {
-	.Call(Cquarter.FDate, x)
+	.Call(Cquarter.FDate, as.FDate(x))
 }
 
 qday.FDate <- function(x)
 {
-	.Call(Cqday.FDate, x)
+	.Call(Cqday.FDate, as.FDate(x))
 }
 
 month.FDate <- function(x)
 {
-	.Call(Cmonth.FDate, x)
+	.Call(Cmonth.FDate, as.FDate(x))
 }
 
 mday.FDate <- function(x)
 {
-	.Call(Cmday.FDate, x)
+	.Call(Cmday.FDate, as.FDate(x))
 }
 
 week.FDate <- function(x)
 {
-	.Call(Cweek.FDate, x)
+	.Call(Cweek.FDate, as.FDate(x))
 }
 
 wday.FDate <- function(x)
 {
-	.Call(Cwday.FDate, x)
+	.Call(Cwday.FDate, as.FDate(x))
 }
 
 
