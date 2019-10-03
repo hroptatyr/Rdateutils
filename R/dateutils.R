@@ -304,7 +304,7 @@ min.FDate <- max.FDate <- "[.FDate" <- function(x, ...)
 	x
 }
 
-seq.FDate <- function(from, till, by=ddur(1L), from.last=F)
+seq.FDate <- function(from, till, by, from.last=F)
 {
 ## follow dateseq(1) semantics
 	if (length(from) != 1L) {
@@ -317,14 +317,15 @@ seq.FDate <- function(from, till, by=ddur(1L), from.last=F)
 	} else if (!is.finite(till <- as.FDate(till))) {
 		stop("TILL must be finite")
 	}
-	if (length(by) != 1L) {
-		stop("BY must be of length 1")
-	} else if (is.na(by <- as.ddur(by))) {
-		stop("BY must be non-NA")
-	}
 	if (from == till) {
 		## regardless of BY
 		return(from)
+	} else if (missing(by)) {
+		by <- ddur(0L)
+	} else if (length(by) != 1L) {
+		stop("BY must be of length 1")
+	} else if (is.na(by <- as.ddur(by))) {
+		stop("BY must be non-NA")
 	} else if (!by) {
 		stop("BY must be non-zero")
 	}

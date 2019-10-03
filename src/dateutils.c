@@ -1848,19 +1848,26 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 		case 0U:
 			if (d.m % 12) {
 				goto nope;
+			} else if (!d.m) {
+				d.m = 12;
 			}
 			break;
 		case 1U:
 			if (d.m % 6) {
 				goto nope;
+			} else if (!d.m) {
+				d.m = 6;
 			}
 			break;
 		case 2U:
 			if (d.m % 3) {
 				goto nope;
+			} else if (!d.m) {
+				d.m = 3;
 			}
 			break;
 		case 3U:
+			d.m += !d.m;
 			break;
 		}
 
