@@ -512,14 +512,7 @@ dday.ddur <- function(x)
 		return(.Call(`C+.FDate`, x, rep.int(as.ddur(y), length(x))))
 	}
 	if (inherits(x, "ddur") || inherits(y, "ddur")) {
-		if (inherits(x, "ddur") && inherits(y, "ddur")) {
-			;
-		} else if (inherits(x, "ddur")) {
-			y <- as.ddur(y)
-		} else if (inherits(y, "ddur")) {
-			x <- as.ddur(x)
-		}
-		return(.Call(`C+.ddur`, x, y))
+		return(.Call(`C+.ddur`, as.ddur(x), as.ddur(y)))
 	}
 	stop("no method found to add ",class(y)," to ",class(x))
 }
@@ -546,15 +539,7 @@ dday.ddur <- function(x)
 		return(.Call(`C+.FDate`, x, rep.int(z, length(x))))
 	}
 	if (inherits(x, "ddur") || inherits(y, "ddur")) {
-		if (inherits(x, "ddur") && inherits(y, "ddur")) {
-			;
-		} else if (inherits(x, "ddur")) {
-			y <- as.ddur(y)
-		} else if (inherits(y, "ddur")) {
-			x <- as.ddur(x)
-		}
-		y <- .Call(Cneg.ddur, y)
-		return(.Call(`C+.ddur`, x, y))
+		return(.Call(`C+.ddur`, as.ddur(x), .Call(Cneg.ddur, as.ddur(y))))
 	}
 	stop("no method found to subtract ",class(y)," from ",class(x))
 }
@@ -572,4 +557,73 @@ dday.ddur <- function(x)
 `%%.ddur` <- function(x, y)
 {
 	.Call(`C%.ddur`, x, rep.int(as.numeric(y), length(x)))
+}
+
+
+## convenience
+`%before%` <- function(x, y) UseMethod("%before%")
+`%before|on%` <- function(x, y) UseMethod("%before|on%")
+`%after%` <- function(x, y) UseMethod("%after%")
+`%after|on%` <- function(x, y) UseMethod("%after|on%")
+
+`<..duo` <- `%before%..duo` <- function(x, y)
+{
+## use FDate as super-type as they can hold more dates
+	if (inherits(x, "ddur") || inherits(y, "ddur")) {
+		stop("")
+	}
+	x <- as.FDate(x)
+	y <- as.FDate(y)
+	unclass(as.FDate(x)) < unclass(as.FDate(y))
+}
+
+`<=..duo` <- `%before|on%..duo` <- function(x, y)
+{
+## use FDate as super-type as they can hold more dates
+	if (inherits(x, "ddur") || inherits(y, "ddur")) {
+		stop("")
+	}
+	unclass(as.FDate(x)) <= unclass(as.FDate(y))
+}
+
+`>..duo` <- `%after%..duo` <- function(x, y)
+{
+## use FDate as super-type as they can hold more dates
+	if (inherits(x, "ddur") || inherits(y, "ddur")) {
+		stop("")
+	}
+	unclass(as.FDate(x)) > unclass(as.FDate(y))
+}
+
+`>=..duo` <- `%after|on%..duo` <- function(x, y)
+{
+## use FDate as super-type as they can hold more dates
+	if (inherits(x, "ddur") || inherits(y, "ddur")) {
+		stop("")
+	}
+	unclass(as.FDate(x)) >= unclass(as.FDate(y))
+}
+
+`==..duo` <- function(x, y)
+{
+## use FDate as super-type as they can hold more dates
+	if (inherits(x, "ddur") || inherits(y, "ddur")) {
+		;
+	} else {
+		x <- as.FDate(x)
+		y <- as.FDate(y)
+	}
+	unclass(x) == unclass(y)
+}
+
+`!=..duo` <- function(x, y)
+{
+## use FDate as super-type as they can hold more dates
+	if (inherits(x, "ddur") || inherits(y, "ddur")) {
+		;	
+	} else {
+		x <- as.FDate(x)
+		y <- as.FDate(y)
+	}
+	unclass(x) != unclass(y)
 }
