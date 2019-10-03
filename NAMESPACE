@@ -166,3 +166,6 @@ export(dday.ddur)
 ## these ones do arithmetic with EDates and FDates as well
 S3method(`+`, .duo)
 S3method(`-`, .duo)
+S3method(`*`, ddur)
+S3method(`/`, ddur)
+S3method(`%%`, ddur)

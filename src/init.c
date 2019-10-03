@@ -49,6 +49,9 @@ R_CallMethodDef callMethods[] = {
 	{"Cformat.ddur", (DL_FUNC)&format_ddur, -1},
 	{"C+.ddur", (DL_FUNC)&plus_ddur, -1},
 	{"Cneg.ddur", (DL_FUNC)&neg_ddur, -1},
+	{"C*.ddur", (DL_FUNC)&mul_ddur, -1},
+	{"C/.ddur", (DL_FUNC)&div_ddur, -1},
+	{"C%.ddur", (DL_FUNC)&mod_ddur, -1},
 
 	{"Cyear.ddur", (DL_FUNC)&year_ddur, -1},
 	{"Csemi.ddur", (DL_FUNC)&semi_ddur, -1},

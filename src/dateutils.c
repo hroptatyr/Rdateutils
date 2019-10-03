@@ -2467,7 +2467,7 @@ plus_ddur(SEXP x, SEXP y)
 	const ddur *xp = DDUR(x);
 	const ddur *yp = DDUR(y);
 
-	/* no omp here as mkCharLen doesn't like it */
+	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		ddur dx = xp[i];
 		ddur dy = yp[i];
@@ -2496,11 +2496,95 @@ neg_ddur(SEXP x)
 	ddur *restrict ansp = DDUR(ans);
 	const ddur *xp = DDUR(x);
 
-	/* no omp here as mkCharLen doesn't like it */
+	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		ddur d = xp[i];
 		d.m = -d.m;
 		d.d = -d.d;
+		ansp[i] = d;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+mul_ddur(SEXP x, SEXP y)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+	const double *yp = REAL(y);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur d = xp[i];
+		d.m = (int)((double)d.m * yp[i]);
+		d.d = (int)((double)d.d * yp[i]);
+		ansp[i] = d;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+div_ddur(SEXP x, SEXP y)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+	const double *yp = REAL(y);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur d = xp[i];
+		d.m = (int)((double)d.m / yp[i]);
+		d.d = (int)((double)d.d / yp[i]);
+		ansp[i] = d;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+mod_ddur(SEXP x, SEXP y)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+	const double *yp = REAL(y);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur d = xp[i];
+		d.m = (int)(fmod((double)d.m, yp[i]));
+		d.d = (int)(fmod((double)d.d, yp[i]));
 		ansp[i] = d;
 	}
 

@@ -556,3 +556,18 @@ dday.ddur <- function(x)
 	}
 	stop("no method found to subtract ",class(y)," from ",class(x))
 }
+
+`*.ddur` <- function(x, y)
+{
+	.Call(`C*.ddur`, x, rep.int(as.numeric(y), length(x)))
+}
+
+`/.ddur` <- function(x, y)
+{
+	.Call(`C/.ddur`, x, rep.int(as.numeric(y), length(x)))
+}
+
+`%%.ddur` <- function(x, y)
+{
+	.Call(`C%.ddur`, x, rep.int(as.numeric(y), length(x)))
+}
