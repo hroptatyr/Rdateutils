@@ -448,8 +448,9 @@ as_EDate_character(SEXP x)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -479,8 +480,9 @@ as_EDate_integer(SEXP x)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -539,8 +541,9 @@ as_FDate_EDate(SEXP x)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -682,8 +685,9 @@ year_bang(SEXP x, SEXP value)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -741,8 +745,9 @@ yday_bang(SEXP x, SEXP value)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -941,8 +946,9 @@ month_bang(SEXP x, SEXP value)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -1009,8 +1015,9 @@ mday_bang(SEXP x, SEXP value)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -1129,8 +1136,9 @@ seq_EDate(SEXP from, SEXP till, SEXP by)
 	memcpy(INTEGER(ans), tmp, z * sizeof(*tmp));
 	Free(tmp);
 
-	with (SEXP class = PROTECT(allocVector(STRSXP, 1))) {
+	with (SEXP class = PROTECT(allocVector(STRSXP, 2))) {
 		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -1191,8 +1199,9 @@ plus_EDate(SEXP x, SEXP y)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -1237,8 +1246,9 @@ minus_EDate(SEXP x, SEXP y)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -1265,8 +1275,9 @@ ddur_EDate(SEXP x, SEXP y)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -1297,8 +1308,9 @@ as_FDate_character(SEXP x)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -1328,8 +1340,9 @@ as_FDate_integer(SEXP x)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -1389,8 +1402,9 @@ as_EDate_FDate(SEXP x)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -1984,8 +1998,9 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 	memcpy(INTEGER(ans), tmp, z * sizeof(*tmp));
 	Free(tmp);
 
-	with (SEXP class = PROTECT(allocVector(STRSXP, 1))) {
+	with (SEXP class = PROTECT(allocVector(STRSXP, 2))) {
 		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -2101,8 +2116,9 @@ plus_FDate(SEXP x, SEXP y)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -2151,8 +2167,9 @@ minus_FDate(SEXP x, SEXP y)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -2201,8 +2218,9 @@ ddur_FDate(SEXP x, SEXP y)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -2234,8 +2252,9 @@ as_ddur_character(SEXP x)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -2282,8 +2301,9 @@ as_ddur_numeric(SEXP x)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -2451,8 +2471,9 @@ plus_ddur(SEXP x, SEXP y)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 
@@ -2477,8 +2498,9 @@ neg_ddur(SEXP x)
 	}
 
 	with (SEXP class) {
-		PROTECT(class = allocVector(STRSXP, 1));
+		PROTECT(class = allocVector(STRSXP, 2));
 		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
 

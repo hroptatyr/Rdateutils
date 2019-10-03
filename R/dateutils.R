@@ -71,7 +71,7 @@ as.EDate.character <- function(x)
 as.EDate.Date <- as.EDate.IDate <- function(x, ...)
 {
 	x <- as.integer(x) + 719469L ##/*0000-03-00*/
-	class(x) <- "EDate"
+	class(x) <- c("EDate",".duo")
 	return(x)
 }
 
@@ -79,7 +79,7 @@ as.EDate.POSIXct <- function(x, tz=attr(x, "tzone"), ...)
 {
 	if (is.null(tz) || tz == "UTC") {
 		x <- as.integer(x / 86400)
-		class(x) <- "EDate"
+		class(x) <- c("EDate",".duo")
 		return(x)
 	}
 	return(as.EDate(as.Date(x, tz=tz, ...)))
@@ -135,7 +135,7 @@ round.EDate <- split.EDate <- unique.EDate <-
 min.EDate <- max.EDate <- "[.EDate" <- function(x, ...)
 {
 	x <- NextMethod()
-	class(x) <- "EDate"
+	class(x) <- c("EDate",".duo")
 	return(x)
 }
 
@@ -300,7 +300,7 @@ round.FDate <- split.FDate <- unique.FDate <-
 min.FDate <- max.FDate <- "[.FDate" <- function(x, ...)
 {
 	x <- NextMethod()
-	class(x) <- "FDate"
+	class(x) <- c("FDate",".duo")
 	x
 }
 
@@ -446,7 +446,7 @@ c.ddur <- rev.ddur <- rep.ddur <-
 round.ddur <- unique.ddur <- "[.ddur" <- function(x, ...)
 {
 	x <- NextMethod()
-	class(x) <- "ddur"
+	class(x) <- c("ddur",".duo")
 	x
 }
 
@@ -497,59 +497,61 @@ dday.ddur <- function(x)
 }
 
 
-`+.ddur` <- function(x, y)
+## multidispatch stuff
+`+..duo` <- function(x, y)
 {
 ## pretend it's a multidispatch
 	if (nargs() == 1L) {
 		return(x)
 	}
-	if (inherits(x, "ddur") && inherits(y, "ddur")) {
+	if (inherits(x, "EDate")) {
+		return(.Call(`C+.EDate`, x, rep.int(as.ddur(y), length(x))))
+	}
+	if (inherits(x, "FDate")) {
+		return(.Call(`C+.FDate`, x, rep.int(as.ddur(y), length(x))))
+	}
+	if (inherits(x, "ddur") || inherits(y, "ddur")) {
+		if (inherits(x, "ddur") && inherits(y, "ddur")) {
+			;
+		} else if (inherits(x, "ddur")) {
+			y <- as.ddur(y)
+		} else if (inherits(y, "ddur")) {
+			x <- as.ddur(x)
+		}
 		return(.Call(`C+.ddur`, x, y))
-	}
-	if (inherits(x, "EDate") && inherits(y, "ddur")) {
-		return(.Call(`C+.EDate`, x, rep.int(y, length(x))))
-	}
-	if (inherits(x, "FDate") && inherits(y, "ddur")) {
-		return(.Call(`C+.FDate`, x, rep.int(y, length(x))))
 	}
 	stop("no method found to add ",class(y)," to ",class(x))
 }
 
-`-.ddur` <- function(x, y)
+`-..duo` <- function(x, y)
 {
-	if (nargs() == 1L) {
+	if (nargs() == 1L && inherits(x, "ddur")) {
 		return(.Call(Cneg.ddur, x))
+	} else if (nargs() == 1L) {
+		stop("unary minus is undefined for ",class(x))
 	}
-	if (inherits(y, "ddur")) {
-		return(`+.ddur`(x, .Call(Cneg.ddur, y)))
+	if (inherits(x, "EDate") && inherits(y, "ddur")) {
+		y <- .Call(Cneg.ddur, y)
+		return(.Call(`C+.EDate`, x, rep.int(y, length(x))))
+	} else if (inherits(x, "EDate")) {
+		return(.Call(`C-.EDate`, x, rep.int(as.EDate(y), length(x))))
 	}
-	stop("no method found to subtract ",class(y)," from ",class(x))
-}
-
-`-.EDate` <- function(x, y)
-{
-	if (nargs() == 1L) {
-		stop("unary minus is undefined for EDate")
+	if (inherits(x, "FDate") && inherits(y, "ddur")) {
+		y <- .Call(Cneg.ddur, y)
+		return(.Call(`C+.FDate`, x, rep.int(y, length(x))))
+	} else if (inherits(x, "FDate")) {
+		return(.Call(`C-.FDate`, x, rep.int(as.FDate(y), length(x))))
 	}
-	if (inherits(y, "EDate")) {
-		return(.Call(`C-.EDate`, x, rep.int(y, length(x))))
-	}
-	if (inherits(y, "ddur")) {
-		return(`+.ddur`(x, .Call(Cneg.ddur, y)))
-	}
-	stop("no method found to subtract ",class(y)," from ",class(x))
-}
-
-`-.FDate` <- function(x, y)
-{
-	if (nargs() == 1L) {
-		stop("unary minus is undefined for FDate")
-	}
-	if (inherits(y, "FDate")) {
-		return(.Call(`C-.FDate`, x, rep.int(y, length(x))))
-	}
-	if (inherits(y, "ddur")) {
-		return(`+.ddur`(x, .Call(Cneg.ddur, y)))
+	if (inherits(x, "ddur") || inherits(y, "ddur")) {
+		if (inherits(x, "ddur") && inherits(y, "ddur")) {
+			;
+		} else if (inherits(x, "ddur")) {
+			y <- as.ddur(y)
+		} else if (inherits(y, "ddur")) {
+			x <- as.ddur(x)
+		}
+		y <- .Call(Cneg.ddur, y)
+		return(.Call(`C+.ddur`, x, y))
 	}
 	stop("no method found to subtract ",class(y)," from ",class(x))
 }
