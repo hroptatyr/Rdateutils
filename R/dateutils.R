@@ -531,17 +531,19 @@ dday.ddur <- function(x)
 	} else if (nargs() == 1L) {
 		stop("unary minus is undefined for ",class(x))
 	}
-	if (inherits(x, "EDate") && inherits(y, "ddur")) {
-		y <- .Call(Cneg.ddur, y)
-		return(.Call(`C+.EDate`, x, rep.int(y, length(x))))
-	} else if (inherits(x, "EDate")) {
-		return(.Call(`C-.EDate`, x, rep.int(as.EDate(y), length(x))))
+	if (inherits(x, "EDate")) {
+		if (!all(is.na(z <- as.EDate(y)))) {
+			return(.Call(`C-.EDate`, x, rep.int(z, length(x))))
+		}
+		z <- .Call(Cneg.ddur, as.ddur(y))
+		return(.Call(`C+.EDate`, x, rep.int(z, length(x))))
 	}
-	if (inherits(x, "FDate") && inherits(y, "ddur")) {
-		y <- .Call(Cneg.ddur, y)
-		return(.Call(`C+.FDate`, x, rep.int(y, length(x))))
-	} else if (inherits(x, "FDate")) {
-		return(.Call(`C-.FDate`, x, rep.int(as.FDate(y), length(x))))
+	if (inherits(x, "FDate")) {
+		if (!all(is.na(z <- as.FDate(y)))) {
+			return(.Call(`C-.FDate`, x, rep.int(z, length(x))))
+		}
+		z <- .Call(Cneg.ddur, as.ddur(y))
+		return(.Call(`C+.FDate`, x, rep.int(z, length(x))))
 	}
 	if (inherits(x, "ddur") || inherits(y, "ddur")) {
 		if (inherits(x, "ddur") && inherits(y, "ddur")) {
