@@ -534,7 +534,7 @@ as_FDate_EDate(SEXP x)
 			unsigned int md = (2U * pend % 61U) / 2U;
 			unsigned int mm = (5U * pent + mo + 2U) % 12U;
 
-			ansp[i] = _mkFDate(y, mm+1U, md+1U);
+			ansp[i] = _mkFDate(y+(yd >= 306U), mm+1U, md+1U);
 		} else {
 			ansp[i] = NA_INTEGER;
 		}
