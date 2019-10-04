@@ -89,6 +89,8 @@ S3method(as.FDate, integer)
 S3method(as.FDate, EDate)
 S3method(as.FDate, default)
 S3method(as.EDate, FDate)
+S3method(as.Date, FDate)
+export(as.IDate.FDate)
 S3method(as.POSIXlt, FDate)
 export(as.POSIXlt.FDate)
 

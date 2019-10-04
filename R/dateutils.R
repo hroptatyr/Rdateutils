@@ -289,6 +289,16 @@ as.EDate.FDate <- function(x)
 	.Call(Cas.EDate.FDate, x)
 }
 
+as.IDate.FDate <- function(x)
+{
+	as.IDate(.Call(Cas.EDate.FDate, x))
+}
+
+as.Date.FDate <- function(x)
+{
+	as.Date(.Call(Cas.EDate.FDate, x))
+}
+
 as.POSIXlt.FDate <- function(x)
 {
 	.Call(Cas.POSIXlt.FDate, x)

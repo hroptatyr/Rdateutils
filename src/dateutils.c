@@ -2035,8 +2035,7 @@ plus_FDate(SEXP x, SEXP y)
 		int md = (yd + 192U) % 195U % 97U % 32U;
 		int mo = (yd - md) / 32U;
 
-		if (UNLIKELY(m == NA_INTEGER || _is_na_ddur(d) || !(yd && md) && d.d)) {
-		nope:
+		if (UNLIKELY(m == NA_INTEGER || _is_na_ddur(d))) {
 			ansp[i] = NA_INTEGER;
 			continue;
 		} else if (!(yd && md)) {
@@ -2044,23 +2043,12 @@ plus_FDate(SEXP x, SEXP y)
 
 			switch (qd%4U) {
 			case 0U:
-				if (d.m % 12) {
-					goto nope;
-				}
-				mo = 0, md = -3;
-				break;
+				mo = md = 0;
+				md -= !(d.m % 12);
 			case 1U:
-				if (d.m % 6) {
-					goto nope;
-				}
-				md = -2;
-				break;
+				md -= !(d.m % 6);
 			case 2U:
-				if (d.m % 3) {
-					goto nope;
-				}
-				md = -1;
-				break;
+				md -= !(d.m % 3);
 			case 3U:
 				break;
 			}
