@@ -565,12 +565,14 @@ dday.ddur <- function(x)
 `%before|on%` <- function(x, y) UseMethod("%before|on%")
 `%after%` <- function(x, y) UseMethod("%after%")
 `%after|on%` <- function(x, y) UseMethod("%after|on%")
+`%older.than%` <- function(x, y) UseMethod("%older.than%")
+`%younger.than%` <- function(x, y) UseMethod("%younger.than%")
 
 `<..duo` <- `%before%..duo` <- function(x, y)
 {
 ## use FDate as super-type as they can hold more dates
 	if (inherits(x, "ddur")) {
-		return(.Call(`C<.ddur`, x,  rep.int(as.ddur(y), length(x))))
+		return(.Call(`C<.ddur`, x, rep.int(as.ddur(y), length(x))))
 	}
 	x <- as.FDate(x)
 	y <- as.FDate(y)
@@ -581,7 +583,7 @@ dday.ddur <- function(x)
 {
 ## use FDate as super-type as they can hold more dates
 	if (inherits(x, "ddur")) {
-		return(.Call(`C<=.ddur`, x,  rep.int(as.ddur(y), length(x))))
+		return(.Call(`C<=.ddur`, x, rep.int(as.ddur(y), length(x))))
 	}
 	unclass(as.FDate(x)) <= unclass(as.FDate(y))
 }
@@ -590,7 +592,7 @@ dday.ddur <- function(x)
 {
 ## use FDate as super-type as they can hold more dates
 	if (inherits(x, "ddur")) {
-		return(.Call(`C>.ddur`, x,  rep.int(as.ddur(y), length(x))))
+		return(.Call(`C>.ddur`, x, rep.int(as.ddur(y), length(x))))
 	}
 	unclass(as.FDate(x)) > unclass(as.FDate(y))
 }
@@ -599,7 +601,7 @@ dday.ddur <- function(x)
 {
 ## use FDate as super-type as they can hold more dates
 	if (inherits(x, "ddur")) {
-		return(.Call(`C>=.ddur`, x,  rep.int(as.ddur(y), length(x))))
+		return(.Call(`C>=.ddur`, x, rep.int(as.ddur(y), length(x))))
 	}
 	unclass(as.FDate(x)) >= unclass(as.FDate(y))
 }
@@ -626,4 +628,26 @@ dday.ddur <- function(x)
 		y <- as.FDate(y)
 	}
 	unclass(x) != unclass(y)
+}
+
+`%older.than%..duo` <- function(x, y, today=Sys.Date())
+{
+	y <- as.ddur(y)
+	if (is.FDate(x)) {
+		return(unclass(.Call(`C+.FDate`, x, y)) < unclass(as.FDate(today)))
+	} else if (is.EDate(x)) {
+		return(unclass(.Call(`C+.EDate`, x, y)) < unclass(as.EDate(today)))
+	}
+	return(.Call(`C<.ddur`, as.ddur(x), y))
+}
+
+`%younger.than%..duo` <- function(x, y, today=Sys.Date())
+{
+	y <- rep.int(as.ddur(y), length(x))
+	if (is.FDate(x)) {
+		return(unclass(.Call(`C+.FDate`, x, y)) > unclass(as.FDate(today)))
+	} else if (is.EDate(x)) {
+		return(unclass(.Call(`C+.EDate`, x, y)) > unclass(as.EDate(today)))
+	}
+	return(.Call(`C>.ddur`, as.ddur(x), y))
 }
