@@ -1919,6 +1919,7 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 			z -= cmp(fd, old) == c;
 		}
 	} else if (cmp) {
+		d.d += !d.d && !d.m;
 		with (unsigned int m = fd < td ? td - fd : fd - td) {
 			/* if only month steps, save on allocation */
 			m >>= !d.d * 5U;
