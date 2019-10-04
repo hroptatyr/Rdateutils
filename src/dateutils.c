@@ -1837,38 +1837,40 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 	int md = (yd + 192U) % 195U % 97U % 32U;
 	int mo = (yd - md) / 32U;
 
-	if (UNLIKELY(!(yd && md) && d.d)) {
-	nope:
-		error("duration incompatible with start or end date");
-	} else if (!(yd && md)) {
+	if (!(yd && md)) {
 		/* special dates, only allowed for d.d == 0 */
 		unsigned int qd = (yd % 97U - (yd > 195U));
 
-		switch (qd%4U) {
-		case 0U:
-			if (d.m % 12) {
-				goto nope;
-			} else if (!d.m) {
+		if (d.m) {
+			switch (qd%4U) {
+			case 0U:
+				mo = md = 0;
+				md -= !(d.m % 12);
+			case 1U:
+				md -= !(d.m % 6);
+			case 2U:
+				md -= !(d.m % 3);
+			case 3U:
+				break;
+			}
+		} else {
+			switch (qd%4U) {
+			case 0U:
 				d.m = 12;
-			}
-			break;
-		case 1U:
-			if (d.m % 6) {
-				goto nope;
-			} else if (!d.m) {
+				mo = 0, md = -3;
+				break;
+			case 1U:
 				d.m = 6;
-			}
-			break;
-		case 2U:
-			if (d.m % 3) {
-				goto nope;
-			} else if (!d.m) {
+				md = -2;
+				break;
+			case 2U:
 				d.m = 3;
+				md = -1;
+				break;
+			case 3U:
+				d.m = 1;
+				break;
 			}
-			break;
-		case 3U:
-			d.m += !d.m;
-			break;
 		}
 
 		/* we use at least month steps */
@@ -1877,23 +1879,12 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 			tmp = Calloc(m + 1U, FDate);
 		}
 		if (cmp) {
+			/* because of auto-fixups above */
+			fd = _mkFDate(y+1U, mo+1U, md);
 			do {
 				/* what we've got in the last round */
 				tmp[z++] = fd;
 
-				switch (qd%4U) {
-				case 0U:
-					mo = 0, md = -3;
-					break;
-				case 1U:
-					md = -2;
-					break;
-				case 2U:
-					md = -1;
-					break;
-				case 3U:
-					break;
-				}
 				y += (mo + d.m) / 12;
 				mo = (mo + d.m) % 12;
 				/* make sure residues are non-negative */
@@ -1909,6 +1900,18 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 				md = (yd + 192U) % 195U % 97U % 32U;
 				mo = (yd - md) / 32U;
 				qd = (yd % 97U - (yd > 195U));
+
+				switch (qd%4U) {
+				case 0U:
+					mo = md = 0;
+					md--;
+				case 1U:
+					md--;
+				case 2U:
+					md--;
+				case 3U:
+					break;
+				}
 
 				/* the exit condition is equivalent to
 				 * old < fd < td  if the original fd < td  and
