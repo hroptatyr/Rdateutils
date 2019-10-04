@@ -2499,8 +2499,11 @@ neg_ddur(SEXP x)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		ddur d = xp[i];
-		d.m = -d.m;
-		d.d = -d.d;
+
+		if (LIKELY(!_is_na_ddur(d))) {
+			d.m = -d.m;
+			d.d = -d.d;
+		}
 		ansp[i] = d;
 	}
 
@@ -2527,8 +2530,11 @@ mul_ddur(SEXP x, SEXP y)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		ddur d = xp[i];
-		d.m = (int)((double)d.m * yp[i]);
-		d.d = (int)((double)d.d * yp[i]);
+
+		if (LIKELY(!_is_na_ddur(d))) {
+			d.m = (int)((double)d.m * yp[i]);
+			d.d = (int)((double)d.d * yp[i]);
+		}
 		ansp[i] = d;
 	}
 
@@ -2555,8 +2561,11 @@ div_ddur(SEXP x, SEXP y)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		ddur d = xp[i];
-		d.m = (int)((double)d.m / yp[i]);
-		d.d = (int)((double)d.d / yp[i]);
+
+		if (LIKELY(!_is_na_ddur(d))) {
+			d.m = (int)((double)d.m / yp[i]);
+			d.d = (int)((double)d.d / yp[i]);
+		}
 		ansp[i] = d;
 	}
 
@@ -2583,8 +2592,11 @@ mod_ddur(SEXP x, SEXP y)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		ddur d = xp[i];
-		d.m = (int)(fmod((double)d.m, yp[i]));
-		d.d = (int)(fmod((double)d.d, yp[i]));
+
+		if (LIKELY(!_is_na_ddur(d))) {
+			d.m = (int)(fmod((double)d.m, yp[i]));
+			d.d = (int)(fmod((double)d.d, yp[i]));
+		}
 		ansp[i] = d;
 	}
 
@@ -2596,5 +2608,97 @@ mod_ddur(SEXP x, SEXP y)
 	}
 
 	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+lt_ddur(SEXP x, SEXP y)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(LGLSXP, n));
+	int *restrict ansp = LOGICAL(ans);
+	const ddur *xp = DDUR(x);
+	const ddur *yp = DDUR(y);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur xd = xp[i];
+		ddur yd = yp[i];
+
+		ansp[i] = !_is_na_ddur(xd) && !_is_na_ddur(yd)
+			? xd.m * 61LL + xd.d * 2LL + (xd.m<yd.m) < yd.m * 61LL + yd.d * 2LL + (yd.m<xd.m)
+			: NA_LOGICAL;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+le_ddur(SEXP x, SEXP y)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(LGLSXP, n));
+	int *restrict ansp = LOGICAL(ans);
+	const ddur *xp = DDUR(x);
+	const ddur *yp = DDUR(y);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur xd = xp[i];
+		ddur yd = yp[i];
+
+		ansp[i] = !_is_na_ddur(xd) && !_is_na_ddur(yd)
+			? xd.m * 61LL + xd.d * 2LL + (xd.m<yd.m) <= yd.m * 61LL + yd.d * 2LL + (yd.m<xd.m)
+			: NA_LOGICAL;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+gt_ddur(SEXP x, SEXP y)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(LGLSXP, n));
+	int *restrict ansp = LOGICAL(ans);
+	const ddur *xp = DDUR(x);
+	const ddur *yp = DDUR(y);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur xd = xp[i];
+		ddur yd = yp[i];
+
+		ansp[i] = !_is_na_ddur(xd) && !_is_na_ddur(yd)
+			? xd.m * 61LL + xd.d * 2LL + (xd.m<yd.m) > yd.m * 61LL + yd.d * 2LL + (yd.m<xd.m)
+			: NA_LOGICAL;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+ge_ddur(SEXP x, SEXP y)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(LGLSXP, n));
+	int *restrict ansp = LOGICAL(ans);
+	const ddur *xp = DDUR(x);
+	const ddur *yp = DDUR(y);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur xd = xp[i];
+		ddur yd = yp[i];
+
+		ansp[i] = !_is_na_ddur(xd) && !_is_na_ddur(yd)
+			? xd.m * 61LL + xd.d * 2LL + (xd.m<yd.m) >= yd.m * 61LL + yd.d * 2LL + (yd.m<xd.m)
+			: NA_LOGICAL;
+	}
+
+	UNPROTECT(1);
 	return ans;
 }

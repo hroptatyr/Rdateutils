@@ -55,6 +55,10 @@ SEXP neg_ddur(SEXP x);
 SEXP mul_ddur(SEXP x, SEXP y);
 SEXP div_ddur(SEXP x, SEXP y);
 SEXP mod_ddur(SEXP x, SEXP y);
+SEXP lt_ddur(SEXP x, SEXP y);
+SEXP le_ddur(SEXP x, SEXP y);
+SEXP gt_ddur(SEXP x, SEXP y);
+SEXP ge_ddur(SEXP x, SEXP y);
 
 SEXP year_ddur(SEXP x);
 SEXP semi_ddur(SEXP x);
