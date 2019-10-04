@@ -651,3 +651,45 @@ dday.ddur <- function(x)
 	}
 	return(.Call(`C>.ddur`, as.ddur(x), y))
 }
+
+oldest <- function(dates, span, which=FALSE)
+{
+## invariant: oldest(X, SPAN) + youngest(X, -SPAN) = X
+	if (length(span) != 1L) {
+		stop("SPAN must be of length 1")
+	}
+	span <- as.ddur(span)
+	pivot <- if (span < 0) {
+		max(dates)+1L
+	} else if (span > 0) {
+		min(dates)
+	} else {
+		stop("SPAN must not be nought")
+	}
+	r <- dates %before% (pivot+span)
+	if (which) {
+		return(r)
+	}
+	dates[r]
+}
+
+youngest <- function(dates, span, which=FALSE)
+{
+## invariant: youngest(X, SPAN) + oldest(X, -SPAN) = X
+	if (length(span) != 1L) {
+		stop("SPAN must be of length 1")
+	}
+	span <- .Call(Cneg.ddur, as.ddur(span))
+	pivot <- if (span < 0) {
+		max(dates)
+	} else if (span > 0) {
+		min(dates)-1L
+	} else {
+		stop("SPAN must not be nought")
+	}
+	r <- dates %after% (pivot+span)
+	if (which) {
+		return(r)
+	}
+	dates[r]
+}
