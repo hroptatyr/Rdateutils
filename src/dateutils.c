@@ -1837,7 +1837,7 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 	int md = (yd + 192U) % 195U % 97U % 32U;
 	int mo = (yd - md) / 32U;
 
-	if (!(yd && md)) {
+	if (!(yd && md) && !d.d) {
 		/* special dates, only allowed for d.d == 0 */
 		unsigned int qd = (yd % 97U - (yd > 195U));
 
@@ -1928,6 +1928,10 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 			m >>= !d.d * 5U;
 			tmp = Calloc(m + 1U, FDate);
 		}
+		/* maybe spurious? */
+		mo &= -!!yd;
+		md &= -!!(yd && md);
+		md += !md && d.d < 0;
 		do {
 			/* what we've got in the last round */
 			tmp[z++] = fd;
@@ -2041,7 +2045,7 @@ plus_FDate(SEXP x, SEXP y)
 		if (UNLIKELY(m == NA_INTEGER || _is_na_ddur(d))) {
 			ansp[i] = NA_INTEGER;
 			continue;
-		} else if (!(yd && md)) {
+		} else if (!(yd && md) && !d.d) {
 			unsigned int qd = (yd % 97U - (yd > 195U));
 
 			switch (qd%4U) {
@@ -2061,6 +2065,10 @@ plus_FDate(SEXP x, SEXP y)
 			y -= mo < 0;
 			mo = (mo + 12) % 12;
 			goto out;
+		} else if (!(yd && md)) {
+			/* maybe spurious? */
+			mo &= -!!yd;
+			md = d.d < 0;
 		}
 		if (d.d < 0) {
 			/* negative day periods take precedence
