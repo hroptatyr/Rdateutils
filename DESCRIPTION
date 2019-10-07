@@ -1,11 +1,18 @@
 Package: dateutils
 Type: Package
-Title: dateutils in R
+Title: Handling Dates in R
 Version: 0.1
 Date: 2019-09-06
 Depends: 
+    R (>= 3.2)
+Suggests:
+    knitr,
+    methods,
+    testthat
 Author: Sebastian Freundt
 Maintainer: Sebastian Freundt <freundt@ga-group.nl>
 Description: fast date handling in R
-License: BSD3c
+License: BSD_3_clause
 NeedsCompilation: yes
+URL: https://github.com/hroptatyr/Rdateutils
+BugReports: https://github.com/hroptatyr/Rdateutils/issues

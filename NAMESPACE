@@ -1,7 +1,5 @@
 useDynLib(dateutils, .registration=TRUE)
 
-import(methods)
-
 export(year)
 export(`year<-`)
 export(yday)

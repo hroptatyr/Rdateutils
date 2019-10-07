@@ -10,43 +10,43 @@ week <- function(x, ...) UseMethod("week")
 wday <- function(x, ...) UseMethod("wday")
 dday <- function(x, ...) UseMethod("dday")
 
-year.default <- function(x)
+year.default <- function(x, ...)
 {
 	as.POSIXlt(x)$year + 1900L
 }
 
-yday.default <- function(x)
+yday.default <- function(x, ...)
 {
 	as.POSIXlt(x)$yday + 1L
 }
 
-semi.default <- function(x)
+semi.default <- function(x, ...)
 {
 	as.POSIXlt(x)$mon %/% 6L + 1L
 }
 
-quarter.default <- function(x)
+quarter.default <- function(x, ...)
 {
 	as.POSIXlt(x)$mon %/% 3L + 1L
 }
 
-month.default <- function(x)
+month.default <- function(x, ...)
 {
 	as.POSIXlt(x)$mon + 1L
 }
 
-mday.default <- function(x)
+mday.default <- function(x, ...)
 {
 	as.POSIXlt(x)$mday
 }
 
-week.default <- function(x)
+week.default <- function(x, ...)
 {
 	z <- as.POSIXlt(x)
 	(z$yday - (z$wday-1L)%%7L + 10L) %/% 7L
 }
 
-wday.default <- function(x)
+wday.default <- function(x, ...)
 {
 	as.POSIXlt(x)$wday
 }
@@ -63,7 +63,7 @@ as.EDate.default <- function(x, ..., tz=attr(x, "tzone"))
 	as.EDate(as.Date(x, tz=if(!is.null(tz)) tz else "UTC", ...))
 }
 
-as.EDate.character <- function(x)
+as.EDate.character <- function(x, ...)
 {
 	.Call(Cas.EDate.character, x)
 }
@@ -90,7 +90,7 @@ as.EDate.EDate <- function(x, ...)
 	return(x)
 }
 
-as.EDate.integer <- function(x)
+as.EDate.integer <- function(x, ...)
 {
 	.Call(Cas.EDate.integer, x);
 }
@@ -139,7 +139,7 @@ min.EDate <- max.EDate <- "[.EDate" <- function(x, ...)
 	return(x)
 }
 
-seq.EDate <- function(from, till, by=ddur(1L), from.last=F)
+seq.EDate <- function(from, till, by=ddur(1L), from.last=F, ...)
 {
 ## follow dateseq(1) semantics
 	if (length(from) != 1L) {
@@ -171,7 +171,7 @@ seq.EDate <- function(from, till, by=ddur(1L), from.last=F)
 }
 
 ## accessors
-year.EDate <- function(x)
+year.EDate <- function(x, ...)
 {
 	.Call(Cyear.EDate, as.EDate(x))
 }
@@ -181,7 +181,7 @@ year.EDate <- function(x)
 	.Call(`Cyear<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
 }
 
-yday.EDate <- function(x)
+yday.EDate <- function(x, ...)
 {
 	.Call(Cyday.EDate, as.EDate(x))
 }
@@ -191,27 +191,27 @@ yday.EDate <- function(x)
 	.Call(`Cyday<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
 }
 
-semi.EDate <- function(x)
+semi.EDate <- function(x, ...)
 {
 	.Call(Csemi.EDate, as.EDate(x))
 }
 
-sday.EDate <- function(x)
+sday.EDate <- function(x, ...)
 {
 	.Call(Csday.EDate, as.EDate(x))
 }
 
-quarter.EDate <- function(x)
+quarter.EDate <- function(x, ...)
 {
 	.Call(Cquarter.EDate, as.EDate(x))
 }
 
-qday.EDate <- function(x)
+qday.EDate <- function(x, ...)
 {
 	.Call(Cqday.EDate, as.EDate(x))
 }
 
-month.EDate <- function(x)
+month.EDate <- function(x, ...)
 {
 	.Call(Cmonth.EDate, as.EDate(x))
 }
@@ -221,7 +221,7 @@ month.EDate <- function(x)
 	.Call(`Cmonth<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
 }
 
-mday.EDate <- function(x)
+mday.EDate <- function(x, ...)
 {
 	.Call(Cmday.EDate, as.EDate(x))
 }
@@ -231,12 +231,12 @@ mday.EDate <- function(x)
 	.Call(`Cmday<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
 }
 
-week.EDate <- function(x)
+week.EDate <- function(x, ...)
 {
 	.Call(Cweek.EDate, as.EDate(x))
 }
 
-wday.EDate <- function(x)
+wday.EDate <- function(x, ...)
 {
 	.Call(Cwday.EDate, as.EDate(x))
 }
@@ -248,7 +248,7 @@ is.FDate <- function(x)
 	inherits(x, "FDate")
 }
 
-as.FDate.character <- function(x)
+as.FDate.character <- function(x, ...)
 {
 	.Call(Cas.FDate.character, x)
 }
@@ -258,17 +258,17 @@ as.FDate.FDate <- function(x, ...)
 	return(x)
 }
 
-as.FDate.integer <- function(x)
+as.FDate.integer <- function(x, ...)
 {
 	.Call(Cas.FDate.integer, x);
 }
 
-as.FDate.EDate <- function(x)
+as.FDate.EDate <- function(x, ...)
 {
 	.Call(Cas.FDate.EDate, x)
 }
 
-as.FDate.default <- function(x)
+as.FDate.default <- function(x, ...)
 {
 ## go through EDates
 	.Call(Cas.FDate.EDate, as.EDate(x))
@@ -284,22 +284,22 @@ print.FDate <- function(x, ...)
 	print(format.FDate(x), ...)
 }
 
-as.EDate.FDate <- function(x)
+as.EDate.FDate <- function(x, ...)
 {
 	.Call(Cas.EDate.FDate, x)
 }
 
-as.IDate.FDate <- function(x)
+as.IDate.FDate <- function(x, ...)
 {
 	as.IDate(.Call(Cas.EDate.FDate, x))
 }
 
-as.Date.FDate <- function(x)
+as.Date.FDate <- function(x, ...)
 {
 	as.Date(.Call(Cas.EDate.FDate, x))
 }
 
-as.POSIXlt.FDate <- function(x)
+as.POSIXlt.FDate <- function(x, ...)
 {
 	.Call(Cas.POSIXlt.FDate, x)
 }
@@ -314,7 +314,7 @@ min.FDate <- max.FDate <- "[.FDate" <- function(x, ...)
 	x
 }
 
-seq.FDate <- function(from, till, by, from.last=F)
+seq.FDate <- function(from, till, by, from.last=F, ...)
 {
 ## follow dateseq(1) semantics
 	if (length(from) != 1L) {
@@ -347,52 +347,52 @@ seq.FDate <- function(from, till, by, from.last=F)
 }
 
 ## accessors
-year.FDate <- function(x)
+year.FDate <- function(x, ...)
 {
 	.Call(Cyear.FDate, as.FDate(x))
 }
 
-yday.FDate <- function(x)
+yday.FDate <- function(x, ...)
 {
 	.Call(Cyday.FDate, as.FDate(x))
 }
 
-semi.FDate <- function(x)
+semi.FDate <- function(x, ...)
 {
 	.Call(Csemi.FDate, as.FDate(x))
 }
 
-sday.FDate <- function(x)
+sday.FDate <- function(x, ...)
 {
 	.Call(Csday.FDate, as.FDate(x))
 }
 
-quarter.FDate <- function(x)
+quarter.FDate <- function(x, ...)
 {
 	.Call(Cquarter.FDate, as.FDate(x))
 }
 
-qday.FDate <- function(x)
+qday.FDate <- function(x, ...)
 {
 	.Call(Cqday.FDate, as.FDate(x))
 }
 
-month.FDate <- function(x)
+month.FDate <- function(x, ...)
 {
 	.Call(Cmonth.FDate, as.FDate(x))
 }
 
-mday.FDate <- function(x)
+mday.FDate <- function(x, ...)
 {
 	.Call(Cmday.FDate, as.FDate(x))
 }
 
-week.FDate <- function(x)
+week.FDate <- function(x, ...)
 {
 	.Call(Cweek.FDate, as.FDate(x))
 }
 
-wday.FDate <- function(x)
+wday.FDate <- function(x, ...)
 {
 	.Call(Cwday.FDate, as.FDate(x))
 }
@@ -433,12 +433,12 @@ as.ddur.ddur <- function(x, ...)
 	return(x)
 }
 
-as.ddur.character <- function(x)
+as.ddur.character <- function(x, ...)
 {
 	.Call(Cas.ddur.character, x)
 }
 
-as.ddur.numeric <- function(x)
+as.ddur.numeric <- function(x, ...)
 {
 	.Call(Cas.ddur.numeric, x)
 }
@@ -477,32 +477,32 @@ ddur <- function(x, y)
 }
 
 ## accessors
-year.ddur <- function(x)
+year.ddur <- function(x, ...)
 {
 	.Call(Cyear.ddur, x)
 }
 
-semi.ddur <- function(x)
+semi.ddur <- function(x, ...)
 {
 	.Call(Csemi.ddur, x)
 }
 
-quarter.ddur <- function(x)
+quarter.ddur <- function(x, ...)
 {
 	.Call(Cquarter.ddur, x)
 }
 
-month.ddur <- function(x)
+month.ddur <- function(x, ...)
 {
 	.Call(Cmonth.ddur, x)
 }
 
-week.ddur <- function(x)
+week.ddur <- function(x, ...)
 {
 	.Call(Cweek.ddur, x)
 }
 
-dday.ddur <- function(x)
+dday.ddur <- function(x, ...)
 {
 	.Call(Cdday.ddur, x)
 }
@@ -575,8 +575,8 @@ dday.ddur <- function(x)
 `%before|on%` <- function(x, y) UseMethod("%before|on%")
 `%after%` <- function(x, y) UseMethod("%after%")
 `%after|on%` <- function(x, y) UseMethod("%after|on%")
-`%older.than%` <- function(x, y) UseMethod("%older.than%")
-`%younger.than%` <- function(x, y) UseMethod("%younger.than%")
+`%older.than%` <- function(x, y, today) UseMethod("%older.than%")
+`%younger.than%` <- function(x, y, today) UseMethod("%younger.than%")
 
 `<..duo` <- `%before%..duo` <- function(x, y)
 {
