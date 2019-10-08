@@ -81,5 +81,6 @@ R_ExternalMethodDef externalMethods[] = {
 void attribute_visible R_init_dateutils(DllInfo *info)
 {
 	R_registerRoutines(info, NULL, callMethods, NULL, externalMethods);
+	R_useDynamicSymbols(info, FALSE);
 	return;
 }

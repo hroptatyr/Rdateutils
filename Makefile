@@ -19,7 +19,7 @@ install: build
 
 .PHONY: test
 test:
-	$(R) --vanilla -e 'source("tests/EDate.R")'
+	$(R) --vanilla -e 'devtools::test()'
 
 .PHONY: check
 check:
