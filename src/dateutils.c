@@ -2459,6 +2459,12 @@ dday_ddur(SEXP x)
 }
 
 SEXP
+seq_ddur(SEXP from, SEXP till, SEXP by)
+{
+	return R_NilValue;
+}
+
+SEXP
 plus_ddur(SEXP x, SEXP y)
 {
 	R_xlen_t n = XLENGTH(x);

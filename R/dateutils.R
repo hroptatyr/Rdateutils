@@ -461,6 +461,37 @@ round.ddur <- unique.ddur <- "[.ddur" <- function(x, ...)
 	x
 }
 
+seq.ddur <- function(from, till, by, from.last=F, ...)
+{
+	if (length(from) != 1L) {
+		stop("FROM must be of length 1")
+	} else if (!is.finite(from <- as.FDate(from))) {
+		stop("FROM must be finite")
+	}
+	if (length(till) != 1L) {
+		stop("TILL must be of length 1")
+	} else if (!is.finite(till <- as.FDate(till))) {
+		stop("TILL must be finite")
+	}
+	if (from == till) {
+		## regardless of BY
+		return(from)
+	} else if (missing(by)) {
+		by <- ddur(0L)
+	} else if (length(by) != 1L) {
+		stop("BY must be of length 1")
+	} else if (is.na(by <- as.ddur(by))) {
+		stop("BY must be non-NA")
+	} else if (!by) {
+		stop("BY must be non-zero")
+	}
+	if (from.last) {
+		x <- .Call(Cseq.FDate, till, from, -by)
+		return(rev(x))
+	}
+	.Call(Cseq.ddur, from, till, by)
+}
+
 ddur <- function(x, y)
 {
 ## actual (day) duration from x to y
