@@ -216,6 +216,7 @@ _prFDate(char *restrict buf, size_t bsz, FDate x)
 	unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 	unsigned int mo = (yd - md) / 32U;
 	unsigned int qd = (yd % 97U - (yd > 195U));
+	int leapp = _leapp(y+1);
 	size_t z = 4U;
 
 	y++, mo++;
@@ -225,6 +226,11 @@ _prFDate(char *restrict buf, size_t bsz, FDate x)
 	buf[0U] = (y % 10U) ^ '0';
 	buf[4U] = '-';
 	if (LIKELY(yd && md)) {
+		unsigned int eo;
+
+		eo = yday_eom[mo] - yday_eom[mo - 1U] + (mo==1U && leapp);
+		md = md <= eo ? md : eo;
+
 		buf[6U] = (mo % 10U) ^ '0', mo /= 10U;
 		buf[5U] = (mo % 10U) ^ '0';
 		buf[7U] = '-';
