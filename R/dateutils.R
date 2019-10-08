@@ -10,6 +10,11 @@ week <- function(x, ...) UseMethod("week")
 wday <- function(x, ...) UseMethod("wday")
 dday <- function(x, ...) UseMethod("dday")
 
+`year<-` <- function(x, ..., value) UseMethod("year<-")
+`yday<-` <- function(x, ..., value) UseMethod("yday<-")
+`month<-` <- function(x, ..., value) UseMethod("month<-")
+`mday<-` <- function(x, ..., value) UseMethod("mday<-")
+
 year.default <- function(x, ...)
 {
 	as.POSIXlt(x)$year + 1900L
@@ -52,196 +57,6 @@ wday.default <- function(x, ...)
 }
 
 
-as.EDate <- function(x, ...) UseMethod("as.EDate")
-is.EDate <- function(x)
-{
-	inherits(x, "EDate")
-}
-
-as.EDate.default <- function(x, ..., tz=attr(x, "tzone"))
-{
-	as.EDate(as.Date(x, tz=if(!is.null(tz)) tz else "UTC", ...))
-}
-
-as.EDate.character <- function(x, ...)
-{
-	.Call(Cas.EDate.character, x)
-}
-
-as.EDate.Date <- as.EDate.IDate <- function(x, ...)
-{
-	x <- as.integer(x) + 719469L ##/*0000-03-00*/
-	class(x) <- c("EDate",".duo")
-	return(x)
-}
-
-as.EDate.POSIXct <- function(x, tz=attr(x, "tzone"), ...)
-{
-	if (is.null(tz) || tz == "UTC") {
-		x <- as.integer(x / 86400)
-		class(x) <- c("EDate",".duo")
-		return(x)
-	}
-	return(as.EDate(as.Date(x, tz=tz, ...)))
-}
-
-as.EDate.EDate <- function(x, ...)
-{
-	return(x)
-}
-
-as.EDate.integer <- function(x, ...)
-{
-	.Call(Cas.EDate.integer, x);
-}
-
-as.Date.EDate <- function(x, ...)
-{
-	x <- as.numeric(x) - 719469L
-	class(x) <- "Date"
-	return(x)
-}
-
-as.IDate.EDate <- function(x, ...)
-{
-	x <- as.integer(x) - 719469L
-	class(x) <- c("IDate", "Date")
-	return(x)
-}
-
-as.POSIXlt.EDate <- function(x, ...)
-{
-	.Call(Cas.POSIXlt.EDate, x);
-}
-
-as.POSIXct.EDate <- function(x, ...)
-{
-	return(as.POSIXct(as.Date(x)))
-}
-
-format.EDate <- function(x, ...)
-{
-	.Call(Cformat.EDate, x)
-}
-
-print.EDate <- function(x, ...)
-{
-	print(format.EDate(x), ...)
-}
-
-c.EDate <- rev.EDate <- cut.EDate <- mean.EDate <-
-cut.EDate <- mean.EDate <- rep.EDate <-
-round.EDate <- split.EDate <- unique.EDate <-
-min.EDate <- max.EDate <- "[.EDate" <- function(x, ...)
-{
-	x <- NextMethod()
-	class(x) <- c("EDate",".duo")
-	return(x)
-}
-
-seq.EDate <- function(from, till, by=ddur(1L), from.last=F, ...)
-{
-## follow dateseq(1) semantics
-	if (length(from) != 1L) {
-		stop("FROM must be of length 1")
-	} else if (!is.finite(from <- as.EDate(from))) {
-		stop("FROM must be finite")
-	}
-	if (length(till) != 1L) {
-		stop("TILL must be of length 1")
-	} else if (!is.finite(till <- as.EDate(till))) {
-		stop("TILL must be finite")
-	}
-	if (length(by) != 1L) {
-		stop("BY must be of length 1")
-	} else if (is.na(by <- as.ddur(by))) {
-		stop("BY must be non-NA")
-	}
-	if (from == till) {
-		## regardless of BY
-		return(from)
-	} else if (!by) {
-		stop("BY must be non-zero")
-	}
-	if (from.last) {
-		x <- .Call(Cseq.EDate, till, from, -by)
-		return(rev(x))
-	}
-	.Call(Cseq.EDate, from, till, by)
-}
-
-## accessors
-year.EDate <- function(x, ...)
-{
-	.Call(Cyear.EDate, as.EDate(x))
-}
-
-`year<-` <- function(x, value)
-{
-	.Call(`Cyear<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
-}
-
-yday.EDate <- function(x, ...)
-{
-	.Call(Cyday.EDate, as.EDate(x))
-}
-
-`yday<-` <- function(x, value)
-{
-	.Call(`Cyday<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
-}
-
-semi.EDate <- function(x, ...)
-{
-	.Call(Csemi.EDate, as.EDate(x))
-}
-
-sday.EDate <- function(x, ...)
-{
-	.Call(Csday.EDate, as.EDate(x))
-}
-
-quarter.EDate <- function(x, ...)
-{
-	.Call(Cquarter.EDate, as.EDate(x))
-}
-
-qday.EDate <- function(x, ...)
-{
-	.Call(Cqday.EDate, as.EDate(x))
-}
-
-month.EDate <- function(x, ...)
-{
-	.Call(Cmonth.EDate, as.EDate(x))
-}
-
-`month<-` <- function(x, value)
-{
-	.Call(`Cmonth<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
-}
-
-mday.EDate <- function(x, ...)
-{
-	.Call(Cmday.EDate, as.EDate(x))
-}
-
-`mday<-` <- function(x, value)
-{
-	.Call(`Cmday<-`, as.EDate(x), rep_len(as.integer(value), length(x)))
-}
-
-week.EDate <- function(x, ...)
-{
-	.Call(Cweek.EDate, as.EDate(x))
-}
-
-wday.EDate <- function(x, ...)
-{
-	.Call(Cwday.EDate, as.EDate(x))
-}
-
-
 as.FDate <- function(x, ...) UseMethod("as.FDate")
 is.FDate <- function(x)
 {
@@ -263,15 +78,15 @@ as.FDate.integer <- function(x, ...)
 	.Call(Cas.FDate.integer, x);
 }
 
-as.FDate.EDate <- function(x, ...)
+as.FDate.Date <- as.FDate.IDate <- function(x, ...)
 {
-	.Call(Cas.FDate.EDate, x)
+	.Call(Cas.FDate.IDate, as.integer(unclass(x)))
 }
 
 as.FDate.default <- function(x, ...)
 {
-## go through EDates
-	.Call(Cas.FDate.EDate, as.EDate(x))
+## go through Date
+	.Call(Cas.FDate.IDate, as.integer(unclass(as.Date(x))))
 }
 
 format.FDate <- function(x, ...)
@@ -284,19 +99,14 @@ print.FDate <- function(x, ...)
 	print(format.FDate(x), ...)
 }
 
-as.EDate.FDate <- function(x, ...)
-{
-	.Call(Cas.EDate.FDate, x)
-}
-
 as.IDate.FDate <- function(x, ...)
 {
-	as.IDate(.Call(Cas.EDate.FDate, x))
+	.Call(Cas.IDate.FDate, x)
 }
 
 as.Date.FDate <- function(x, ...)
 {
-	as.Date(.Call(Cas.EDate.FDate, x))
+	as.Date(.Call(Cas.IDate.FDate, x))
 }
 
 as.POSIXlt.FDate <- function(x, ...)
@@ -397,9 +207,29 @@ wday.FDate <- function(x, ...)
 	.Call(Cwday.FDate, as.FDate(x))
 }
 
+`year<-.FDate` <- function(x, ..., value)
+{
+	.Call(`Cyear<-.FDate`, as.FDate(x), rep_len(as.integer(value), length(x)))
+}
+
+`yday<-.FDate` <- function(x, ..., value)
+{
+	.Call(`Cyday<-.FDate`, as.FDate(x), rep_len(as.integer(value), length(x)))
+}
+
+`month<-.FDate` <- function(x, ..., value)
+{
+	.Call(`Cmonth<-.FDate`, as.FDate(x), rep_len(as.integer(value), length(x)))
+}
+
+`mday<-.FDate` <- function(x, ..., value)
+{
+	.Call(`Cmday<-.FDate`, as.FDate(x), rep_len(as.integer(value), length(x)))
+}
+
 
 ## integrate with base
-weekdays.FDate <- weekdays.EDate <- function(x, abbreviate=FALSE)
+weekdays.FDate <- function(x, abbreviate=FALSE)
 {
 	wd <- list(
 		c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"),
@@ -409,7 +239,7 @@ weekdays.FDate <- weekdays.EDate <- function(x, abbreviate=FALSE)
 	wd[[abbreviate+1L]][wday(x) + 1L]
 }
 
-months.FDate <- months.EDate <- function(x, abbreviate=FALSE)
+months.FDate <- function(x, abbreviate=FALSE)
 {
 	ms <- list(
 		c("January", "February", "March", "April", "May", "June",
@@ -498,9 +328,6 @@ ddur <- function(x, y)
 	if (missing(y)) {
 		return(as.ddur(x))
 	}
-	if (inherits(x, "EDate")) {
-		return(.Call(Cddur.EDate, x, rep.int(as.EDate(y), length(x))))
-	}
 	if (inherits(x, "FDate")) {
 		return(.Call(Cddur.FDate, x, rep.int(as.FDate(y), length(x))))
 	}
@@ -546,9 +373,6 @@ dday.ddur <- function(x, ...)
 	if (nargs() == 1L) {
 		return(x)
 	}
-	if (inherits(x, "EDate")) {
-		return(.Call(`C+.EDate`, x, rep.int(as.ddur(y), length(x))))
-	}
 	if (inherits(x, "FDate")) {
 		return(.Call(`C+.FDate`, x, rep.int(as.ddur(y), length(x))))
 	}
@@ -564,13 +388,6 @@ dday.ddur <- function(x, ...)
 		return(.Call(Cneg.ddur, x))
 	} else if (nargs() == 1L) {
 		stop("unary minus is undefined for ",class(x))
-	}
-	if (inherits(x, "EDate")) {
-		if (!all(is.na(z <- as.EDate(y)))) {
-			return(.Call(`C-.EDate`, x, rep.int(z, length(x))))
-		}
-		z <- .Call(Cneg.ddur, as.ddur(y))
-		return(.Call(`C+.EDate`, x, rep.int(z, length(x))))
 	}
 	if (inherits(x, "FDate")) {
 		if (!all(is.na(z <- as.FDate(y)))) {
@@ -676,8 +493,6 @@ dday.ddur <- function(x, ...)
 	y <- as.ddur(y)
 	if (is.FDate(x)) {
 		return(unclass(.Call(`C+.FDate`, x, y)) < unclass(as.FDate(today)))
-	} else if (is.EDate(x)) {
-		return(unclass(.Call(`C+.EDate`, x, y)) < unclass(as.EDate(today)))
 	}
 	return(.Call(`C<.ddur`, as.ddur(x), y))
 }
@@ -687,8 +502,6 @@ dday.ddur <- function(x, ...)
 	y <- rep.int(as.ddur(y), length(x))
 	if (is.FDate(x)) {
 		return(unclass(.Call(`C+.FDate`, x, y)) > unclass(as.FDate(today)))
-	} else if (is.EDate(x)) {
-		return(unclass(.Call(`C+.EDate`, x, y)) > unclass(as.EDate(today)))
 	}
 	return(.Call(`C>.ddur`, as.ddur(x), y))
 }
