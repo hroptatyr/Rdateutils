@@ -1,0 +1,23 @@
+test_that("EDate arith", {
+	expect_equal(as.EDate("2000-2-28") + as.ddur("P0"), as.EDate(20000228L))
+	expect_equal(as.EDate("2000-2-28") + as.ddur("P1D"), as.EDate(20000229L))
+	expect_equal(as.EDate("2000-2-28") + as.ddur("P1W"), as.EDate("2000-03-06"))
+	expect_equal(as.EDate("2000-2-28") + as.ddur("P-1D"), as.EDate("2000-02-27"))
+	expect_equal(as.EDate("2000-2-28") + as.ddur("P-2W"), as.EDate("2000-02-14"))
+
+	expect_equal(as.EDate("2000-2-29") + as.ddur("P1M"), as.EDate("2000-03-29"))
+	expect_equal(as.EDate("2000-2-29") + as.ddur("P-1M"), as.EDate("2000-01-29"))
+	expect_equal(as.EDate("2000-2-29") + as.ddur("P-13M"), as.EDate(19990129L))
+	expect_equal(as.EDate("2000-2-29") + as.ddur("P1Y"), as.EDate(20010228L))
+	expect_equal(as.EDate("2000-2-29") + as.ddur("P-1Y"), as.EDate(19990228L))
+
+	expect_equal(as.EDate("2000-1-31") + as.ddur("P1M"), as.EDate("2000-2-31"))
+	expect_equal(as.EDate("2000-1-31") + as.ddur("P1M1D"), as.EDate("2000-03-01"))
+	expect_equal(as.EDate("2000-1-31") + as.ddur("P3M"), as.EDate("2000-04-30"))
+	expect_equal(as.EDate("2000-1-31") + as.ddur("P3M2D"), as.EDate("2000-05-02"))
+	expect_equal(as.EDate("2000-1-31") + as.ddur("P-2M"), as.EDate(19991130L))
+	expect_equal(as.EDate("2000-1-31") + as.ddur("P-2M-1D"), as.EDate(19991130L))
+	expect_equal(as.EDate("2000-1-31") + as.ddur("P1M-1D"), as.EDate(20000229L))
+	expect_equal(as.EDate("2000-1-31") + as.ddur("P-2M1D"), as.EDate(19991201L))
+	expect_true(is.na(as.EDate("2000-1-31") + as.ddur("XXX")))
+})

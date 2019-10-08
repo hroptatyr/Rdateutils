@@ -1,0 +1,15 @@
+test_that("ddur from/to character", {
+	expect_true(is.ddur(as.ddur("P0")))
+	expect_true(is.ddur(as.ddur("P2W")))
+	expect_true(is.ddur(as.ddur("P2Y2M")))
+	expect_true(is.ddur(as.ddur("P2W2D")))
+	expect_true(is.ddur(as.ddur("P2Y2M2W2D")))
+
+	expect_equal(format(as.ddur("0")), "P0D")
+	expect_equal(format(as.ddur(0L)), "P0D")
+	expect_equal(format(as.ddur("P2W")), "P14D")
+	expect_equal(format(as.ddur("P-2W")), "P-14D")
+	expect_equal(format(as.ddur(-14L)), "P-14D")
+	expect_equal(format(as.ddur("P2W2D")), "P16D")
+	expect_equal(format(as.ddur("P2Y2M2W2D")), "P26M16D")
+})
