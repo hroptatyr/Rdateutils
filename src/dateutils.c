@@ -928,19 +928,15 @@ year_bang_FDate(SEXP x, SEXP value)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = xp[i];
-		int y2b = vp[i];
-		unsigned int y = _year(m);
-		unsigned int yd = m - _j00(y);
+		int y2b = vp[i] - 1;
+		unsigned int yd = m % 391U;
 
-		/* massage y and yd into Jan years */
-		yd -= yd > 365U && !_leapp(y2b);
-		y2b -= yd >= 307U;
-		ansp[i] = m != NA_INTEGER ? _j00(y2b) + yd : NA_INTEGER;
+		ansp[i] = m != NA_INTEGER ? y2b * 391 + yd : NA_INTEGER;
 	}
 
 	with (SEXP class) {
 		PROTECT(class = allocVector(STRSXP, 2));
-		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
 		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
@@ -961,22 +957,30 @@ yday_bang_FDate(SEXP x, SEXP value)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = xp[i];
-		int yd2b = vp[i];
-		unsigned int y = _year(m);
-		unsigned int yd = m - _j00(y);
+		int yd2b = vp[i] - 1;
+		unsigned int y = m / 391U;
+		unsigned int mo;
+		unsigned int md;
 
-		/* massage y into Jan years */
-		y += yd >= 307U;
-		/* clamp between -366/366 */
-		yd2b = yd2b <= 365 ? yd2b : !_leapp(y) ? 365 : 366;
-		yd2b = yd2b >= -364 ? yd2b : !_leapp(y-1) ? -364 : -365;
-		yd2b -= 59 + _leapp(y);
-		ansp[i] = m != NA_INTEGER ? _j00(y) + yd2b : NA_INTEGER;
+		if ((yd2b -= _leapp(y+1)) < 59) {
+			/* third trimester */
+			yd2b += _leapp(y+1);
+		} else if ((yd2b += 2) < 153 + 61) {
+			/* first trimester */
+			;
+		} else {
+			/* second trimester */
+			yd2b += 30;
+		}
+
+		mo = 2 * yd2b / 61;
+		md = 2 * yd2b % 61;
+		ansp[i] = m != NA_INTEGER ? _mkFDate(y+1, mo+1 - (mo>=7), md/2+1) : NA_INTEGER;
 	}
 
 	with (SEXP class) {
 		PROTECT(class = allocVector(STRSXP, 2));
-		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
 		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
@@ -997,37 +1001,17 @@ month_bang_FDate(SEXP x, SEXP value)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = xp[i];
-		int m2b = vp[i] - 1;
+		int m2b = vp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 
-		if (m != NA_INTEGER && (unsigned int)m2b < 12U) {
-			unsigned int y = _year(m);
-			unsigned int yd = m - _j00(y);
-			unsigned int pend = (yd - 1) % 153U;
-			unsigned int md = (2U * pend % 61U) / 2U;
-			unsigned int eo;
-			int yd2b;
-
-			m2b += 10U;
-			m2b %= 12U;
-			yd2b = yday_Eom[m2b] + md + 1U;
-			/* massage y into Jan years */
-			y += yd >= 307U;
-			y -= yd2b >= 307U;
-
-			/* clamp to month's last */
-			eo = yday_Eom[m2b + 1U];
-			eo += m2b >= 11U && _leapp(y+1U);
-			yd2b = yd2b <= eo ? yd2b : eo;
-
-			ansp[i] = _j00(y) + yd2b;
-		} else {
-			ansp[i] = NA_INTEGER;
-		}
+		ansp[i] = m != NA_INTEGER ? _mkFDate(y+1, m2b, md) : NA_INTEGER;
 	}
 
 	with (SEXP class) {
 		PROTECT(class = allocVector(STRSXP, 2));
-		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
 		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
@@ -1049,31 +1033,17 @@ mday_bang_FDate(SEXP x, SEXP value)
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = xp[i];
 		int md2b = vp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
 
-		if (m != NA_INTEGER && (unsigned int)md2b <= 31U) {
-			unsigned int y = _year(m);
-			unsigned int yd = m - _j00(y) - 1;
-			unsigned int pent = yd / 153U;
-			unsigned int pend = yd % 153U;
-			unsigned int mo = (2U * pend / 61U);
-			unsigned int md = (2U * pend % 61U) / 2U;
-			unsigned int mz;
-			int yd2b;
-
-			mo += 5U * pent;
-			mz = yday_Eom[mo + 1U] - yday_Eom[mo];
-			mz += mo >= 11U && _leapp(y+1U);
-			md2b = md2b <= mz ? md2b : mz;
-			yd2b = yd - md + md2b;
-			ansp[i] = _j00(y) + yd2b;
-		} else {
-			ansp[i] = NA_INTEGER;
-		}
+		ansp[i] = m != NA_INTEGER ? _mkFDate(y+1, mo+1, md2b) : NA_INTEGER;
 	}
 
 	with (SEXP class) {
 		PROTECT(class = allocVector(STRSXP, 2));
-		SET_STRING_ELT(class, 0, mkChar("EDate"));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
 		SET_STRING_ELT(class, 1, mkChar(".duo"));
 		classgets(ans, class);
 	}
