@@ -228,7 +228,7 @@ _prFDate(char *restrict buf, size_t bsz, FDate x)
 	if (LIKELY(yd && md)) {
 		unsigned int eo;
 
-		eo = yday_eom[mo] - yday_eom[mo - 1U] + (mo==1U && leapp);
+		eo = yday_eom[mo] - yday_eom[mo - 1U] + (mo==2U && leapp);
 		md = md <= eo ? md : eo;
 
 		buf[6U] = (mo % 10U) ^ '0', mo /= 10U;
