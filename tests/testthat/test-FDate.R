@@ -58,7 +58,7 @@ test_that("FDate accessors", {
 	f <- as.FDate("2000-02-29")
 	year(f) <- 2001
 	expect_equal(f, as.FDate("2001-02-29"))
-	expect_equal(f, as.FDate("2001-02-28"))
+	expect_equal(format(f), "2001-02-28")
 	f <- as.FDate("2000-01-01")
 	year(f) <- 2001
 	expect_equal(f, as.FDate("2001-01-01"))
@@ -71,19 +71,19 @@ test_that("FDate accessors", {
 	expect_equal(f, as.FDate("2000-01-31"))
 	month(f) <- 4
 	expect_equal(f, as.FDate("2000-04-31"))
-	expect_equal(f, as.FDate("2000-04-30"))
+	expect_equal(format(f), "2000-04-30")
 	month(f) <- 2
 	expect_equal(f, as.FDate("2000-02-31"))
-	expect_equal(f, as.FDate("2000-02-30"))
-	expect_equal(f, as.FDate("2000-02-29"))
+	expect_equal(format(f), "2000-02-29")
 	month(f) <- 12
-	expect_equal(f, as.FDate("2000-12-29"))
+	expect_equal(f, as.FDate("2000-12-31"))
 
 	f <- as.FDate("2000-02-29")
 	mday(f) <- 20
 	expect_equal(f, as.FDate("2000-2-20"))
 	mday(f) <- 31
-	expect_equal(f, as.FDate("2000-2-29"))
+	expect_equal(f, as.FDate("2000-2-31"))
+	expect_true(as.Date(f) == as.Date("2000-2-29"))
 	mday(f) <- 29
 	expect_equal(f, as.FDate("2000-2-29"))
 
@@ -91,7 +91,7 @@ test_that("FDate accessors", {
 	mday(f) <- 31
 	expect_equal(mday(f), 30L)
 	expect_equal(f, as.FDate("2000-04-31"))
-	expect_equal(f, as.FDate("2000-04-30"))
+	expect_equal(format(f), "2000-04-30")
 	mday(f) <- 01
 	expect_equal(mday(f), 1L)
 	mday(f) <- 29

@@ -1109,6 +1109,7 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 				d.m = 1;
 				break;
 			}
+			d.m *= c;
 		}
 
 		/* we use at least month steps */
@@ -1116,7 +1117,7 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 			m >>= 5U;
 			tmp = Calloc(m + 1U, FDate);
 		}
-		if (cmp) {
+		if (c) {
 			/* because of auto-fixups above */
 			fd = _mkFDate(y+1U, mo+1U, md);
 			do {
@@ -1159,8 +1160,8 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 			/* make sure we deal with empty sums */
 			z -= cmp(fd, old) == c;
 		}
-	} else if (cmp) {
-		d.d += !d.d && !d.m;
+	} else if (c) {
+		d.d += c * (!d.d && !d.m);
 		with (unsigned int m = fd < td ? td - fd : fd - td) {
 			/* if only month steps, save on allocation */
 			m >>= !d.d * 5U;
