@@ -143,13 +143,48 @@ _rdFDate(const char *s)
 	}
 	switch (*s) {
 	case 'A':
-		d--;
+		d = -3U;
+		m = 1U;
+		s++;
+		goto chk;
 	case 'S':
-		d--;
-	case 'Q':
-		d--;
+		d = -2U;
 		s++;
 		break;
+	case 'Q':
+		if (s[1U]) {
+			d = -1U;
+			s++;
+			break;
+		}
+		goto Q;
+	case 'Z':
+		m++;
+	case 'X':
+		m++;
+	case 'V':
+		m++;
+	case 'U':
+		m++;
+	Q:
+		/* is used twice, for august and quartal */
+		m++;
+	case 'N':
+		m++;
+	case 'M':
+		m++;
+	case 'K':
+		m++;
+	case 'J':
+		m++;
+	case 'H':
+		m++;
+	case 'G':
+		m++;
+	case 'F':
+		m++;
+		s++;
+		goto chk;
 	default:
 		break;
 	}
@@ -179,13 +214,11 @@ _rdFDate(const char *s)
 		m *= -d * 3;
 		m++;
 		m += !m;
-	} else if (!m) {
-		m = 1U;
 	} else {
 		goto nope;
 	}
 chk:
-	if (*s || (m - 1U) >= 12U || (int)d >= 32) {
+	if (*s || (unsigned int)(m - 1U) >= 12U || (int)d >= 32) {
 		goto nope;
 	}
 	return _mkFDate(y, m, d);
