@@ -22,17 +22,18 @@ test_that("FDate arith", {
 	expect_true(is.na(as.FDate("2000-1-31") + as.ddur("XXX")))
 })
 
-if (FALSE) {
-print("")
-print(as.ddur("P0") + as.ddur("P2M"))
-print(as.ddur("P2D") + as.ddur("P2M"))
-print(as.ddur("P-1D") + as.ddur("P2M"))
-print(as.ddur("P2D") - as.ddur("P2D"))
-print(as.ddur("P2D") - as.ddur("P2M"))
-print(-as.ddur("P-2M2D"))
-print(as.ddur("AA") + as.ddur("P2M"))
-print(as.ddur("TN") + as.ddur("XN"))
+test_that("ddur arith", {
+	expect_equal(as.ddur("P0") + as.ddur("P2M"), as.ddur("P2M"))
+	expect_equal(as.ddur("P2D") + as.ddur("P2M"), as.ddur("P2M2D"))
+	expect_equal(as.ddur("P-1D") + as.ddur("P2M"), as.ddur("2M-1D"))
+	expect_equal(as.ddur("P2D") - as.ddur("P2D"), ddur(0L))
+	expect_equal(as.ddur("P2D") - as.ddur("P2M"), ddur("-2M2D"))
+	expect_equal(-as.ddur("P-2M2D"), as.ddur("P2M-2D"))
+	expect_true(is.na(as.ddur("AA") + as.ddur("P2M")))
+	expect_true(is.na(as.ddur("TN") + as.ddur("XN")))
+})
 
+if (FALSE) {
 print("")
 print(as.FDate("2000-2-29") - as.FDate("2000-1-20"))
 print(as.FDate("2000-2-29") - as.FDate("2001-1-20"))

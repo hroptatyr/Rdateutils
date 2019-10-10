@@ -283,7 +283,7 @@ more:
 		r.d = !neg ? tmp : -tmp;
 		goto out;
 	case '\0':
-		goto out;
+		goto nope;
 	default:
 		break;
 	}
@@ -296,23 +296,28 @@ more:
 		tmp *= 12;
 	case 'M':
 		r.m += !neg ? tmp : -tmp;
-		goto more;
+		goto maybe_more;
 	case 'W':
 		tmp *= 7;
 	case 'D':
 		r.d += !neg ? tmp : -tmp;
-		goto more;
+		goto maybe_more;
 	case '\0':
 		if (!r.m && !r.d) {
 			break;
 		}
 	default:
 		goto nope;
+	maybe_more:
+		if (!*s) {
+			goto out;
+		}
+		goto more;
 	}
 out:
-	return r;	
+	return r;
 nope:
-	return (ddur){NA_INTEGER, NA_INTEGER};
+	return NA_DDUR;
 }
 
 static size_t

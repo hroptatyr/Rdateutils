@@ -12,4 +12,10 @@ test_that("ddur from/to character", {
 	expect_equal(format(as.ddur(-14L)), "P-14D")
 	expect_equal(format(as.ddur("P2W2D")), "P16D")
 	expect_equal(format(as.ddur("P2Y2M2W2D")), "P26M16D")
+
+	expect_equal(format(as.ddur("ON")), "P1D")
+	expect_equal(format(as.ddur("TN")), "P2D")
+	expect_equal(format(as.ddur("SN")), "P3D")
+	expect_true(is.na(as.ddur("XN")))
+	expect_true(is.na(as.ddur("")))
 })
