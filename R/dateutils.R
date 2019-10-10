@@ -432,9 +432,7 @@ dday.ddur <- function(x, ...)
 	if (inherits(x, "ddur")) {
 		return(.Call(`C<.ddur`, x, rep.int(as.ddur(y), length(x))))
 	}
-	x <- as.FDate(x)
-	y <- as.FDate(y)
-	unclass(x) < unclass(y)
+	unclass(as.FDate(x)) < unclass(as.FDate(y))
 }
 
 `<=..duo` <- `%before|on%..duo` <- function(x, y)
@@ -480,7 +478,7 @@ dday.ddur <- function(x, ...)
 {
 ## use FDate as super-type as they can hold more dates
 	if (inherits(x, "ddur") || inherits(y, "ddur")) {
-		;	
+		;
 	} else {
 		x <- as.FDate(x)
 		y <- as.FDate(y)
