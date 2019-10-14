@@ -93,6 +93,7 @@ export(as.ddur)
 export(is.ddur)
 S3method(as.ddur, character)
 S3method(as.ddur, numeric)
+S3method(as.ddur, logical)
 S3method(as.ddur, ddur)
 export(ddur)
 

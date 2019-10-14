@@ -30,6 +30,11 @@ test_that("converting from/to character", {
 	expect_true(is.na(as.FDate("2014-13-02")))
 	expect_true(is.na(as.FDate("20141302")))
 	expect_true(is.na(as.FDate(20141302L)))
+
+	expect_equal(as.FDate("20140102"), as.FDate("2014-01-02"))
+	expect_true(is.na(as.FDate("20140132")))
+	expect_true(is.na(as.FDate("20141302")))
+	expect_equal(as.FDate("2010402"), as.FDate("201-04-02"))
 })
 
 test_that("FDate accessors", {

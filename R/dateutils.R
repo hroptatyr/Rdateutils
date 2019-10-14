@@ -273,6 +273,11 @@ as.ddur.numeric <- function(x, ...)
 	.Call(Cas.ddur.numeric, x)
 }
 
+as.ddur.logical <- function(x, ...)
+{
+	.Call(Cas.ddur.numeric, NA_integer_)
+}
+
 format.ddur <- function(x, ...)
 {
 	.Call(Cformat.ddur, x)
@@ -390,7 +395,9 @@ dday.ddur <- function(x, ...)
 		stop("unary minus is undefined for ",class(x))
 	}
 	if (inherits(x, "FDate")) {
-		if (!all(is.na(z <- as.FDate(y)))) {
+		if (is.ddur(y)) {
+			;
+		} else if (is.FDate(z <- y) || !all(is.na(z <- as.FDate(y)))) {
 			return(.Call(`C-.FDate`, x, rep.int(z, length(x))))
 		}
 		z <- .Call(Cneg.ddur, as.ddur(y))
