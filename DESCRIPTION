@@ -2,7 +2,7 @@ Package: dateutils
 Type: Package
 Title: Handling Dates in R
 Version: 0.1
-Date: 2019-09-06
+Date: 2019-10-16
 Depends: 
     R (>= 3.2)
 Suggests:

@@ -99,14 +99,9 @@ print.FDate <- function(x, ...)
 	print(format.FDate(x), ...)
 }
 
-as.IDate.FDate <- function(x, ...)
-{
-	.Call(Cas.IDate.FDate, x)
-}
-
 as.Date.FDate <- function(x, ...)
 {
-	as.Date(.Call(Cas.IDate.FDate, x))
+	.Call(Cas.IDate.FDate, x)
 }
 
 as.POSIXlt.FDate <- function(x, ...)
@@ -333,10 +328,9 @@ ddur <- function(x, y)
 	if (missing(y)) {
 		return(as.ddur(x))
 	}
-	if (inherits(x, "FDate")) {
-		return(.Call(Cddur.FDate, x, rep.int(as.FDate(y), length(x))))
-	}
-	stop("no method found to obtain duration between ",class(x)," and ",class(y))
+	x <- as.FDate(x)
+	y <- as.FDate(y)
+	return(.Call(Cddur.FDate, x, rep.int(y, length(x))))
 }
 
 ## accessors
@@ -430,8 +424,10 @@ dday.ddur <- function(x, ...)
 `%before|on%` <- function(x, y) UseMethod("%before|on%")
 `%after%` <- function(x, y) UseMethod("%after%")
 `%after|on%` <- function(x, y) UseMethod("%after|on%")
-`%older.than%` <- function(x, y, today) UseMethod("%older.than%")
-`%younger.than%` <- function(x, y, today) UseMethod("%younger.than%")
+`older.than` <- function(x, y, today, ...) UseMethod("older.than")
+`newer.than` <- function(x, y, today, ...) UseMethod("newer.than")
+`%older.than%` <- function(x, y) UseMethod("%older.than%")
+`%newer.than%` <- function(x, y) UseMethod("%newer.than%")
 
 `<..duo` <- `%before%..duo` <- function(x, y)
 {
@@ -493,7 +489,7 @@ dday.ddur <- function(x, ...)
 	unclass(x) != unclass(y)
 }
 
-`%older.than%..duo` <- function(x, y, today=Sys.Date())
+`older.than..duo` <- function(x, y, today=Sys.Date(), ...)
 {
 	y <- as.ddur(y)
 	if (is.FDate(x)) {
@@ -502,7 +498,16 @@ dday.ddur <- function(x, ...)
 	return(.Call(`C<.ddur`, as.ddur(x), y))
 }
 
-`%younger.than%..duo` <- function(x, y, today=Sys.Date())
+`%older.than%..duo` <- function(x, y)
+{
+	y <- as.ddur(y)
+	if (is.FDate(x)) {
+		return(unclass(.Call(`C+.FDate`, x, y)) < unclass(as.FDate(Sys.Date())))
+	}
+	return(.Call(`C<.ddur`, as.ddur(x), y))
+}
+
+`newer.than..duo` <- function(x, y, today=Sys.Date(), ...)
 {
 	y <- rep.int(as.ddur(y), length(x))
 	if (is.FDate(x)) {
@@ -511,9 +516,18 @@ dday.ddur <- function(x, ...)
 	return(.Call(`C>.ddur`, as.ddur(x), y))
 }
 
+`%newer.than%..duo` <- function(x, y)
+{
+	y <- rep.int(as.ddur(y), length(x))
+	if (is.FDate(x)) {
+		return(unclass(.Call(`C+.FDate`, x, y)) > unclass(as.FDate(Sys.Date())))
+	}
+	return(.Call(`C>.ddur`, as.ddur(x), y))
+}
+
 oldest <- function(dates, span, which=FALSE)
 {
-## invariant: oldest(X, SPAN) + youngest(X, -SPAN) = X
+## invariant: oldest(X, SPAN) + newest(X, -SPAN) = X
 	if (length(span) != 1L) {
 		stop("SPAN must be of length 1")
 	}
@@ -527,14 +541,14 @@ oldest <- function(dates, span, which=FALSE)
 	}
 	r <- dates %before% (pivot+span)
 	if (which) {
-		return(r)
+		return(which(r))
 	}
-	dates[r]
+	r
 }
 
-youngest <- function(dates, span, which=FALSE)
+newest <- function(dates, span, which=FALSE)
 {
-## invariant: youngest(X, SPAN) + oldest(X, -SPAN) = X
+## invariant: newest(X, SPAN) + oldest(X, -SPAN) = X
 	if (length(span) != 1L) {
 		stop("SPAN must be of length 1")
 	}
@@ -548,7 +562,7 @@ youngest <- function(dates, span, which=FALSE)
 	}
 	r <- dates %after% (pivot+span)
 	if (which) {
-		return(r)
+		return(which(r))
 	}
-	dates[r]
+	r
 }
