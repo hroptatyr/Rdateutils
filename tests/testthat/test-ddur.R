@@ -19,3 +19,9 @@ test_that("ddur from/to character", {
 	expect_true(is.na(as.ddur("XN")))
 	expect_true(is.na(as.ddur("")))
 })
+
+test_that("ddur from factor", {
+	x <- c("ON", "SN", "TN", "SN", "200", "200D", "P2M")
+	y <- factor(x)
+	expect_equal(as.ddur(x), as.ddur(y))
+})

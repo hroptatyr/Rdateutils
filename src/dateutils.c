@@ -415,12 +415,55 @@ as_FDate_character(SEXP x)
 }
 
 SEXP
+as_FDate_factor(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+	const SEXP *lvl;
+	R_len_t nlvl;
+
+	with (SEXP levels = getAttrib(x, R_LevelsSymbol)) {
+		if (isNull(levels)) {
+			error("Factor vector with no levels");
+		}
+		lvl = STRING_PTR_RO(levels);
+		nlvl = length(levels);
+	}
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int l = xp[i];
+		FDate d;
+
+		if (UNLIKELY(l == NA_INTEGER || (unsigned int)--l >= nlvl ||
+			     !((d = _rdFDate(CHAR(lvl[l])))+1))) {
+			ansp[i] = NA_INTEGER;
+			continue;
+		}
+
+		ansp[i] = d;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
 as_FDate_integer(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
-	int *xp = INTEGER(x);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
@@ -452,7 +495,7 @@ as_FDate_IDate(SEXP x)
 	R_xlen_t n = XLENGTH(x);
 	SEXP ans = PROTECT(allocVector(INTSXP, n));
 	int *restrict ansp = INTEGER(ans);
-	int *xp = INTEGER(x);
+	const int *xp = INTEGER(x);
 
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
@@ -1523,6 +1566,49 @@ as_ddur_character(SEXP x)
 
 		if (UNLIKELY(s == NA_STRING ||
 			     (d = _rdddur(CHAR(s))).d == NA_INTEGER)) {
+			ansp[i] = NA_DDUR;
+			continue;
+		}
+
+		ansp[i] = d;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+as_ddur_factor(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const int *xp = INTEGER(x);
+	const SEXP *lvl;
+	R_len_t nlvl;
+
+	with (SEXP levels = getAttrib(x, R_LevelsSymbol)) {
+		if (isNull(levels)) {
+			error("Factor vector with no levels");
+		}
+		lvl = STRING_PTR_RO(levels);
+		nlvl = length(levels);
+	}
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int l = xp[i];
+		ddur d;
+
+		if (UNLIKELY(l == NA_INTEGER || (unsigned int)--l >= nlvl ||
+			     (d = _rdddur(CHAR(lvl[l]))).d == NA_INTEGER)) {
 			ansp[i] = NA_DDUR;
 			continue;
 		}

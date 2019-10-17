@@ -37,6 +37,12 @@ test_that("converting from/to character", {
 	expect_equal(as.FDate("2010402"), as.FDate("201-04-02"))
 })
 
+test_that("FDate from factor", {
+	x <- c("2008-01-31", "2014-02-31", "2004-S1", "2004-S1", "2003-Q", "2000")
+	y <- factor(x)
+	expect_equal(as.FDate(x), as.FDate(y))
+})
+
 test_that("FDate accessors", {
 	expect_equal(year(seq.FDate("2000-01-01","2000-12-31")), rep(2000L, 366L))
 	expect_equal(yday(seq.FDate("2000-01-01","2000-12-31")), (1L:366L))

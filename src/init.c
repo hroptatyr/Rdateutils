@@ -6,6 +6,7 @@
 static const
 R_CallMethodDef callMethods[] = {
 	{"Cas.FDate.character", (DL_FUNC)&as_FDate_character, -1},
+	{"Cas.FDate.factor", (DL_FUNC)&as_FDate_factor, -1},
 	{"Cas.FDate.integer", (DL_FUNC)&as_FDate_integer, -1},
 	{"Cas.FDate.IDate", (DL_FUNC)&as_FDate_IDate, -1},
 	{"Cformat.FDate", (DL_FUNC)&format_FDate, -1},
@@ -28,6 +29,7 @@ R_CallMethodDef callMethods[] = {
 	{"Cmday<-.FDate", (DL_FUNC)&mday_bang_FDate, -1},
 
 	{"Cas.ddur.character", (DL_FUNC)&as_ddur_character, -1},
+	{"Cas.ddur.factor", (DL_FUNC)&as_ddur_factor, -1},
 	{"Cas.ddur.numeric", (DL_FUNC)&as_ddur_numeric, -1},
 	{"Cis.na.ddur", (DL_FUNC)&is_na_ddur, -1},
 	{"Cformat.ddur", (DL_FUNC)&format_ddur, -1},

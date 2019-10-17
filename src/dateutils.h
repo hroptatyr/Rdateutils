@@ -2,6 +2,7 @@
 #include <Rinternals.h>
 
 SEXP as_FDate_character(SEXP x);
+SEXP as_FDate_factor(SEXP x);
 SEXP as_FDate_integer(SEXP x);
 SEXP as_FDate_IDate(SEXP x);
 SEXP format_FDate(SEXP x);
@@ -27,6 +28,7 @@ SEXP mday_bang_FDate(SEXP x, SEXP value);
 SEXP seq_FDate(SEXP from, SEXP till, SEXP by);
 
 SEXP as_ddur_character(SEXP x);
+SEXP as_ddur_factor(SEXP x);
 SEXP as_ddur_numeric(SEXP x);
 SEXP is_na_ddur(SEXP x);
 SEXP format_ddur(SEXP x);

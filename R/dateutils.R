@@ -68,6 +68,11 @@ as.FDate.character <- function(x, ...)
 	.Call(Cas.FDate.character, x)
 }
 
+as.FDate.factor <- function(x, ...)
+{
+	.Call(Cas.FDate.factor, x)
+}
+
 as.FDate.FDate <- function(x, ...)
 {
 	return(x)
@@ -261,6 +266,11 @@ as.ddur.ddur <- function(x, ...)
 as.ddur.character <- function(x, ...)
 {
 	.Call(Cas.ddur.character, x)
+}
+
+as.ddur.factor <- function(x, ...)
+{
+	.Call(Cas.ddur.factor, x)
 }
 
 as.ddur.numeric <- function(x, ...)
