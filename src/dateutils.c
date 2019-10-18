@@ -1043,14 +1043,20 @@ yday_bang_FDate(SEXP x, SEXP value)
 	#pragma omp parallel for
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = xp[i];
-		int yd2b = vp[i] - 1;
+		int yd2b = vp[i];
 		unsigned int y = m / 391U;
+		int ly = _leapp(y+1);
 		int mo;
 		int md;
 
-		if ((yd2b -= _leapp(y+1)) < 59) {
+		yd2b = yd2b < (365 + ly) ? yd2b : 365 + ly;
+		yd2b = yd2b >= 0 ? yd2b : (365 + ly) + (yd2b + 1);
+		yd2b = yd2b >= 0 ? yd2b : 1;
+		yd2b--;
+
+		if ((yd2b -= ly) < 59) {
 			/* third trimester */
-			yd2b += _leapp(y+1);
+			yd2b += ly;
 		} else if ((yd2b += 2) < 153 + 61) {
 			/* first trimester */
 			;
