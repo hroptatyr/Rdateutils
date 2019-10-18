@@ -501,7 +501,7 @@ as_FDate_IDate(SEXP x)
 	for (R_xlen_t i = 0; i < n; i++) {
 		int m = xp[i] + 719469/*0000-03-00*/;
 
-		if (LIKELY(m != NA_INTEGER)) {
+		if (LIKELY(xp[i] != NA_INTEGER)) {
 			unsigned int y = _year(m);
 			unsigned int yd = m - _j00(y) - 1;
 			unsigned int pent = yd / 153U;

@@ -91,7 +91,7 @@ as.FDate.Date <- as.FDate.IDate <- function(x, ...)
 as.FDate.default <- function(x, ...)
 {
 ## go through Date
-	.Call(Cas.FDate.IDate, as.integer(unclass(as.Date(x))))
+	.Call(Cas.FDate.IDate, as.integer(unclass(as.Date(x, ...))))
 }
 
 format.FDate <- function(x, ...)

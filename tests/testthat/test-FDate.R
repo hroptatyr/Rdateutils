@@ -43,6 +43,17 @@ test_that("FDate from factor", {
 	expect_equal(as.FDate(x), as.FDate(y))
 })
 
+test_that("FDate v NAs", {
+	expect_true(is.na(as.FDate(NA_character_)))
+	expect_true(is.na(as.FDate(as.Date(NA_character_))))
+	expect_true(is.na(as.FDate(NA_integer_)))
+	expect_true(is.na(as.FDate(as.Date(NA_integer_, origin="1970-01-01"))))
+	expect_true(is.na(as.FDate(NA)))
+	expect_true(is.na(as.FDate(as.Date(NA))))
+	expect_true(is.na(as.FDate(NA_real_, origin="1970-01-01")))
+	expect_true(is.na(as.FDate(as.Date(NA_real_, origin="1970-01-01"))))
+})
+
 test_that("FDate accessors", {
 	expect_equal(year(seq.FDate("2000-01-01","2000-12-31")), rep(2000L, 366L))
 	expect_equal(yday(seq.FDate("2000-01-01","2000-12-31")), (1L:366L))
