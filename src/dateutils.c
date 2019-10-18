@@ -1144,6 +1144,7 @@ mday_bang_FDate(SEXP x, SEXP value)
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32U;
 
+		mo &= -!!yd;
 		md2b = md2b < 32 ? md2b : 31;
 		md2b = md2b >= 0 ? md2b : yday_eom[mo+1] - yday_eom[mo] + (md2b + 1) + (_leapp(y+1) && mo==1);
 		md2b = md2b >= 0 ? md2b : 1;

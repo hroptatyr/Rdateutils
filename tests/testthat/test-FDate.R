@@ -155,6 +155,24 @@ test_that("FDate accessors", {
 	expect_equal(f, as.FDate("2000-J"))
 	mday(f) <- -2
 	expect_equal(f, as.FDate("2000-4-29"))
+	f <- as.FDate("2000-Q1")
+	mday(f) <- 0
+	expect_equal(f, as.FDate("2000-01"))
+	f <- as.FDate("2000-Q4")
+	mday(f) <- 0
+	expect_equal(f, as.FDate("2000-V"))
+	f <- as.FDate("2000-S2")
+	mday(f) <- 0
+	expect_equal(f, as.FDate("2000-N"))
+	f <- as.FDate("2000-S2")
+	mday(f) <- 1
+	expect_equal(f, as.FDate("2000-07-01"))
+	f <- as.FDate("2001-A")
+	mday(f) <- 2
+	expect_equal(f, as.FDate("2001-01-02"))
+	f <- as.FDate("2000-A")
+	mday(f) <- 0
+	expect_equal(f, as.FDate("2000-F"))
 })
 
 test_that("FDate poset", {
