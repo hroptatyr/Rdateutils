@@ -1045,8 +1045,8 @@ yday_bang_FDate(SEXP x, SEXP value)
 		int m = xp[i];
 		int yd2b = vp[i] - 1;
 		unsigned int y = m / 391U;
-		unsigned int mo;
-		unsigned int md;
+		int mo;
+		int md;
 
 		if ((yd2b -= _leapp(y+1)) < 59) {
 			/* third trimester */
@@ -1061,7 +1061,10 @@ yday_bang_FDate(SEXP x, SEXP value)
 
 		mo = 2 * yd2b / 61;
 		md = 2 * yd2b % 61;
-		ansp[i] = m != NA_INTEGER ? _mkFDate(y+1, mo+1 - (mo>=7), md/2+1) : NA_INTEGER;
+
+		md >>= md >= 0;
+		md <<= md < 0;
+		ansp[i] = m != NA_INTEGER ? _mkFDate(y+1, mo+1 - (mo>=7), md+1) : NA_INTEGER;
 	}
 
 	with (SEXP class) {

@@ -93,6 +93,14 @@ test_that("FDate accessors", {
 	year(f) <- 2001
 	expect_equal(f, as.FDate("2001-12-31"))
 
+	f <- as.FDate("2000-01-29")
+	yday(f) <- 14
+	expect_equal(f, as.FDate("2000-01-14"))
+	yday(f) <- 60
+	expect_equal(f, as.FDate("2000-02-29"))
+	yday(f) <- 0
+	expect_equal(f, as.FDate("2000-A"))
+
 	f <- as.FDate("2000-03-31")
 	month(f) <- 1
 	expect_equal(f, as.FDate("2000-01-31"))
