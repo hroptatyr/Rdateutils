@@ -109,6 +109,9 @@ test_that("FDate accessors", {
 	expect_equal(f, as.FDate("2000-12-01"))
 	yday(f) <- -32
 	expect_equal(f, as.FDate("2000-11-30"))
+	g <- f <- seq.FDate("2000-01-01", "2002-A")
+	yday(f) <- yday(g)
+	expect_equal(f, g)
 
 	f <- as.FDate("2000-03-31")
 	month(f) <- 1

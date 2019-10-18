@@ -1054,6 +1054,7 @@ yday_bang_FDate(SEXP x, SEXP value)
 		yd2b = yd2b >= 0 ? yd2b : 1;
 		yd2b--;
 
+#if 0
 		if ((yd2b -= ly) < 59) {
 			/* third trimester */
 			yd2b += ly;
@@ -1064,6 +1065,16 @@ yday_bang_FDate(SEXP x, SEXP value)
 			/* second trimester */
 			yd2b += 30;
 		}
+#else
+/* branchless version */
+		/* first and second trimester */
+		yd2b -= ly;
+		/* second trimester */
+		yd2b += (yd2b >= 151 + 61) << 5U;
+		/* third and first trimester */
+		yd2b += (yd2b >= 59 && yd2b < 151 + 61) << 1U;
+		yd2b += ly && yd2b < 59;
+#endif
 
 		mo = 2 * yd2b / 61;
 		md = 2 * yd2b % 61;
