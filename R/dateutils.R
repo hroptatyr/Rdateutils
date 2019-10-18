@@ -94,7 +94,7 @@ as.FDate.default <- function(x, ...)
 	.Call(Cas.FDate.IDate, as.integer(unclass(as.Date(x, ...))))
 }
 
-format.FDate <- function(x, ...)
+as.character.FDate <- format.FDate <- function(x, ...)
 {
 	.Call(Cformat.FDate, x)
 }
@@ -283,7 +283,7 @@ as.ddur.logical <- function(x, ...)
 	.Call(Cas.ddur.numeric, NA_integer_)
 }
 
-format.ddur <- function(x, ...)
+as.character.ddur <- format.ddur <- function(x, ...)
 {
 	.Call(Cformat.ddur, x)
 }
