@@ -233,10 +233,15 @@ _rdFDate_int(int x)
 
 	y = x / 10000;
 	m = x % 10000;
-	d = m % 100;
-	m /= 100;
-	if (UNLIKELY((m - 1U) >= 12U || d >= 32U)) {
-		return (FDate)-1;
+	if (m) {
+		d = m % 100;
+		m /= 100;
+		if (UNLIKELY((m - 1U) >= 12U || d >= 32U)) {
+			return (FDate)-1;
+		}
+	} else {
+		m = 1U;
+		d = -3U;
 	}
 	return _mkFDate(y, m, d);
 }

@@ -22,14 +22,11 @@ test_that("converting from/to character", {
 	expect_equal(format(as.FDate("2001-04-31")), "2001-04-30")
 	expect_equal(as.FDate("20140102"), as.FDate("2014-01-02"))
 	expect_equal(as.FDate("20140102"), as.FDate("2014-1-2"))
-	expect_equal(as.FDate(20140102L), as.FDate("2014-01-02"))
 
 	expect_true(is.na(as.FDate("2014-01-32")))
 	expect_true(is.na(as.FDate("20140132")))
-	expect_true(is.na(as.FDate(20140132L)))
 	expect_true(is.na(as.FDate("2014-13-02")))
 	expect_true(is.na(as.FDate("20141302")))
-	expect_true(is.na(as.FDate(20141302L)))
 
 	expect_equal(as.FDate("20140102"), as.FDate("2014-01-02"))
 	expect_true(is.na(as.FDate("20140132")))
@@ -41,6 +38,14 @@ test_that("FDate from factor", {
 	x <- c("2008-01-31", "2014-02-31", "2004-S1", "2004-S1", "2003-Q", "2000")
 	y <- factor(x)
 	expect_equal(as.FDate(x), as.FDate(y))
+})
+
+test_that("FDate from integer", {
+	expect_equal(as.FDate(20140102L), as.FDate("2014-01-02"))
+	expect_true(is.na(as.FDate(20140132L)))
+	expect_true(is.na(as.FDate(20141302L)))
+	expect_equal(as.FDate(20141200L), as.FDate("2014-12"))
+	expect_equal(as.FDate(20140000L), as.FDate("2014-A"))
 })
 
 test_that("FDate v NAs", {
