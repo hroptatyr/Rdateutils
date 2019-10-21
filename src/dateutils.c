@@ -1051,7 +1051,7 @@ yday_bang_FDate(SEXP x, SEXP value)
 
 		yd2b = yd2b < (365 + ly) ? yd2b : 365 + ly;
 		yd2b = yd2b >= 0 ? yd2b : (365 + ly) + (yd2b + 1);
-		yd2b = yd2b >= 0 ? yd2b : 1;
+		yd2b = yd2b >= 0 ? yd2b : 0;
 		yd2b--;
 
 #if 0
@@ -1082,6 +1082,60 @@ yday_bang_FDate(SEXP x, SEXP value)
 		md >>= md >= 0;
 		md <<= md < 0;
 		ansp[i] = m != NA_INTEGER ? _mkFDate(y+1, mo+1 - (mo>=7), md+1) : NA_INTEGER;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+qday_bang_FDate(SEXP x, SEXP value)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+	const int *vp = INTEGER(value);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		int qd2b = vp[i];
+
+		if (LIKELY(m != NA_INTEGER)) {
+			unsigned int y = m / 391U;
+			unsigned int yd = m % 391U;
+			unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+			unsigned int mo = (yd - md) / 32U & -!!yd;
+			unsigned int q = mo / 3U;
+			unsigned int ly = _leapp(y+1);
+			int bo = yday_eom[3U*(q+0U)];
+			int eo = yday_eom[3U*(q+1U)];
+			int ymo = 3 * q;
+			int ymd;
+
+			/* count from the end of the quarter if negative */
+			qd2b += qd2b >= 0 ? bo : eo + 1 + (!q && ly);
+			ymo += qd2b > yday_eom[ymo + 1];
+			qd2b -= !q && ly;
+			ymo += qd2b > yday_eom[ymo + 1];
+			qd2b += !q && ly && qd2b < 60;
+			qd2b = qd2b <= eo ? qd2b : eo;
+			qd2b = qd2b >= bo ? qd2b : bo;
+			ymd = qd2b - yday_eom[ymo];
+			ymd -= !ymd;
+
+			ansp[i] = _mkFDate(y+1, ymo+1, ymd);
+		} else {
+			ansp[i] = NA_INTEGER;
+		}
 	}
 
 	with (SEXP class) {

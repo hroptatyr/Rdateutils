@@ -12,6 +12,7 @@ dday <- function(x, ...) UseMethod("dday")
 
 `year<-` <- function(x, ..., value) UseMethod("year<-")
 `yday<-` <- function(x, ..., value) UseMethod("yday<-")
+`qday<-` <- function(x, ..., value) UseMethod("qday<-")
 `month<-` <- function(x, ..., value) UseMethod("month<-")
 `mday<-` <- function(x, ..., value) UseMethod("mday<-")
 
@@ -215,6 +216,11 @@ wday.FDate <- function(x, ...)
 `yday<-.FDate` <- function(x, ..., value)
 {
 	.Call(`Cyday<-.FDate`, as.FDate(x), rep_len(as.integer(value), length(x)))
+}
+
+`qday<-.FDate` <- function(x, ..., value)
+{
+	.Call(`Cqday<-.FDate`, as.FDate(x), rep_len(as.integer(value), length(x)))
 }
 
 `month<-.FDate` <- function(x, ..., value)
