@@ -1096,6 +1096,70 @@ yday_bang_FDate(SEXP x, SEXP value)
 }
 
 SEXP
+sday_bang_FDate(SEXP x, SEXP value)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+	const int *vp = INTEGER(value);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		int sd2b = vp[i];
+
+		if (LIKELY(m != NA_INTEGER)) {
+			/* use yday semantics instead of iterating like in qday<- */
+			unsigned int y = m / 391U;
+			unsigned int yd = m % 391U;
+			unsigned int s = yd > 195U;
+			unsigned int ly = _leapp(y+1) && !s;
+			int bo = yday_eom[6U*(s+0U)];
+			int eo = yday_eom[6U*(s+1U)];
+			int mo;
+			int md;
+
+			sd2b += sd2b >= 0 ? bo : eo + 1 + ly;
+			sd2b = sd2b <= eo + ly ? sd2b : eo + ly;
+			sd2b = sd2b >= bo ? sd2b : bo;
+			sd2b--;
+
+			/* first and second trimester */
+			sd2b -= ly;
+			/* second trimester */
+			sd2b += (sd2b >= 151 + 61) << 5;
+			/* third and first trimester */
+			sd2b += (sd2b >= 59 && sd2b < 151 + 61) << 1;
+			sd2b += ly && sd2b < 59;
+
+			mo = 2 * sd2b / 61;
+			md = 2 * sd2b % 61;
+
+			md >>= md >= 0;
+			md += md >= 0;
+
+			mo += (sd2b - s <= bo);
+			md -= (sd2b - s <= bo) << 5;
+
+			ansp[i] = _mkFDate(y+1, mo+1 - (mo>=7), md);
+		} else {
+			ansp[i] = NA_INTEGER;
+		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
 qday_bang_FDate(SEXP x, SEXP value)
 {
 	R_xlen_t n = XLENGTH(x);

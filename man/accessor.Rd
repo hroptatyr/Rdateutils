@@ -12,6 +12,7 @@
 \alias{dday}
 \alias{year<-}
 \alias{yday<-}
+\alias{sday<-}
 \alias{qday<-}
 \alias{month<-}
 \alias{mday<-}
@@ -27,6 +28,7 @@
 \alias{wday.FDate}
 \alias{year<-.FDate}
 \alias{yday<-.FDate}
+\alias{sday<-.FDate}
 \alias{qday<-.FDate}
 \alias{month<-.FDate}
 \alias{mday<-.FDate}

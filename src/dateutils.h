@@ -22,6 +22,7 @@ SEXP wday_FDate(SEXP x);
 
 SEXP year_bang_FDate(SEXP x, SEXP value);
 SEXP yday_bang_FDate(SEXP x, SEXP value);
+SEXP sday_bang_FDate(SEXP x, SEXP value);
 SEXP qday_bang_FDate(SEXP x, SEXP value);
 SEXP month_bang_FDate(SEXP x, SEXP value);
 SEXP mday_bang_FDate(SEXP x, SEXP value);

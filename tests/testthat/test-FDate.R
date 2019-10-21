@@ -179,6 +179,46 @@ test_that("FDate accessors", {
 	expect_equal(f, as.FDate("2000-F"))
 
 	f <- as.FDate("2000-Q1")
+	sday(f) <- 0
+	expect_equal(f, as.FDate("2000-S1"))
+	sday(f) <- 1
+	expect_equal(f, as.FDate("2000-01-01"))
+	sday(f) <- 31
+	expect_equal(f, as.FDate("2000-01-31"))
+	sday(f) <- 32
+	expect_equal(f, as.FDate("2000-02-01"))
+	sday(f) <- 59
+	expect_equal(f, as.FDate("2000-02-28"))
+	sday(f) <- 60
+	expect_equal(f, as.FDate("2000-02-29"))
+	sday(f) <- 61
+	expect_equal(f, as.FDate("2000-03-01"))
+	sday(f) <- -1
+	expect_equal(f, as.FDate("2000-06-30"))
+	sday(f) <- -30
+	expect_equal(f, as.FDate("2000-06-01"))
+	sday(f) <- -31
+	expect_equal(f, as.FDate("2000-05-31"))
+	sday(f) <- -122
+	expect_equal(f, as.FDate("2000-03-01"))
+	sday(f) <- -123
+	expect_equal(f, as.FDate("2000-02-29"))
+	f <- as.FDate("2000-09")
+	sday(f) <- 4
+	expect_equal(f, as.FDate("2000-07-04"))
+	sday(f) <- 0
+	expect_equal(f, as.FDate("2000-S2"))
+	f <- as.FDate("2000-08-01")
+	sday(f) <- sday(f)
+	expect_equal(f, as.FDate("2000-08-01"))
+	sday(f) <- -1
+	expect_equal(f, as.FDate("2000-12-31"))
+	sday(f) <- 200
+	expect_equal(f, as.FDate("2000-12-31"))
+	sday(f) <- -200
+	expect_equal(f, as.FDate("2000-S2"))
+
+	f <- as.FDate("2000-Q1")
 	qday(f) <- 0
 	expect_equal(f, as.FDate("2000-Q1"))
 	qday(f) <- 1
