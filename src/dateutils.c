@@ -1017,7 +1017,8 @@ year_bang_FDate(SEXP x, SEXP value)
 		int y2b = vp[i] - 1;
 		unsigned int yd = m % 391U;
 
-		ansp[i] = m != NA_INTEGER ? y2b * 391 + yd : NA_INTEGER;
+		ansp[i] = m != NA_INTEGER && (unsigned int)y2b < 10000U
+			? y2b * 391 + yd : NA_INTEGER;
 	}
 
 	with (SEXP class) {
@@ -1230,7 +1231,8 @@ month_bang_FDate(SEXP x, SEXP value)
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 
-		ansp[i] = m != NA_INTEGER ? _mkFDate(y+1, m2b, md) : NA_INTEGER;
+		ansp[i] = m != NA_INTEGER && (unsigned int)(m2b - 1) < 12U
+			? _mkFDate(y+1, m2b, md) : NA_INTEGER;
 	}
 
 	with (SEXP class) {
@@ -1268,6 +1270,78 @@ mday_bang_FDate(SEXP x, SEXP value)
 		md2b = md2b >= 0 ? md2b : 1;
 
 		ansp[i] = m != NA_INTEGER ? _mkFDate(y+1, mo+1, md2b) : NA_INTEGER;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+week_bang_FDate(SEXP x, SEXP value)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+	const int *vp = INTEGER(value);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		static const int_fast8_t iso[] = {2, 1, 0, -1, -2, 4, 3, 2};
+		int m = xp[i];
+		unsigned int w2b = vp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+
+		if (m != NA_INTEGER && w2b <= 53U && yd && md) {
+			unsigned int eo = yday_eom[mo + 1U];
+			/* f01 is the wday of Jan-01 */
+			unsigned int f01 = (y + y / 4U - y / 100U + y / 400U + 1U) % 7U;
+			unsigned int ly = _leapp(y+1);
+			unsigned int w;
+			int yd2b;
+
+			md += mo>2U && ly;
+			eo += mo>1U && ly;
+
+			yd = yday_eom[mo] + md;
+			yd = yd <= eo ? yd : eo;
+			w = (7 + yd - iso[f01]) / 7;
+			yd2b = yd + (w2b - w) * 7 - 1;
+
+			if (yd2b < 0) {
+				ly = _leapp(y--);
+				yd2b += 365 + ly;
+			} else if (yd2b >= 365 + ly) {
+				yd2b -= 365 + ly;
+				ly = _leapp(++y + 1);
+			}
+
+			/* first and second trimester */
+			yd2b -= ly;
+			/* second trimester */
+			yd2b += (yd2b >= 151 + 61) << 5U;
+			/* third and first trimester */
+			yd2b += (yd2b >= 59 && yd2b < 151 + 61) << 1U;
+			yd2b += ly && yd2b < 59;
+
+			mo = 2 * yd2b / 61;
+			md = 2 * yd2b % 61;
+			md >>= 1U;
+
+			ansp[i] = _mkFDate(y+1, mo+1 - (mo>=7), md+1);
+		} else {
+			ansp[i] = NA_INTEGER;
+		}
 	}
 
 	with (SEXP class) {

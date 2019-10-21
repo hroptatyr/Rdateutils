@@ -16,6 +16,7 @@ dday <- function(x, ...) UseMethod("dday")
 `qday<-` <- function(x, ..., value) UseMethod("qday<-")
 `month<-` <- function(x, ..., value) UseMethod("month<-")
 `mday<-` <- function(x, ..., value) UseMethod("mday<-")
+`week<-` <- function(x, ..., value) UseMethod("week<-")
 
 year.default <- function(x, ...)
 {
@@ -237,6 +238,11 @@ wday.FDate <- function(x, ...)
 `mday<-.FDate` <- function(x, ..., value)
 {
 	.Call(`Cmday<-.FDate`, as.FDate(x), rep_len(as.integer(value), length(x)))
+}
+
+`week<-.FDate` <- function(x, ..., value)
+{
+	.Call(`Cweek<-.FDate`, as.FDate(x), rep_len(as.integer(value), length(x)))
 }
 
 

@@ -26,6 +26,7 @@ export(`sday<-`)
 export(`qday<-`)
 export(`month<-`)
 export(`mday<-`)
+export(`week<-`)
 
 
 export(as.FDate)
@@ -94,6 +95,8 @@ S3method(`month<-`, FDate)
 export(`month<-.FDate`)
 S3method(`mday<-`, FDate)
 export(`mday<-.FDate`)
+S3method(`week<-`, FDate)
+export(`week<-.FDate`)
 
 
 export(as.ddur)

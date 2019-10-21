@@ -266,6 +266,17 @@ test_that("FDate accessors", {
 	expect_equal(f, as.FDate("2000-12-31"))
 	qday(f) <- -100
 	expect_equal(f, as.FDate("2000-Q4"))
+
+	f <- as.FDate("2019-10-21")
+	week(f) <- 42
+	expect_equal(f, as.FDate("2019-10-14"))
+	week(f) <- 1
+	expect_equal(f, as.FDate("2018-12-31"))
+	f <- as.FDate("2019-10-23")
+	week(f) <- 43
+	expect_equal(f, as.FDate("2019-10-23"))
+	week(f) <- 53
+	expect_equal(f, as.FDate("2020-01-01"))
 })
 
 test_that("FDate poset", {
