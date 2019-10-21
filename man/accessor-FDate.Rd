@@ -16,6 +16,7 @@
 \alias{month<-}
 \alias{mday<-}
 \alias{week<-}
+\alias{wday<-}
 \alias{year.FDate}
 \alias{yday.FDate}
 \alias{semi.FDate}
@@ -33,6 +34,7 @@
 \alias{month<-.FDate}
 \alias{mday<-.FDate}
 \alias{week<-.FDate}
+\alias{wday<-.FDate}
 \title{
   Access date components
 }

@@ -1355,6 +1355,80 @@ week_bang_FDate(SEXP x, SEXP value)
 	return ans;
 }
 
+SEXP
+wday_bang_FDate(SEXP x, SEXP value)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+	const int *vp = INTEGER(value);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		static const int_fast8_t iso[] = {2, 1, 0, -1, -2, 4, 3, 2};
+		int m = xp[i];
+		unsigned int wd2b = vp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+
+		if (m != NA_INTEGER && wd2b <= 7U && yd && md) {
+			unsigned int eo = yday_eom[mo + 1U];
+			/* f00 is the wday of Jan-00 */
+			unsigned int f00 = (y + y / 4U - y / 100U + y / 400U);
+			unsigned int ly = _leapp(y+1);
+			unsigned int wd;
+			int yd2b;
+
+			md += mo>1U && ly;
+			eo += mo>0U && ly;
+
+			yd = yday_eom[mo] + md;
+			yd = yd <= eo ? yd : eo;
+			/* sun is 7U, this is wd2b + 6 % 7 - (f00 + yd - 1) % 7*/
+			wd = (f00 + yd) % 7U;
+			wd2b ^= -!wd2b & 0x7U;
+			yd2b = yd + (wd2b - wd) - 1;
+
+			if (yd2b < 0) {
+				ly = _leapp(y--);
+				yd2b += 365 + ly;
+			} else if (yd2b >= 365 + ly) {
+				yd2b -= 365 + ly;
+				ly = _leapp(++y + 1);
+			}
+
+			/* first and second trimester */
+			yd2b -= ly;
+			/* second trimester */
+			yd2b += (yd2b >= 151 + 61) << 5U;
+			/* third and first trimester */
+			yd2b += (yd2b >= 59 && yd2b < 151 + 61) << 1U;
+			yd2b += ly && yd2b < 59;
+
+			mo = 2 * yd2b / 61;
+			md = 2 * yd2b % 61;
+			md >>= 1U;
+
+			ansp[i] = _mkFDate(y+1, mo+1 - (mo>=7), md+1);
+		} else {
+			ansp[i] = NA_INTEGER;
+		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
 
 SEXP
 seq_FDate(SEXP from, SEXP till, SEXP by)
