@@ -1,4 +1,4 @@
-\name{accessor}
+\name{accessor-FDate}
 \alias{year}
 \alias{yday}
 \alias{semi}
@@ -9,7 +9,6 @@
 \alias{mday}
 \alias{week}
 \alias{wday}
-\alias{dday}
 \alias{year<-}
 \alias{yday<-}
 \alias{sday<-}
@@ -32,17 +31,11 @@
 \alias{qday<-.FDate}
 \alias{month<-.FDate}
 \alias{mday<-.FDate}
-\alias{year.ddur}
-\alias{semi.ddur}
-\alias{quarter.ddur}
-\alias{month.ddur}
-\alias{week.ddur}
-\alias{dday.ddur}
 \title{
-  Access date or duration components
+  Access date components
 }
 \description{
-  Access components of a date or duration.
+  Access components of a date.
 }
 \usage{
 year(x, \dots)
@@ -55,7 +48,6 @@ month(x, \dots)
 mday(x, \dots)
 week(x, \dots)
 wday(x, \dots)
-dday(x, \dots)
 \method{year}{FDate}(x, \dots)
 \method{yday}{FDate}(x, \dots)
 \method{semi}{FDate}(x, \dots)
@@ -66,16 +58,16 @@ dday(x, \dots)
 \method{mday}{FDate}(x, \dots)
 \method{week}{FDate}(x, \dots)
 \method{wday}{FDate}(x, \dots)
-\method{year}{ddur}(x, \dots)
-\method{semi}{ddur}(x, \dots)
-\method{quarter}{ddur}(x, \dots)
-\method{month}{ddur}(x, \dots)
-\method{week}{ddur}(x, \dots)
-\method{dday}{ddur}(x, \dots)
+
+year(x, \dots) <- value
+yday(x, \dots) <- value
+\method{year}{FDate}(x, \dots) <- value
+\method{yday}{FDate}(x, \dots) <- value
 }
 \arguments{
-  \item{x}{vector of date or duration objects.}
+  \item{x}{vector of date objects.}
   \item{\dots}{further arguments, currently ignored}
+  \item{value}{integer value}
 }
 \value{
   Integer value(s) of the date or duration component.
