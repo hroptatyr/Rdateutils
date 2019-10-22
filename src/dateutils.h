@@ -52,6 +52,11 @@ SEXP quarter_ddur(SEXP x);
 SEXP month_ddur(SEXP x);
 SEXP week_ddur(SEXP x);
 SEXP dday_ddur(SEXP x);
+SEXP year_bang_ddur(SEXP x, SEXP value);
+SEXP month_bang_ddur(SEXP x, SEXP value);
+SEXP week_bang_ddur(SEXP x, SEXP value);
+SEXP dday_bang_ddur(SEXP x, SEXP value);
+
 SEXP seq_ddur(SEXP from, SEXP till, SEXP by);
 
 SEXP plus_FDate(SEXP x, SEXP y);

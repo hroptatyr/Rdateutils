@@ -18,6 +18,7 @@ dday <- function(x, ...) UseMethod("dday")
 `mday<-` <- function(x, ..., value) UseMethod("mday<-")
 `week<-` <- function(x, ..., value) UseMethod("week<-")
 `wday<-` <- function(x, ..., value) UseMethod("wday<-")
+`dday<-` <- function(x, ..., value) UseMethod("dday<-")
 
 year.default <- function(x, ...)
 {
@@ -396,6 +397,26 @@ week.ddur <- function(x, ...)
 dday.ddur <- function(x, ...)
 {
 	.Call(Cdday.ddur, x)
+}
+
+`year<-.ddur` <- function(x, ..., value)
+{
+	.Call(`Cyear<-.ddur`, as.ddur(x), rep_len(as.integer(value), length(x)))
+}
+
+`month<-.ddur` <- function(x, ..., value)
+{
+	.Call(`Cmonth<-.ddur`, as.ddur(x), rep_len(as.integer(value), length(x)))
+}
+
+`week<-.ddur` <- function(x, ..., value)
+{
+	.Call(`Cweek<-.ddur`, as.ddur(x), rep_len(as.integer(value), length(x)))
+}
+
+`dday<-.ddur` <- function(x, ..., value)
+{
+	.Call(`Cdday<-.ddur`, as.ddur(x), rep_len(as.integer(value), length(x)))
 }
 
 

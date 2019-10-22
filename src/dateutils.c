@@ -2113,6 +2113,118 @@ dday_ddur(SEXP x)
 }
 
 SEXP
+year_bang_ddur(SEXP x, SEXP value)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+	const int *vp = INTEGER(value);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur m = xp[i];
+		int y2b = vp[i];
+
+		ansp[i] = !_is_na_ddur(m) ? (ddur){m.d, y2b * 12} : NA_DDUR;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+month_bang_ddur(SEXP x, SEXP value)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+	const int *vp = INTEGER(value);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur m = xp[i];
+		int m2b = vp[i];
+
+		ansp[i] = !_is_na_ddur(m) ? (ddur){m.d, m2b} : NA_DDUR;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+week_bang_ddur(SEXP x, SEXP value)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+	const int *vp = INTEGER(value);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur m = xp[i];
+		int w2b = vp[i];
+
+		ansp[i] = !_is_na_ddur(m) ? (ddur){w2b * 7, m.m} : NA_DDUR;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+dday_bang_ddur(SEXP x, SEXP value)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+	const int *vp = INTEGER(value);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur m = xp[i];
+		int d2b = vp[i];
+
+		ansp[i] = !_is_na_ddur(m) ? (ddur){d2b, m.m} : NA_DDUR;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
 seq_ddur(SEXP from, SEXP till, SEXP by)
 {
 	return R_NilValue;

@@ -28,6 +28,7 @@ export(`month<-`)
 export(`mday<-`)
 export(`week<-`)
 export(`wday<-`)
+export(`dday<-`)
 
 
 export(as.FDate)
@@ -126,6 +127,11 @@ S3method(week, ddur)
 export(week.ddur)
 S3method(dday, ddur)
 export(dday.ddur)
+
+S3method(`year<-`, ddur)
+S3method(`month<-`, ddur)
+S3method(`week<-`, ddur)
+S3method(`dday<-`, ddur)
 
 ## these ones do arithmetic with FDates and ddurs
 S3method(`+`, .duo)

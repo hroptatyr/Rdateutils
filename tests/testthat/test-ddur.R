@@ -25,3 +25,25 @@ test_that("ddur from factor", {
 	y <- factor(x)
 	expect_equal(as.ddur(x), as.ddur(y))
 })
+
+test_that("ddur accessors", {
+	f <- as.ddur("P19M15D")
+	expect_equal(year(f), 1L)
+	expect_equal(semi(f), 3L)
+	expect_equal(quarter(f), 6L)
+	expect_equal(month(f), 19L)
+	expect_equal(week(f), 2L)
+	expect_equal(dday(f), 15L)
+})
+
+test_that("ddur accessors bang", {
+	f <- as.ddur("P19M15D")
+	year(f) <- 2
+	expect_equal(f, as.ddur("P24M15D"))
+	month(f) <- -1
+	expect_equal(f, as.ddur("P-1M15D"))
+	week(f) <- 2
+	expect_equal(f, as.ddur("P-1M21D"))
+	dday(f) <- -1
+	expect_equal(f, as.ddur("P-1M-1D"))
+})
