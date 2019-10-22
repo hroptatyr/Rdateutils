@@ -331,13 +331,17 @@ more:
 	}
 	switch (*s++) {
 	case 'Y':
+	case 'y':
 		tmp *= 12;
 	case 'M':
+	case 'm':
 		r.m += !neg ? tmp : -tmp;
 		goto maybe_more;
 	case 'W':
+	case 'w':
 		tmp *= 7;
 	case 'D':
+	case 'd':
 		r.d += !neg ? tmp : -tmp;
 		goto maybe_more;
 	case '\0':
