@@ -45,10 +45,23 @@ itostr(char *restrict buf, size_t bsz, int v)
 }
 
 static inline int
-cmp(unsigned int a, unsigned int b)
+cmp_ui(unsigned int a, unsigned int b)
 {
 	/* calc cmp where -1 means A < B, 0 means A == B, and 1 means A > B */
 	return (a < b) - (b < a);
+}
+
+static inline int
+cmp_ddur(ddur a, ddur b)
+{
+	/* calc cmp where -1 means A < B, 0 means A == B, and 1 means A > B */
+	return (a.m < b.m || a.m == b.m && a.d < b.d) - (b.m < a.m || b.m == a.m && b.d < a.d);
+}
+
+static inline int
+iabs(int x)
+{
+	return x >= 0 ? x : -x;
 }
 
 
@@ -1443,7 +1456,7 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 	SEXP ans;
 	FDate *tmp;
 	size_t z = 0U;
-	const int c = cmp(fd, td);
+	const int c = cmp_ui(fd, td);
 	/* decomp */
 	FDate old = fd;
 	unsigned int y = fd / 391U;
@@ -1532,9 +1545,9 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 				 * old < fd < td  if the original fd < td  and
 				 * old > fd > td  if the original fd > td
 				 * equality is handled after this if-block */
-			} while (cmp(fd, td) == c && cmp(old, fd) == c);
+			} while (cmp_ui(fd, td) == c && cmp_ui(old, fd) == c);
 			/* make sure we deal with empty sums */
-			z -= cmp(fd, old) == c;
+			z -= cmp_ui(fd, old) == c;
 		}
 	} else if (c) {
 		d.d += c * (!d.d && !d.m);
@@ -1613,9 +1626,9 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 			 * old < fd < td  if the original fd < td  and
 			 * old > fd > td  if the original fd > td
 			 * equality is handled after this if-block */
-		} while (cmp(fd, td) == c && cmp(old, fd) == c);
+		} while (cmp_ui(fd, td) == c && cmp_ui(old, fd) == c);
 		/* make sure we deal with empty sums */
-		z -= cmp(fd, old) == c;
+		z -= cmp_ui(fd, old) == c;
 	} else {
 		tmp = Calloc(1U, FDate);
 	}
@@ -2231,7 +2244,58 @@ dday_bang_ddur(SEXP x, SEXP value)
 SEXP
 seq_ddur(SEXP from, SEXP till, SEXP by)
 {
-	return R_NilValue;
+	ddur fd = DDUR_ELT(from, 0U);
+	ddur td = DDUR_ELT(till, 0U);
+	ddur d = DDUR_ELT(by, 0U);
+	SEXP ans;
+	ddur *tmp;
+	size_t z = 0U;
+	const int c = cmp_ddur(fd, td);
+	/* decomp */
+	ddur old = fd;
+
+	/* determine BY if omitted */
+	d.d += c * (!d.d && !d.m && fd.m == td.m);
+	d.m += c * (!d.d && !d.m);
+	if (!c || UNLIKELY(!d.m && fd.m != td.m)) {
+		tmp = Calloc(1U, ddur);
+	} else {
+		size_t m = d.m ? iabs(td.m - fd.m) : iabs(td.d - fd.d);
+		/* if only month steps, save on allocation */
+		tmp = Calloc(m + 2U, ddur);
+
+		do {
+			/* what we've got in the last round */
+			tmp[z++] = fd;
+
+			fd.m += d.m;
+			fd.d += d.d;
+
+			/* the exit condition is equivalent to
+			 * old < fd < td  if the original fd < td  and
+			 * old > fd > td  if the original fd > td
+			 * equality is handled after this if-block */
+		} while (z <= m && cmp_ddur(fd, td) == c && cmp_ddur(old, fd) == c);
+		/* make sure we deal with empty sums */
+		z -= cmp_ddur(fd, old) == c;
+	}
+	/* seq is inclusive, so finalise tmp if they're equal */
+	tmp[z] = fd;
+	z += fd.m == td.m && fd.d == td.d;
+
+	/* now for real */
+	ans = PROTECT(allocVector(DDURSXP, z));
+	memcpy(DDUR(ans), tmp, z * sizeof(*tmp));
+	Free(tmp);
+
+	with (SEXP class = PROTECT(allocVector(STRSXP, 2))) {
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
 }
 
 SEXP

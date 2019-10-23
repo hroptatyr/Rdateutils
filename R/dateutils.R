@@ -330,12 +330,12 @@ seq.ddur <- function(from, till, by, from.last=F, ...)
 {
 	if (length(from) != 1L) {
 		stop("FROM must be of length 1")
-	} else if (!is.finite(from <- as.FDate(from))) {
+	} else if (!is.finite(from <- as.ddur(from))) {
 		stop("FROM must be finite")
 	}
 	if (length(till) != 1L) {
 		stop("TILL must be of length 1")
-	} else if (!is.finite(till <- as.FDate(till))) {
+	} else if (!is.finite(till <- as.ddur(till))) {
 		stop("TILL must be finite")
 	}
 	if (from == till) {
@@ -351,7 +351,7 @@ seq.ddur <- function(from, till, by, from.last=F, ...)
 		stop("BY must be non-zero")
 	}
 	if (from.last) {
-		x <- .Call(Cseq.FDate, till, from, -by)
+		x <- .Call(Cseq.ddur, till, from, -by)
 		return(rev(x))
 	}
 	.Call(Cseq.ddur, from, till, by)

@@ -25,3 +25,9 @@ test_that("FDate sequencing", {
 
 	expect_equal(seq(as.FDate("2000-2"), as.FDate("2000-H"), ddur("15D")), as.FDate(c(20000200L, 20000215L)))
 })
+
+test_that("ddur sequencing", {
+	expect_equal(seq.ddur("P1M", "P7M"), as.ddur(c("P1M","P2M","P3M","P4M","P5M","P6M","P7M")))
+	expect_true(!length(seq.ddur("P1M-5D", "P-7M8D", "1D")))
+	expect_equal(seq.ddur("P-2M1D", "P4M10D", "P1M1D"), as.ddur(c("P-2M1D", "P-1M2D", "P3D", "P1M5D", "P2M6D", "P3M7D", "P4M8D")))
+})

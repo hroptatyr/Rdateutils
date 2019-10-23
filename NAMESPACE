@@ -114,6 +114,8 @@ S3method(rep, ddur)
 S3method(round, ddur)
 S3method(unique, ddur)
 S3method("[", ddur)
+S3method(seq, ddur)
+export(seq.ddur)
 
 S3method(year, ddur)
 export(year.ddur)
