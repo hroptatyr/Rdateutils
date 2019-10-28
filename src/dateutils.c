@@ -1009,7 +1009,7 @@ wday_FDate(SEXP x)
 			yd = yday_eom[mo] + md;
 			yd = yd <= eo ? yd : eo;
 
-			wd = (f00 + yd) % 7U;
+			wd = (f00 + yd - 1U) % 7U + 1U;
 		} else {
 			wd = NA_INTEGER;
 		}

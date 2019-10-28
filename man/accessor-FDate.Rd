@@ -8,7 +8,6 @@
 \alias{month}
 \alias{mday}
 \alias{week}
-\alias{wday}
 \alias{year<-}
 \alias{yday<-}
 \alias{sday<-}
@@ -16,7 +15,6 @@
 \alias{month<-}
 \alias{mday<-}
 \alias{week<-}
-\alias{wday<-}
 \alias{year.FDate}
 \alias{yday.FDate}
 \alias{semi.FDate}
@@ -26,7 +24,6 @@
 \alias{month.FDate}
 \alias{mday.FDate}
 \alias{week.FDate}
-\alias{wday.FDate}
 \alias{year<-.FDate}
 \alias{yday<-.FDate}
 \alias{sday<-.FDate}
@@ -34,7 +31,6 @@
 \alias{month<-.FDate}
 \alias{mday<-.FDate}
 \alias{week<-.FDate}
-\alias{wday<-.FDate}
 \title{
   Access date components
 }
@@ -51,7 +47,6 @@ qday(x, \dots)
 month(x, \dots)
 mday(x, \dots)
 week(x, \dots)
-wday(x, \dots)
 \method{year}{FDate}(x, \dots)
 \method{yday}{FDate}(x, \dots)
 \method{semi}{FDate}(x, \dots)
@@ -61,7 +56,6 @@ wday(x, \dots)
 \method{month}{FDate}(x, \dots)
 \method{mday}{FDate}(x, \dots)
 \method{week}{FDate}(x, \dots)
-\method{wday}{FDate}(x, \dots)
 
 year(x, \dots) <- value
 yday(x, \dots) <- value
@@ -82,7 +76,7 @@ mday(x, \dots) <- value
 }
 \keyword{classes}
 \keyword{manip}
-\seealso{\code{\link{months}} \code{\link{weekdays}}}
+\seealso{\code{\link{months}}}
 \examples{
   year.FDate("2014-05-19")
   yday.FDate("2014-01-19")
@@ -93,5 +87,4 @@ mday(x, \dots) <- value
   month.FDate("2014-05-19")
   mday.FDate("2014-05-19")
   week.FDate("2014-01-09")
-  wday.FDate("2014-01-09")
 }

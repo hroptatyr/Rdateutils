@@ -78,7 +78,7 @@ test_that("FDate accessors", {
 
 	## 2018's isoweeks coincide with calendar
 	expect_equal(week(seq.FDate("2018-01-01", "2018-12-30")), unlist(lapply(seq_len(52L), rep.int, times=7L)))
-	expect_equal(wday(seq.FDate("2018-01-01", "2018-12-30")), rep.int(c(1,2,3,4,5,6,0), 52L))
+	expect_equal(wday(seq.FDate("2018-01-01", "2018-12-30")), rep.int(c(1,2,3,4,5,6,7), 52L))
 })
 
 test_that("FDate accessors bang", {
