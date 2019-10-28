@@ -297,3 +297,19 @@ test_that("FDate poset", {
 	expect_equal(max(d), d[3L])
 	expect_equal(range(d), c(d[2L], d[3L]))
 })
+
+test_that("FDate iso week", {
+	expect_equal(week.FDate("2019-02-02"), 5L)
+	expect_equal(week.FDate("2019-06-02"), 22L)
+	expect_equal(mweek.FDate("2019-02-02"), 0L)
+	expect_equal(mweek.FDate("2019-06-02"), 0L)
+	expect_equal(mweek.FDate("2019-06-03"), 1L)
+
+	expect_equal(wcnt.FDate("2019-02-02"), 5L)
+	expect_equal(wcnt.FDate("2019-06-02"), 22L)
+	expect_equal(wcnt.FDate("2017-01-28"), 4L)
+	expect_equal(wcnt.FDate("2017-01-29"), 5L)
+	expect_equal(mwcnt.FDate("2019-02-02"), 1L)
+	expect_equal(mwcnt.FDate("2019-06-02"), 1L)
+	expect_equal(mwcnt.FDate("2019-06-03"), 1L)
+})

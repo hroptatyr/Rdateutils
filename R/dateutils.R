@@ -8,6 +8,9 @@ month <- function(x, ...) UseMethod("month")
 mday <- function(x, ...) UseMethod("mday")
 week <- function(x, ...) UseMethod("week")
 wday <- function(x, ...) UseMethod("wday")
+mweek <- function(x, ...) UseMethod("mweek")
+wcnt <- function(x, ...) UseMethod("wcnt")
+mwcnt <- function(x, ...) UseMethod("mwcnt")
 dday <- function(x, ...) UseMethod("dday")
 
 `year<-` <- function(x, ..., value) UseMethod("year<-")
@@ -59,6 +62,23 @@ week.default <- function(x, ...)
 wday.default <- function(x, ...)
 {
 	as.POSIXlt(x)$wday
+}
+
+mweek.default <- function(x, ...)
+{
+	.Call(Cmweek.FDate, as.FDate(x))
+}
+
+wcnt.default <- function(x, ...)
+{
+	z <- as.POSIXlt(x)
+	z$yday %/% 7L + 1L
+}
+
+mwcnt.default <- function(x, ...)
+{
+	z <- as.POSIXlt(x)
+	(z$mday - 1L) %/% 7L + 1L
 }
 
 
@@ -210,6 +230,21 @@ week.FDate <- function(x, ...)
 wday.FDate <- function(x, ...)
 {
 	.Call(Cwday.FDate, as.FDate(x))
+}
+
+mweek.FDate <- function(x, ...)
+{
+	.Call(Cmweek.FDate, as.FDate(x))
+}
+
+wcnt.FDate <- function(x, ...)
+{
+	.Call(Cwcnt.FDate, as.FDate(x))
+}
+
+mwcnt.FDate <- function(x, ...)
+{
+	.Call(Cmwcnt.FDate, as.FDate(x))
 }
 
 `year<-.FDate` <- function(x, ..., value)

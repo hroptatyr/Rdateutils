@@ -78,7 +78,7 @@ mday(x, \dots) <- value
   \item{value}{integer value}
 }
 \value{
-  Integer value(s) of the date or duration component.
+  Integer value(s) of the date component.
 }
 \keyword{classes}
 \keyword{manip}

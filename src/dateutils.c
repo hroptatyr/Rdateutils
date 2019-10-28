@@ -958,6 +958,7 @@ week_FDate(SEXP x)
 		unsigned int yd = m % 391U;
 		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
 		unsigned int mo = (yd - md) / 32U;
+		unsigned int w;
 
 		if (m != NA_INTEGER && yd && md) {
 			unsigned int eo = yday_eom[mo + 1U];
@@ -969,11 +970,11 @@ week_FDate(SEXP x)
 
 			yd = yday_eom[mo] + md;
 			yd = yd <= eo ? yd : eo;
-			yd = (7 + yd - iso[f01]) / 7;
+			w = (7 + yd - iso[f01]) / 7;
 		} else {
-			yd = NA_INTEGER;
+			w = NA_INTEGER;
 		}
-		ansp[i] = yd;
+		ansp[i] = w;
 	}
 
 	UNPROTECT(1);
@@ -997,7 +998,7 @@ wday_FDate(SEXP x)
 		unsigned int mo = (yd - md) / 32U;
 		unsigned int wd;
 
-		if (m != NA_INTEGER && yd && md) {
+		if (LIKELY(m != NA_INTEGER && yd && md)) {
 			unsigned int eo = yday_eom[mo + 1U];
 			/* f00 is the wday of Jan-00 */
 			unsigned int f00 = y + y / 4U - y / 100U + y / 400U;
@@ -1013,6 +1014,119 @@ wday_FDate(SEXP x)
 			wd = NA_INTEGER;
 		}
 		ansp[i] = wd;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+mweek_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		static const int_fast8_t iso[] = {2, 1, 0, -1, -2, 4, 3, 2};
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+		unsigned int w;
+
+		if (LIKELY(m != NA_INTEGER && yd && md)) {
+			unsigned int eo = yday_eom[mo + 1U];
+			/* f01 is the wday of Jan-01 */
+			unsigned int f01 = (y + y / 4U - y / 100U + y / 400U + 1U) % 7U;
+			int m4;
+
+			md += mo>2U && _leapp(y+1U);
+			eo += mo>1U && _leapp(y+1U);
+
+			yd = yday_eom[mo] + md;
+			yd = yd <= eo ? yd : eo;
+
+			m4 = yday_eom[mo] - 3;
+			w = (7 + yd - iso[f01]) / 7 - (7 + m4 - iso[f01]) / 7;
+		} else {
+			w = NA_INTEGER;
+		}
+		ansp[i] = w;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+wcnt_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+		unsigned int wc;
+
+		if (LIKELY(m != NA_INTEGER && yd && md)) {
+			unsigned int eo = yday_eom[mo + 1U];
+
+			md += mo>1U && _leapp(y+1U);
+			eo += mo>0U && _leapp(y+1U);
+
+			yd = yday_eom[mo] + md;
+			yd = yd <= eo ? yd : eo;
+
+			wc = (yd - 1U) / 7U + 1U;
+		} else {
+			wc = NA_INTEGER;
+		}
+		ansp[i] = wc;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+mwcnt_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		static const int_fast8_t iso[] = {2, 1, 0, -1, -2, 4, 3, 2};
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+		unsigned int wc;
+
+		if (m != NA_INTEGER && yd && md) {
+			unsigned int eo = yday_eom[mo + 1U] - yday_eom[mo];
+
+			eo += mo==1U && _leapp(y+1U);
+			md = md <= eo ? md : eo;
+			wc = (md - 1U) / 7U + 1U;
+		} else {
+			wc = NA_INTEGER;
+		}
+		ansp[i] = wc;
 	}
 
 	UNPROTECT(1);
