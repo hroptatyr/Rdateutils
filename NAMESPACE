@@ -184,6 +184,7 @@ export(as.wcnt)
 export(is.wcnt)
 S3method(as.wcnt, character)
 S3method(as.wcnt, factor)
+S3method(as.wcnt, numeric)
 S3method(as.wcnt, wcnt)
 S3method(as.character, wcnt)
 

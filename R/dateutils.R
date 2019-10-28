@@ -679,6 +679,13 @@ as.wcnt.factor <- function(x, ...)
 	.Call(Cas.wcnt.factor, x)
 }
 
+as.wcnt.numeric <- function(x, wd, ...)
+{
+	x <- as.integer(x) * 8L + as.integer(wd)
+	class(x) <- c("wcnt",".duo")
+	x
+}
+
 as.character.wcnt <- format.wcnt <- function(x, ...)
 {
 	.Call(Cformat.wcnt, x)
