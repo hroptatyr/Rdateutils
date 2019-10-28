@@ -66,6 +66,10 @@ R_CallMethodDef callMethods[] = {
 	{"C-.FDate", (DL_FUNC)&minus_FDate, -1},
 	{"Cddur.FDate", (DL_FUNC)&ddur_FDate, -1},
 	{"Cseq.FDate", (DL_FUNC)&seq_FDate, -1},
+
+	{"Cas.wcnt.character", (DL_FUNC)&as_wcnt_character, -1},
+	{"Cas.wcnt.factor", (DL_FUNC)&as_wcnt_factor, -1},
+	{"Cformat.wcnt", (DL_FUNC)&format_wcnt, -1},
 	{NULL, NULL, 0}
 };
 

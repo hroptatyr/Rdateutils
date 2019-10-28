@@ -16,12 +16,10 @@ wcnt(x, \dots)
   \item{\dots}{further arguments, currently ignored}
 }
 \value{
-  Integer value(s) representing the count of the weekday of date within the year.
-  Range 1 to 53.
+  (Vector of) wcnt(s).
 }
 \keyword{classes}
-\keyword{manip}
-\seealso{\code{\link{week}} \code{\link{mwcnt}}}
+\seealso{\code{\link{as.wcnt}} \code{\link{week}} \code{\link{mwcnt}}}
 \examples{
   wcnt.FDate("2014-05-19")
 }

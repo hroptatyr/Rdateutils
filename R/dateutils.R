@@ -656,3 +656,35 @@ newest <- function(dates, span, which=FALSE)
 	}
 	r
 }
+
+
+as.wcnt <- function(x, ...) UseMethod("as.wcnt")
+is.wcnt <- function(x)
+{
+	inherits(x, "wcnt")
+}
+
+as.wcnt.wcnt <- function(x, ...)
+{
+	return(x)
+}
+
+as.wcnt.character <- function(x, ...)
+{
+	.Call(Cas.wcnt.character, x)
+}
+
+as.wcnt.factor <- function(x, ...)
+{
+	.Call(Cas.wcnt.factor, x)
+}
+
+as.character.wcnt <- format.wcnt <- function(x, ...)
+{
+	.Call(Cformat.wcnt, x)
+}
+
+print.wcnt <- function(x, ...)
+{
+	print(format.wcnt(x), ...)
+}

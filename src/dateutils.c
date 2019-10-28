@@ -18,11 +18,17 @@ typedef union {
 
 typedef unsigned int EDate;
 typedef unsigned int FDate;
+typedef int wcnt;
 
 #define DDURSXP		REALSXP
 #define DDUR(x)		((ddur*)DATAPTR(x))
 #define DDUR_ELT(x, i)	(DDUR(x)[i])
 #define NA_DDUR		((ddur){.x = -1ULL})
+
+#define WCNTSXP		INTSXP
+#define WCNT(x)		((wcnt*)INTEGER(x))
+#define WCNT_ELT(x, i)	(INTEGER(x)[i])
+#define NA_WCNT		NA_INTEGER
 
 static size_t
 itostr(char *restrict buf, size_t bsz, int v)
@@ -401,6 +407,114 @@ static inline int
 _is_na_ddur(ddur x)
 {
 	return !(x.x+1ULL);
+}
+
+static wcnt
+_rdwcnt(const char *s)
+{
+	unsigned int w = 0U;
+	int c = 0;
+	int neg;
+
+	s += neg = *s == '-';
+	for (; ((unsigned char)*s ^ '0') < 10U; s++) {
+		c *= 10;
+		c += (unsigned char)*s ^ '0';
+	}
+	if (!s[0U] || !s[1U]) {
+		/* capture abbrev'd weekday */
+		switch (*s) {
+		case 'S':
+			w++;
+		case 'A':
+			w++;
+		case 'F':
+			w++;
+		case 'R':
+			w++;
+		case 'W':
+			w++;
+		case 'T':
+			w++;
+		case 'M':
+			w++;
+		case '\0':
+			break;
+		default:
+			goto nope;
+		}
+	} else {
+		/* 3 letter abbrev? */
+		switch (*s) {
+		case 'M':
+			if (s[1U] != 'O' && s[1U] != 'o' ||
+			    s[2U] != 'N' && s[2U] != 'n') {
+				goto nope;
+			}
+			w = 1U;
+			break;
+		case 'T':
+			if ((s[1U] == 'H' || s[1U] == 'h') &&
+			    (s[2U] == 'U' || s[2U] == 'u')) {
+				w = 4U;
+			} else if ((s[1U] == 'U' || s[1U] == 'u') &&
+				   (s[2U] == 'E' || s[2U] == 'e')) {
+				w = 2U;
+			} else {
+				goto nope;
+			}
+			break;
+		case 'W':
+			if (s[1U] != 'E' && s[1U] != 'e' ||
+			    s[2U] != 'D' && s[2U] != 'd') {
+				goto nope;
+			}
+			w = 3U;
+			break;
+		case 'F':
+			if (s[1U] != 'R' && s[1U] != 'r' ||
+			    s[2U] != 'I' && s[2U] != 'i') {
+				goto nope;
+			}
+			w = 5U;
+			break;
+		case 'S':
+			if ((s[1U] == 'U' || s[1U] == 'u') &&
+			    (s[2U] == 'N' || s[2U] == 'n')) {
+				w = 7U;
+			} else if ((s[1U] == 'A' || s[1U] == 'a') &&
+				   (s[2U] == 'T' || s[2U] == 't')) {
+				w = 6U;
+			} else {
+				goto nope;
+			}
+			break;
+		default:
+			goto nope;
+		}
+	}
+	c += !c && neg;
+	c = !neg ? c : -c;
+	return c << 3 ^ w;
+nope:
+	return NA_INTEGER;
+}
+
+static size_t
+_prwcnt(char *restrict buf, size_t bsz, const wcnt d)
+{
+	static const char W[] = "\0MTWRFAS";
+	size_t z = 0U;
+	int c = d >> 3;
+	unsigned int w = d & 7U;
+
+	if (c) {
+		z += itostr(buf + z, bsz - z, c);
+	}
+	buf[z] = W[w];
+	z += !!w;
+	buf[z] = '\0';
+	return z;
 }
 
 
@@ -2653,6 +2767,104 @@ ge_ddur(SEXP x, SEXP y)
 			: NA_LOGICAL;
 	}
 
+	UNPROTECT(1);
+	return ans;
+}
+
+
+SEXP
+as_wcnt_character(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(WCNTSXP, n));
+	wcnt *restrict ansp = WCNT(ans);
+	const SEXP *xp = STRING_PTR_RO(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		SEXP s = xp[i];
+		wcnt d;
+
+		if (UNLIKELY(s == NA_STRING)) {
+			d = NA_WCNT;
+		} else {
+			d = _rdwcnt(CHAR(s));
+		}
+
+		ansp[i] = d;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("wcnt"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+as_wcnt_factor(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(WCNTSXP, n));
+	wcnt *restrict ansp = WCNT(ans);
+	const int *xp = INTEGER(x);
+	const SEXP *lvl;
+	R_len_t nlvl;
+
+	with (SEXP levels = getAttrib(x, R_LevelsSymbol)) {
+		if (isNull(levels)) {
+			error("Factor vector with no levels");
+		}
+		lvl = STRING_PTR_RO(levels);
+		nlvl = length(levels);
+	}
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int l = xp[i];
+		wcnt d;
+
+		if (UNLIKELY(l == NA_INTEGER || (unsigned int)--l >= nlvl)) {
+			d = NA_WCNT;
+		} else {
+			d = _rdwcnt(CHAR(lvl[l]));
+		}
+
+		ansp[i] = d;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("wcnt"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+format_wcnt(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(STRSXP, n));
+	const wcnt *xp = WCNT(x);
+
+	/* no omp here as mkCharLen doesn't like it */
+	for (R_xlen_t i = 0; i < n; i++) {
+		char buf[64U];
+
+		if (LIKELY(xp[i] != NA_WCNT)) {
+			SET_STRING_ELT(ans, i, mkCharLen(buf, _prwcnt(buf, sizeof(buf), xp[i])));
+		} else {
+			SET_STRING_ELT(ans, i, NA_STRING);
+		}
+	}
 	UNPROTECT(1);
 	return ans;
 }

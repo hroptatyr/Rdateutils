@@ -65,3 +65,7 @@ SEXP seq_ddur(SEXP from, SEXP till, SEXP by);
 SEXP plus_FDate(SEXP x, SEXP y);
 SEXP minus_FDate(SEXP x, SEXP y);
 SEXP ddur_FDate(SEXP x, SEXP y);
+
+SEXP as_wcnt_character(SEXP x);
+SEXP as_wcnt_factor(SEXP x);
+SEXP format_wcnt(SEXP x);

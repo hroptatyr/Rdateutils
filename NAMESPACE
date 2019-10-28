@@ -178,3 +178,14 @@ S3method("%newer.than%", .duo)
 S3method("newer.than", .duo)
 export(oldest)
 export(newest)
+
+
+export(as.wcnt)
+export(is.wcnt)
+S3method(as.wcnt, character)
+S3method(as.wcnt, factor)
+S3method(as.wcnt, wcnt)
+S3method(as.character, wcnt)
+
+S3method(format, wcnt)
+S3method(print, wcnt)

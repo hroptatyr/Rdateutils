@@ -6,7 +6,7 @@
   Coerce to ddur
 }
 \description{
-  Methods to coerce duration inputs to ddur. 
+  Methods to coerce duration inputs to ddur.
 
   For character vectors \code{as.ddur} parses ISO 8601 duration strings.
 
