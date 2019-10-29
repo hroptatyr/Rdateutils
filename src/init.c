@@ -38,6 +38,7 @@ R_CallMethodDef callMethods[] = {
 	{"Cas.ddur.character", (DL_FUNC)&as_ddur_character, -1},
 	{"Cas.ddur.factor", (DL_FUNC)&as_ddur_factor, -1},
 	{"Cas.ddur.numeric", (DL_FUNC)&as_ddur_numeric, -1},
+	{"Cas.ddur.wcnt", (DL_FUNC)&as_ddur_wcnt, -1},
 	{"Cis.na.ddur", (DL_FUNC)&is_na_ddur, -1},
 	{"Cformat.ddur", (DL_FUNC)&format_ddur, -1},
 	{"C+.ddur", (DL_FUNC)&plus_ddur, -1},
@@ -70,6 +71,7 @@ R_CallMethodDef callMethods[] = {
 	{"Cas.wcnt.character", (DL_FUNC)&as_wcnt_character, -1},
 	{"Cas.wcnt.factor", (DL_FUNC)&as_wcnt_factor, -1},
 	{"Cformat.wcnt", (DL_FUNC)&format_wcnt, -1},
+	{"C+.wcnt", (DL_FUNC)&plus_wcnt, -1},
 	{NULL, NULL, 0}
 };
 

@@ -338,6 +338,11 @@ as.ddur.numeric <- function(x, ...)
 	.Call(Cas.ddur.numeric, x)
 }
 
+as.ddur.wcnt <- function(x, ...)
+{
+	.Call(Cas.ddur.wcnt, x)
+}
+
 as.ddur.logical <- function(x, ...)
 {
 	.Call(Cas.ddur.numeric, NA_integer_)
@@ -465,8 +470,11 @@ dday.ddur <- function(x, ...)
 	if (inherits(x, "FDate")) {
 		return(.Call(`C+.FDate`, x, rep.int(as.ddur(y), length(x))))
 	}
+	if (inherits(x, "wcnt")) {
+		return(.Call(`C+.wcnt`, x, rep.int(as.ddur(y), length(x))))
+	}
 	if (inherits(x, "ddur") || inherits(y, "ddur")) {
-		return(.Call(`C+.ddur`, as.ddur(x), as.ddur(y)))
+		return(.Call(`C+.ddur`, as.ddur(x), rep.int(as.ddur(y), length(x))))
 	}
 	stop("no method found to add ",class(y)," to ",class(x))
 }

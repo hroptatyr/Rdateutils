@@ -2241,6 +2241,32 @@ as_ddur_numeric(SEXP x)
 }
 
 SEXP
+as_ddur_wcnt(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const wcnt *xp = WCNT(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		wcnt v = xp[i];
+
+		ansp[i] = v != NA_INTEGER && !(v & 0x7U) ? (ddur){(v >> 3) * 7} : NA_DDUR;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
 is_na_ddur(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);
@@ -2889,5 +2915,45 @@ format_wcnt(SEXP x)
 		}
 	}
 	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+plus_wcnt(SEXP x, SEXP y)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(WCNTSXP, n));
+	wcnt *restrict ansp = WCNT(ans);
+	const wcnt *xp = WCNT(x);
+	const ddur *yp = DDUR(y);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		wcnt w = xp[i];
+		ddur d = yp[i];
+
+		if (LIKELY(w != NA_INTEGER && !_is_na_ddur(d) && !d.m)) {
+			int c = w >> 3;
+			int wd = w & 0x7U;
+
+			c += d.d / 7;
+			wd += d.d % 7;
+			c += wd >> 3;
+			wd &= 0x7U;
+
+			ansp[i] = c << 3U ^ wd;
+		} else {
+			ansp[i] = NA_INTEGER;
+		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("wcnt"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
 	return ans;
 }
