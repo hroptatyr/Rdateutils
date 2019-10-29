@@ -25,3 +25,14 @@ test_that("wcnt/ddur", {
 	expect_equal(as.ddur(as.wcnt("10")), as.ddur(10L))
 	expect_equal(as.ddur(as.wcnt("-4")), as.ddur("P-4D"))
 })
+
+test_that("wcnt accessors", {
+	expect_equal(week(as.wcnt("12R")), 12L)
+	expect_equal(week(as.wcnt("Mon")), 0L)
+	expect_equal(week.wcnt("-R"), -1L)
+	expect_equal(week.wcnt("-6"), -6L)
+	expect_equal(wday(as.wcnt("12R")), 4L)
+	expect_equal(wday(as.wcnt("Mon")), 1L)
+	expect_equal(wday.wcnt("-R"), 4L)
+	expect_equal(wday.wcnt("-6"), 0L)
+})

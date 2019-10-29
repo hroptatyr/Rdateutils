@@ -1697,6 +1697,54 @@ wday_bang_FDate(SEXP x, SEXP value)
 	return ans;
 }
 
+SEXP
+wcnt_FDate_bang(SEXP x, SEXP value)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(WCNTSXP, n));
+	int *restrict ansp = WCNT(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+
+		if (LIKELY(m != NA_INTEGER && yd && md)) {
+			unsigned int eo = yday_eom[mo + 1U];
+			/* f00 is the wday of Jan-00 */
+			unsigned int f00 = y + y / 4U - y / 100U + y / 400U;
+			unsigned int wc;
+			unsigned int wd;
+
+			md += mo>1U && _leapp(y+1U);
+			eo += mo>0U && _leapp(y+1U);
+
+			yd = yday_eom[mo] + md;
+			yd = yd <= eo ? yd : eo;
+
+			wc = (yd - 1U) / 7U + 1U;
+			wd = (f00 + yd - 1U) % 7U + 1U;
+			ansp[i] = wc << 3 ^ wd;
+		} else {
+			ansp[i] = NA_INTEGER;
+		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("wcnt"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
 
 SEXP
 seq_FDate(SEXP from, SEXP till, SEXP by)
@@ -2945,6 +2993,104 @@ plus_wcnt(SEXP x, SEXP y)
 		} else {
 			ansp[i] = NA_INTEGER;
 		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("wcnt"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+week_wcnt(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const wcnt *xp = WCNT(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+
+		ansp[i] = m != NA_INTEGER ? m >> 3 : NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+wday_wcnt(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const wcnt *xp = WCNT(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+
+		ansp[i] = m != NA_INTEGER ? m & 0x7U : NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+week_bang_wcnt(SEXP x, SEXP value)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(WCNTSXP, n));
+	int *restrict ansp = WCNT(ans);
+	const int *xp = WCNT(x);
+	const int *vp = INTEGER(value);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		int v = vp[i];
+
+		ansp[i] = m != NA_INTEGER && v != NA_INTEGER
+			? (v >> 3) << 3 ^ (m & 0x7U)
+			: NA_INTEGER;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("wcnt"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+wday_bang_wcnt(SEXP x, SEXP value)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(WCNTSXP, n));
+	int *restrict ansp = WCNT(ans);
+	const int *xp = WCNT(x);
+	const int *vp = INTEGER(value);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int v = vp[i];
+
+		ansp[i] = m != NA_INTEGER && v != NA_INTEGER
+			? (m >> 3) << 3 ^ (v & 0x7U)
+			: NA_INTEGER;
 	}
 
 	with (SEXP class) {

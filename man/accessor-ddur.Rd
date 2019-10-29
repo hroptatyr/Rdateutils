@@ -5,7 +5,6 @@
 \alias{semi.ddur}
 \alias{quarter.ddur}
 \alias{month.ddur}
-\alias{week.ddur}
 \alias{dday.ddur}
 \alias{dday<-.ddur}
 \title{
@@ -20,7 +19,6 @@ dday(x, \dots)
 \method{semi}{ddur}(x, \dots)
 \method{quarter}{ddur}(x, \dots)
 \method{month}{ddur}(x, \dots)
-\method{week}{ddur}(x, \dots)
 \method{dday}{ddur}(x, \dots)
 
 dday(x, \dots) <- value

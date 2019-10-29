@@ -1,23 +1,25 @@
-\name{wday}
-\alias{wday}
-\alias{wday.FDate}
-\alias{wday.wcnt}
-\alias{wday<-}
+\name{week}
+\alias{week}
+\alias{week.FDate}
+\alias{week.ddur}
+\alias{week.wcnt}
+\alias{week<-}
 \title{
   Access date components
 }
 \description{
-  Obtain a numerical representation of the weekday of a date.
+  Obtain a numerical representation of the week of a date.
 
   For the assignment, set to the date whose weekday corresponds to value in the same
   ISO week as the original date.
 }
 \usage{
-wday(x, \dots)
-\method{wday}{FDate}(x, \dots)
-\method{wday}{wcnt}(x, \dots)
+week(x, \dots)
+\method{week}{FDate}(x, \dots)
+\method{week}{ddur}(x, \dots)
+\method{week}{wcnt}(x, \dots)
 
-wday(x, \dots) <- value
+week(x, \dots) <- value
 }
 \arguments{
   \item{x}{vector of date or wcnt objects.}
@@ -32,9 +34,9 @@ wday(x, \dots) <- value
 \keyword{manip}
 \seealso{\code{\link{week}} \code{\link{wcnt}} \code{\link{weekdays}}}
 \examples{
-  wday.FDate("2014-05-19")
-  wday.wcnt("2R")
+  week.FDate("2014-01-09")
+  week.FDate("2014-05-19")
 
   as.FDate("2014-05-19") -> x
-  wday(x) <- 3L
+  week(x) <- 3L
 }

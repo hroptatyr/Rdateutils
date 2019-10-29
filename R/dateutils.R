@@ -140,8 +140,7 @@ as.POSIXlt.FDate <- function(x, ...)
 }
 
 c.FDate <- rev.FDate <- cut.FDate <- mean.FDate <-
-cut.FDate <- mean.FDate <- rep.FDate <-
-round.FDate <- split.FDate <- unique.FDate <-
+rep.FDate <- round.FDate <- split.FDate <- unique.FDate <-
 min.FDate <- max.FDate <- "[.FDate" <- function(x, ...)
 {
 	x <- NextMethod()
@@ -441,22 +440,22 @@ dday.ddur <- function(x, ...)
 
 `year<-.ddur` <- function(x, ..., value)
 {
-	.Call(`Cyear<-.ddur`, as.ddur(x), rep_len(as.integer(value), length(x)))
+	.Call(`Cyear<-.ddur`, x, rep_len(as.integer(value), length(x)))
 }
 
 `month<-.ddur` <- function(x, ..., value)
 {
-	.Call(`Cmonth<-.ddur`, as.ddur(x), rep_len(as.integer(value), length(x)))
+	.Call(`Cmonth<-.ddur`, x, rep_len(as.integer(value), length(x)))
 }
 
 `week<-.ddur` <- function(x, ..., value)
 {
-	.Call(`Cweek<-.ddur`, as.ddur(x), rep_len(as.integer(value), length(x)))
+	.Call(`Cweek<-.ddur`, x, rep_len(as.integer(value), length(x)))
 }
 
 `dday<-.ddur` <- function(x, ..., value)
 {
-	.Call(`Cdday<-.ddur`, as.ddur(x), rep_len(as.integer(value), length(x)))
+	.Call(`Cdday<-.ddur`, x, rep_len(as.integer(value), length(x)))
 }
 
 
@@ -702,4 +701,33 @@ as.character.wcnt <- format.wcnt <- function(x, ...)
 print.wcnt <- function(x, ...)
 {
 	print(format.wcnt(x), ...)
+}
+
+## accessors
+week.wcnt <- function(x, ...)
+{
+	.Call(Cweek.wcnt, as.wcnt(x, ...))
+}
+
+wday.wcnt <- function(x, ...)
+{
+	.Call(Cwday.wcnt, as.wcnt(x, ...))
+}
+
+`week<-.wcnt` <- function(x, ..., value)
+{
+	.Call(`Cweek<-.wcnt`, x, rep_len(value, length(x)))
+}
+
+`wday<-.wcnt` <- function(x, ..., value)
+{
+	.Call(`Cwday<-.wcnt`, x, rep_len(value, length(x)))
+}
+
+c.wcnt <- rev.wcnt <- cut.wcnt <- rep.wcnt <-
+split.wcnt <- unique.wcnt <- min.wcnt <- max.wcnt <- function(x, ...)
+{
+	x <- NextMethod()
+	class(x) <- c("wcnt",".duo")
+	x
 }

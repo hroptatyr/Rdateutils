@@ -7,14 +7,12 @@
 \alias{qday}
 \alias{month}
 \alias{mday}
-\alias{week}
 \alias{year<-}
 \alias{yday<-}
 \alias{sday<-}
 \alias{qday<-}
 \alias{month<-}
 \alias{mday<-}
-\alias{week<-}
 \alias{year.FDate}
 \alias{yday.FDate}
 \alias{semi.FDate}
@@ -23,14 +21,12 @@
 \alias{qday.FDate}
 \alias{month.FDate}
 \alias{mday.FDate}
-\alias{week.FDate}
 \alias{year<-.FDate}
 \alias{yday<-.FDate}
 \alias{sday<-.FDate}
 \alias{qday<-.FDate}
 \alias{month<-.FDate}
 \alias{mday<-.FDate}
-\alias{week<-.FDate}
 \title{
   Access date components
 }
@@ -46,7 +42,6 @@ quarter(x, \dots)
 qday(x, \dots)
 month(x, \dots)
 mday(x, \dots)
-week(x, \dots)
 \method{year}{FDate}(x, \dots)
 \method{yday}{FDate}(x, \dots)
 \method{semi}{FDate}(x, \dots)
@@ -55,7 +50,6 @@ week(x, \dots)
 \method{qday}{FDate}(x, \dots)
 \method{month}{FDate}(x, \dots)
 \method{mday}{FDate}(x, \dots)
-\method{week}{FDate}(x, \dots)
 
 year(x, \dots) <- value
 yday(x, \dots) <- value
@@ -86,5 +80,4 @@ mday(x, \dots) <- value
   qday.FDate("2014-04-19")
   month.FDate("2014-05-19")
   mday.FDate("2014-05-19")
-  week.FDate("2014-01-09")
 }

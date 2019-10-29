@@ -72,6 +72,10 @@ R_CallMethodDef callMethods[] = {
 	{"Cas.wcnt.factor", (DL_FUNC)&as_wcnt_factor, -1},
 	{"Cformat.wcnt", (DL_FUNC)&format_wcnt, -1},
 	{"C+.wcnt", (DL_FUNC)&plus_wcnt, -1},
+	{"Cweek.wcnt", (DL_FUNC)&week_wcnt, -1},
+	{"Cwday.wcnt", (DL_FUNC)&wday_wcnt, -1},
+	{"Cweek<-.wcnt", (DL_FUNC)&week_bang_wcnt, -1},
+	{"Cwday<-.wcnt", (DL_FUNC)&wday_bang_wcnt, -1},
 	{NULL, NULL, 0}
 };
 

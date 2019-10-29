@@ -71,3 +71,7 @@ SEXP as_wcnt_character(SEXP x);
 SEXP as_wcnt_factor(SEXP x);
 SEXP format_wcnt(SEXP x);
 SEXP plus_wcnt(SEXP x, SEXP y);
+SEXP week_wcnt(SEXP x);
+SEXP wday_wcnt(SEXP x);
+SEXP week_bang_wcnt(SEXP x, SEXP value);
+SEXP wday_bang_wcnt(SEXP x, SEXP value);
