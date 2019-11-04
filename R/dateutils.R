@@ -12,6 +12,8 @@ sweek <- function(x, ...) UseMethod("sweek")
 qweek <- function(x, ...) UseMethod("qweek")
 mweek <- function(x, ...) UseMethod("mweek")
 wcnt <- function(x, ...) UseMethod("wcnt")
+swcnt <- function(x, ...) UseMethod("swcnt")
+qwcnt <- function(x, ...) UseMethod("qwcnt")
 mwcnt <- function(x, ...) UseMethod("mwcnt")
 dday <- function(x, ...) UseMethod("dday")
 
@@ -261,6 +263,16 @@ mweek.FDate <- function(x, ...)
 wcnt.FDate <- function(x, ...)
 {
 	.Call(Cwcnt.FDate, as.FDate(x))
+}
+
+swcnt.FDate <- function(x, ...)
+{
+	.Call(Cswcnt.FDate, as.FDate(x))
+}
+
+qwcnt.FDate <- function(x, ...)
+{
+	.Call(Cqwcnt.FDate, as.FDate(x))
 }
 
 mwcnt.FDate <- function(x, ...)

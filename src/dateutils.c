@@ -1309,6 +1309,100 @@ wcnt_FDate(SEXP x)
 }
 
 SEXP
+swcnt_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+		unsigned int wc;
+
+		if (m != NA_INTEGER && yd && md) {
+			unsigned int eo = yday_eom[mo + 1U] - yday_eom[mo];
+			/* f00 is the wday of Jan-00 */
+			unsigned int f00 = y + y / 4U - y / 100U + y / 400U;
+			unsigned int wc;
+			unsigned int wd;
+
+			eo += mo==1U && _leapp(y+1U);
+			md = md <= eo ? md : eo;
+			yd = yday_eom[mo] + md;
+			md = yd - yday_eom[(mo >= 6U) * 6U];
+			wc = (md - 1U) / 7U + 1U;
+			wd = (f00 + yd - 1U) % 7U + 1U;
+			ansp[i] = wc << 3 ^ wd;
+		} else {
+			ansp[i] = NA_INTEGER;
+		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("wcnt"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+qwcnt_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+		unsigned int wc;
+
+		if (m != NA_INTEGER && yd && md) {
+			unsigned int eo = yday_eom[mo + 1U] - yday_eom[mo];
+			/* f00 is the wday of Jan-00 */
+			unsigned int f00 = y + y / 4U - y / 100U + y / 400U;
+			unsigned int wc;
+			unsigned int wd;
+
+			eo += mo==1U && _leapp(y+1U);
+			md = md <= eo ? md : eo;
+			yd = yday_eom[mo] + md;
+			md = yd - yday_eom[(mo / 3U) * 3U];
+			wc = (md - 1U) / 7U + 1U;
+			wd = (f00 + yd - 1U) % 7U + 1U;
+			ansp[i] = wc << 3 ^ wd;
+		} else {
+			ansp[i] = NA_INTEGER;
+		}
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("wcnt"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
 mwcnt_FDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);

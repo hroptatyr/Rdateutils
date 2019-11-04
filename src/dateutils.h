@@ -23,6 +23,8 @@ SEXP sweek_FDate(SEXP x);
 SEXP qweek_FDate(SEXP x);
 SEXP mweek_FDate(SEXP x);
 SEXP wcnt_FDate(SEXP x);
+SEXP swcnt_FDate(SEXP x);
+SEXP qwcnt_FDate(SEXP x);
 SEXP mwcnt_FDate(SEXP x);
 
 SEXP year_bang_FDate(SEXP x, SEXP value);

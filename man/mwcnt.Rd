@@ -16,12 +16,11 @@ mwcnt(x, \dots)
   \item{\dots}{further arguments, currently ignored}
 }
 \value{
-  Integer value(s) representing the count of the weekday of date within the month.
-  Range 1 to 5.
+  (Vector of) wcnt(s).
 }
 \keyword{classes}
 \keyword{manip}
-\seealso{\code{\link{mweek}} \code{\link{wcnt}}}
+\seealso{\code{\link{as.wcnt}} \code{\link{mweek}} \code{\link{wcnt}} \code{\link{swcnt}} \code{\link{qwcnt}}}
 \examples{
   mwcnt.FDate("2014-05-19")
 }
