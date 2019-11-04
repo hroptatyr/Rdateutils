@@ -301,9 +301,23 @@ test_that("FDate poset", {
 test_that("FDate iso week", {
 	expect_equal(week.FDate("2019-02-02"), 5L)
 	expect_equal(week.FDate("2019-06-02"), 22L)
+	expect_equal(week.FDate("2019-06-03"), 23L)
+	expect_equal(week.FDate("2019-08-01"), 31L)
+
+	expect_equal(sweek.FDate("2019-02-02"), 5L)
+	expect_equal(sweek.FDate("2019-06-02"), 22L)
+	expect_equal(sweek.FDate("2019-06-03"), 23L)
+	expect_equal(sweek.FDate("2019-08-01"), 5L)
+
+	expect_equal(qweek.FDate("2019-02-02"), 5L)
+	expect_equal(qweek.FDate("2019-06-02"), 9L)
+	expect_equal(qweek.FDate("2019-06-03"), 10L)
+	expect_equal(qweek.FDate("2019-08-01"), 5L)
+
 	expect_equal(mweek.FDate("2019-02-02"), 0L)
 	expect_equal(mweek.FDate("2019-06-02"), 0L)
 	expect_equal(mweek.FDate("2019-06-03"), 1L)
+	expect_equal(mweek.FDate("2019-08-01"), 1L)
 
 	expect_equal(wcnt.FDate("2019-02-02"), as.wcnt("5A"))
 	expect_equal(wcnt.FDate("2019-06-02"), as.wcnt("22S"))

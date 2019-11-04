@@ -36,6 +36,7 @@ week(x, \dots) <- value
 \examples{
   week.FDate("2014-01-09")
   week.FDate("2014-05-19")
+  week.ddur("P7W")
 
   as.FDate("2014-05-19") -> x
   week(x) <- 3L

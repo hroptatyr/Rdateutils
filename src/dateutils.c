@@ -1135,6 +1135,90 @@ wday_FDate(SEXP x)
 }
 
 SEXP
+sweek_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		static const int_fast8_t iso[] = {2, 1, 0, -1, -2, 4, 3, 2};
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+		unsigned int w;
+
+		if (LIKELY(m != NA_INTEGER && yd && md)) {
+			unsigned int eo = yday_eom[mo + 1U];
+			/* f01 is the wday of Jan-01 */
+			unsigned int f01 = (y + y / 4U - y / 100U + y / 400U + 1U) % 7U;
+			int s4;
+
+			md += mo>2U && _leapp(y+1U);
+			eo += mo>1U && _leapp(y+1U);
+
+			yd = yday_eom[mo] + md;
+			yd = yd <= eo ? yd : eo;
+
+			s4 = yday_eom[(mo >= 6U) * 6U] - 3;
+			w = (7 + yd - iso[f01]) / 7 - (7 + s4 - iso[f01]) / 7;
+		} else {
+			w = NA_INTEGER;
+		}
+		ansp[i] = w;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+qweek_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		static const int_fast8_t iso[] = {2, 1, 0, -1, -2, 4, 3, 2};
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int mo = (yd - md) / 32U;
+		unsigned int w;
+
+		if (LIKELY(m != NA_INTEGER && yd && md)) {
+			unsigned int eo = yday_eom[mo + 1U];
+			/* f01 is the wday of Jan-01 */
+			unsigned int f01 = (y + y / 4U - y / 100U + y / 400U + 1U) % 7U;
+			int q4;
+
+			md += mo>2U && _leapp(y+1U);
+			eo += mo>1U && _leapp(y+1U);
+
+			yd = yday_eom[mo] + md;
+			yd = yd <= eo ? yd : eo;
+
+			q4 = yday_eom[(mo / 3U) * 3U] - 3;
+			w = (7 + yd - iso[f01]) / 7 - (7 + q4 - iso[f01]) / 7;
+		} else {
+			w = NA_INTEGER;
+		}
+		ansp[i] = w;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
 mweek_FDate(SEXP x)
 {
 	R_xlen_t n = XLENGTH(x);

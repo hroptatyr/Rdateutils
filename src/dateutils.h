@@ -19,6 +19,8 @@ SEXP month_FDate(SEXP x);
 SEXP mday_FDate(SEXP x);
 SEXP week_FDate(SEXP x);
 SEXP wday_FDate(SEXP x);
+SEXP sweek_FDate(SEXP x);
+SEXP qweek_FDate(SEXP x);
 SEXP mweek_FDate(SEXP x);
 SEXP wcnt_FDate(SEXP x);
 SEXP mwcnt_FDate(SEXP x);
