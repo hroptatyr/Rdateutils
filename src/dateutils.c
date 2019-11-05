@@ -448,17 +448,17 @@ _rdwcnt(const char *s)
 		switch (*s) {
 		case 'M':
 			if (s[1U] != 'O' && s[1U] != 'o' ||
-			    s[2U] != 'N' && s[2U] != 'n') {
+			    s[2U] && s[2U] != 'N' && s[2U] != 'n') {
 				goto nope;
 			}
 			w = 1U;
 			break;
 		case 'T':
 			if ((s[1U] == 'H' || s[1U] == 'h') &&
-			    (s[2U] == 'U' || s[2U] == 'u')) {
+			    (!s[2U] || (s[2U] == 'U' || s[2U] == 'u'))) {
 				w = 4U;
 			} else if ((s[1U] == 'U' || s[1U] == 'u') &&
-				   (s[2U] == 'E' || s[2U] == 'e')) {
+				   (!s[2U] || (s[2U] == 'E' || s[2U] == 'e'))) {
 				w = 2U;
 			} else {
 				goto nope;
@@ -466,24 +466,24 @@ _rdwcnt(const char *s)
 			break;
 		case 'W':
 			if (s[1U] != 'E' && s[1U] != 'e' ||
-			    s[2U] != 'D' && s[2U] != 'd') {
+			    s[2U] && s[2U] != 'D' && s[2U] != 'd') {
 				goto nope;
 			}
 			w = 3U;
 			break;
 		case 'F':
 			if (s[1U] != 'R' && s[1U] != 'r' ||
-			    s[2U] != 'I' && s[2U] != 'i') {
+			    s[2U] && s[2U] != 'I' && s[2U] != 'i') {
 				goto nope;
 			}
 			w = 5U;
 			break;
 		case 'S':
 			if ((s[1U] == 'U' || s[1U] == 'u') &&
-			    (s[2U] == 'N' || s[2U] == 'n')) {
+			    (!s[2U] || (s[2U] == 'N' || s[2U] == 'n'))) {
 				w = 7U;
 			} else if ((s[1U] == 'A' || s[1U] == 'a') &&
-				   (s[2U] == 'T' || s[2U] == 't')) {
+				   (!s[2U] || (s[2U] == 'T' || s[2U] == 't'))) {
 				w = 6U;
 			} else {
 				goto nope;
