@@ -155,7 +155,7 @@ as.POSIXlt.FDate <- function(x, ...)
 
 c.FDate <- rev.FDate <- cut.FDate <- mean.FDate <-
 rep.FDate <- round.FDate <- split.FDate <- unique.FDate <-
-min.FDate <- max.FDate <- "[.FDate" <- function(x, ...)
+min.FDate <- max.FDate <- "[.FDate" <- "[[.FDate" <- function(x, ...)
 {
 	x <- NextMethod()
 	class(x) <- c("FDate",".duo")
@@ -392,7 +392,7 @@ print.ddur <- function(x, ...)
 }
 
 c.ddur <- rev.ddur <- rep.ddur <-
-round.ddur <- unique.ddur <- "[.ddur" <- function(x, ...)
+round.ddur <- unique.ddur <- "[.ddur" <- "[[.ddur" <- function(x, ...)
 {
 	x <- NextMethod()
 	class(x) <- c("ddur",".duo")
