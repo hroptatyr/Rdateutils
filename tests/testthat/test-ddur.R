@@ -24,6 +24,10 @@ test_that("ddur from factor", {
 	x <- c("ON", "SN", "TN", "SN", "200", "200D", "P2M")
 	y <- factor(x)
 	expect_equal(as.ddur(x), as.ddur(y))
+
+	x <- c("ON", "SN", "TN", "SN", "200", "200D", "P2M")
+	y <- ordered(x, levels=c("ON","SN","TN"))
+	expect_equal(as.ddur(y), as.ddur(c("ON","SN","TN","SN",NA,NA,NA)))
 })
 
 test_that("ddur accessors", {

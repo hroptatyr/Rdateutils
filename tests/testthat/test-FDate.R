@@ -38,6 +38,10 @@ test_that("FDate from factor", {
 	x <- c("2008-01-31", "2014-02-31", "2004-S1", "2004-S1", "2003-Q", "2000")
 	y <- factor(x)
 	expect_equal(as.FDate(x), as.FDate(y))
+	expect_equal(as.FDate(as.factor("2014-01-02")), as.FDate("2014-01-02"))
+	expect_true(is.na(as.FDate(as.factor("2014-01-32"))))
+	expect_true(is.na(as.FDate(as.ordered("2014-13-02"))))
+	expect_equal(as.FDate(as.ordered(c("2014-12-00", "2014-12"))), as.FDate(c("2014-12","2014-12")))
 })
 
 test_that("FDate from integer", {
