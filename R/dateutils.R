@@ -154,12 +154,26 @@ as.POSIXlt.FDate <- function(x, ...)
 }
 
 c.FDate <- rev.FDate <- cut.FDate <- mean.FDate <-
-rep.FDate <- round.FDate <- split.FDate <- unique.FDate <-
+rep.FDate <- split.FDate <- unique.FDate <-
 min.FDate <- max.FDate <- "[.FDate" <- "[[.FDate" <- function(x, ...)
 {
 	x <- NextMethod()
 	class(x) <- c("FDate",".duo")
 	x
+}
+
+trunc.FDate <- function(x, units=c("days", "weeks", "months", "quarters", "semis", "years"), ...)
+{
+	units <- match.arg(units)
+	x <- as.FDate(x)
+	switch(units,
+	days=x,
+	weeks=x - (wday.FDate(x) - 1L),
+	months=.Call(Ctrunc.FDate.month, x),
+	quarters=.Call(Ctrunc.FDate.quarter, x),
+	semis=.Call(Ctrunc.FDate.semi, x),
+	years=.Call(Ctrunc.FDate.year, x),
+	rep.int(as.FDate(NA_integer_), length(x)))
 }
 
 seq.FDate <- function(from, till, by, from.last=F, ...)

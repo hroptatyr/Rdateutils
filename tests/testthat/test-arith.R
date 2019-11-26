@@ -79,6 +79,44 @@ test_that("FDate arith with integers", {
 	expect_equal(as.FDate("2019-11-26") - -100L, as.FDate("2020-03-05"))
 })
 
+test_that("FDate trunc'ing", {
+	expect_equal(trunc.FDate("2001-A", "y"), as.FDate("2001-A"))
+	expect_equal(trunc.FDate("2001-S1", "y"), as.FDate("2001-A"))
+	expect_equal(trunc.FDate("2001-S2", "y"), as.FDate("2001-A"))
+	expect_equal(trunc.FDate("2001-Q3", "y"), as.FDate("2001-A"))
+	expect_equal(trunc.FDate("2001-H", "y"), as.FDate("2001-A"))
+	expect_equal(trunc.FDate("2001-03-03", "y"), as.FDate("2001-A"))
+
+	expect_true(is.na(trunc.FDate("2001-A", "semi")))
+	expect_equal(trunc.FDate("2001-S1", "semi"), as.FDate("2001-S1"))
+	expect_equal(trunc.FDate("2001-S2", "semi"), as.FDate("2001-S2"))
+	expect_equal(trunc.FDate("2001-Q3", "semi"), as.FDate("2001-S2"))
+	expect_equal(trunc.FDate("2001-H", "semi"), as.FDate("2001-S1"))
+	expect_equal(trunc.FDate("2001-12-03", "semi"), as.FDate("2001-S2"))
+
+	expect_true(is.na(trunc.FDate("2001-A", "quarter")))
+	expect_true(is.na(trunc.FDate("2001-S1", "quarter")))
+	expect_true(is.na(trunc.FDate("2001-S2", "quarter")))
+	expect_equal(trunc.FDate("2001-Q3", "quarter"), as.FDate("2001-Q3"))
+	expect_equal(trunc.FDate("2001-H", "quarter"), as.FDate("2001-Q1"))
+	expect_equal(trunc.FDate("2001-12-03", "quarter"), as.FDate("2001-Q4"))
+
+	expect_true(is.na(trunc.FDate("2001-A", "month")))
+	expect_true(is.na(trunc.FDate("2001-S1", "month")))
+	expect_true(is.na(trunc.FDate("2001-S2", "month")))
+	expect_true(is.na(trunc.FDate("2001-Q3", "month")))
+	expect_equal(trunc.FDate("2001-H", "month"), as.FDate("2001-03"))
+	expect_equal(trunc.FDate("2001-12-03", "month"), as.FDate("2001-12"))
+
+	expect_true(is.na(trunc.FDate("2001-A", "week")))
+	expect_true(is.na(trunc.FDate("2001-S1", "week")))
+	expect_true(is.na(trunc.FDate("2001-S2", "week")))
+	expect_true(is.na(trunc.FDate("2001-Q3", "week")))
+	expect_true(is.na(trunc.FDate("2001-H", "week")))
+	expect_equal(trunc.FDate("2001-12-03", "week"), as.FDate("2001-12-03"))
+	expect_equal(trunc.FDate("2001-11-04", "week"), as.FDate("2001-10-29"))
+})
+
 test_that("ddur arith", {
 	expect_equal(as.ddur("P0") + as.ddur("P2M"), as.ddur("P2M"))
 	expect_equal(as.ddur("P2D") + as.ddur("P2M"), as.ddur("P2M2D"))

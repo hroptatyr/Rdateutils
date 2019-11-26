@@ -36,6 +36,12 @@ SEXP mday_bang_FDate(SEXP x, SEXP value);
 SEXP week_bang_FDate(SEXP x, SEXP value);
 SEXP wday_bang_FDate(SEXP x, SEXP value);
 
+SEXP trunc_FDate_year(SEXP x);
+SEXP trunc_FDate_semi(SEXP x);
+SEXP trunc_FDate_quarter(SEXP x);
+SEXP trunc_FDate_month(SEXP x);
+SEXP trunc_FDate_week(SEXP x);
+
 SEXP seq_FDate(SEXP from, SEXP till, SEXP by);
 
 SEXP as_ddur_character(SEXP x);

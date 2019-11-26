@@ -39,6 +39,11 @@ R_CallMethodDef callMethods[] = {
 	{"Cweek<-.FDate", (DL_FUNC)&week_bang_FDate, -1},
 	{"Cwday<-.FDate", (DL_FUNC)&wday_bang_FDate, -1},
 
+	{"Ctrunc.FDate.year", (DL_FUNC)&trunc_FDate_year, -1},
+	{"Ctrunc.FDate.semi", (DL_FUNC)&trunc_FDate_semi, -1},
+	{"Ctrunc.FDate.quarter", (DL_FUNC)&trunc_FDate_quarter, -1},
+	{"Ctrunc.FDate.month", (DL_FUNC)&trunc_FDate_month, -1},
+
 	{"Cas.ddur.character", (DL_FUNC)&as_ddur_character, -1},
 	{"Cas.ddur.factor", (DL_FUNC)&as_ddur_factor, -1},
 	{"Cas.ddur.numeric", (DL_FUNC)&as_ddur_numeric, -1},
