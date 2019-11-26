@@ -72,6 +72,13 @@ test_that("FDate arith with auto-promotion", {
 	expect_equal(as.FDate("2000-02") + as.ddur("P-1Y"), as.FDate("1999-02"))
 })
 
+test_that("FDate arith with integers", {
+	expect_equal(as.FDate("2019-11-26") - 330L, as.FDate("2018-12-31"))
+	expect_equal(as.FDate("2019-11-26") - 99L, as.FDate("2019-08-19"))
+	expect_equal(as.FDate("2019-11-26") - 100L, as.FDate("2019-08-18"))
+	expect_equal(as.FDate("2019-11-26") - -100L, as.FDate("2020-03-05"))
+})
+
 test_that("ddur arith", {
 	expect_equal(as.ddur("P0") + as.ddur("P2M"), as.ddur("P2M"))
 	expect_equal(as.ddur("P2D") + as.ddur("P2M"), as.ddur("P2M2D"))

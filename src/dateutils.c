@@ -248,21 +248,25 @@ nope:
 static FDate
 _rdFDate_int(int x)
 {
-	unsigned int y, m, d;
+	int y, m, d;
 
 	y = x / 10000;
 	m = x % 10000;
-	if (m) {
+	if (UNLIKELY(y < 1000)) {
+		goto nope;
+	} else if (m) {
 		d = m % 100;
 		m /= 100;
 		if (UNLIKELY((m - 1U) >= 12U || d >= 32U)) {
-			return (FDate)-1;
+			goto nope;
 		}
 	} else {
 		m = 1U;
 		d = -3U;
 	}
 	return _mkFDate(y, m, d);
+nope:
+	return (FDate)-1;
 }
 
 static size_t
