@@ -1927,6 +1927,105 @@ wcnt_FDate_bang(SEXP x, SEXP value)
 	return ans;
 }
 
+SEXP
+nyday_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int y = m / 391U;
+
+		ansp[i] = m != NA_INTEGER ? 365 + _leapp(y+1U) : NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+nsday_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+
+		ansp[i] = m != NA_INTEGER && (yd > 0U)
+			? (yd > 195U) ? 184 : 181 + _leapp(y+1U)
+			: NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+nqday_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int qd = (yd % 97U - (yd > 195U));
+		unsigned int q = (yd + 95U - (yd > 195U)) / 97U - 1;
+
+		ansp[i] = m != NA_INTEGER
+			? yd && md || qd%4U/2U
+			? 90 + q + (!q && _leapp(y+1U)) - (q == 3U)
+			: NA_INTEGER
+			: NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
+SEXP
+nmday_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int qd = (yd % 97U - (yd > 195U));
+		unsigned int mo = (yd - md) / 32U;
+
+		ansp[i] = m != NA_INTEGER
+			? yd && md || !((qd+1U)%4U)
+			? yday_eom[mo + 1] - yday_eom[mo] + (mo == 1U && _leapp(y+1U))
+			: NA_INTEGER
+			: NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
 
 SEXP
 seq_FDate(SEXP from, SEXP till, SEXP by)

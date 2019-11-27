@@ -27,6 +27,11 @@ SEXP swcnt_FDate(SEXP x);
 SEXP qwcnt_FDate(SEXP x);
 SEXP mwcnt_FDate(SEXP x);
 
+SEXP nyday_FDate(SEXP x);
+SEXP nsday_FDate(SEXP x);
+SEXP nqday_FDate(SEXP x);
+SEXP nmday_FDate(SEXP x);
+
 SEXP year_bang_FDate(SEXP x, SEXP value);
 SEXP yday_bang_FDate(SEXP x, SEXP value);
 SEXP sday_bang_FDate(SEXP x, SEXP value);

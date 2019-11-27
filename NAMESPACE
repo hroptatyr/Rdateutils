@@ -42,6 +42,17 @@ export(`week<-`)
 export(`wday<-`)
 export(`dday<-`)
 
+export(nyday)
+export(nsday)
+export(nqday)
+export(nmday)
+export(nwday)
+S3method(nyday, default)
+S3method(nsday, default)
+S3method(nqday, default)
+S3method(nmday, default)
+S3method(nwday, default)
+
 
 export(as.FDate)
 export(is.FDate)

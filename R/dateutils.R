@@ -27,6 +27,12 @@ dday <- function(x, ...) UseMethod("dday")
 `wday<-` <- function(x, ..., value) UseMethod("wday<-")
 `dday<-` <- function(x, ..., value) UseMethod("dday<-")
 
+nyday <- function(x, ...) UseMethod("nyday")
+nsday <- function(x, ...) UseMethod("nsday")
+nqday <- function(x, ...) UseMethod("nqday")
+nmday <- function(x, ...) UseMethod("nmday")
+nwday <- function(x, ...) UseMethod("nwday")
+
 year.default <- function(x, ...)
 {
 	as.POSIXlt(x)$year + 1900L
@@ -93,6 +99,31 @@ mwcnt.default <- function(x, ...)
 {
 	z <- as.POSIXlt(x)
 	(z$mday - 1L) %/% 7L + 1L
+}
+
+nyday.default <- function(x, ...)
+{
+	.Call(Cnyday.FDate, as.FDate(x))
+}
+
+nsday.default <- function(x, ...)
+{
+	.Call(Cnsday.FDate, as.FDate(x))
+}
+
+nqday.default <- function(x, ...)
+{
+	.Call(Cnqday.FDate, as.FDate(x))
+}
+
+nmday.default <- function(x, ...)
+{
+	.Call(Cnmday.FDate, as.FDate(x))
+}
+
+nwday.default <- function(x, ...)
+{
+	7L
 }
 
 
