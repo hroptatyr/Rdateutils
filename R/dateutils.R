@@ -475,15 +475,84 @@ seq.ddur <- function(from, till, by, from.last=F, ...)
 	.Call(Cseq.ddur, from, till, by)
 }
 
-ddur <- function(x, y)
+ddur <- function(x, y, day.count=c("act", "30", "30A", "30E", "30I", "30U", "bd", "28"))
 {
 ## actual (day) duration from x to y
 	if (missing(y)) {
 		return(as.ddur(x))
 	}
+	day.count <- match.arg(day.count)
+
 	x <- as.FDate(x)
-	y <- as.FDate(y)
-	return(.Call(Cddur.FDate, x, rep.int(y, length(x))))
+	if (all(is.na(z <- as.FDate(y)))) {
+		y <- as.ddur(y)
+	} else {
+		y <- z
+	}
+	if (inherits(y, "ddur")) {
+		y <- x + y
+	}
+
+	if (day.count == "act") {
+		md <- .Call(Cddur.FDate, x, rep.int(y, length(x)))
+	} else {
+		y <- rep(y, length(x))
+		if (day.count == "30A") {
+			mday(x[mday(x) > 30L]) <- 30L
+			mday(y[mday(x) >= 30L & mday(y) > 30L]) <- 30L
+		} else if (day.count == "30U") {
+			mday(x[mday(x) == nmday(x)]) <- 30L
+			mday(y[mday(x) >= 30L & mday(y) == nmday(x)]) <- 30L
+		} else if (day.count == "30E") {
+			mday(x[mday(x) > 30L]) <- 30L
+			mday(y[mday(x) > 30L]) <- 30L
+		}
+		md <- .Call(`C-.FDate`, y, x)
+		md <- md + month(md)*30
+		month(md) <- 0
+	}
+	md
+}
+
+ydur <- function(x, y, day.count=c("act/act", "30/360", "30A/360", "30E/360", "30I/360", "30U/360", "act/360", "act/365", "act/365A", "bd/252", "28/360"))
+{
+	day.count <- match.arg(day.count)
+
+	x <- as.FDate(x)
+	if (all(is.na(z <- as.FDate(y)))) {
+		y <- as.ddur(y)
+	} else {
+		y <- z
+	}
+	if (inherits(y, "ddur")) {
+		y <- x + y
+	}
+
+	if (switch(day.count,
+		`act/act`=TRUE, `act/360`=TRUE,
+		`act/365`=TRUE, `act/365A`=TRUE,
+		FALSE)) {
+		act <- dday(.Call(Cddur.FDate, x, rep.int(y, length(x))))
+		switch(day.count,
+		`act/act`=act/nyday(x),
+		`act/365A`=act/nyday(x),
+		`act/360`=act/360,
+		`act/365`=act/365)
+	} else {
+		y <- rep(y, length(x))
+		if (day.count == "30A/360") {
+			mday(x[mday(x) > 30L]) <- 30L
+			mday(y[mday(x) >= 30L & mday(y) > 30L]) <- 30L
+		} else if (day.count == "30U/360") {
+			mday(x[mday(x) == nmday(x)]) <- 30L
+			mday(y[mday(x) >= 30L & mday(y) == nmday(x)]) <- 30L
+		} else if (day.count == "30E/360") {
+			mday(x[mday(x) > 30L]) <- 30L
+			mday(y[mday(x) > 30L]) <- 30L
+		}
+		md <- .Call(`C-.FDate`, y, x)
+		(month(md)*30+dday(md))/360
+	}
 }
 
 ## accessors
