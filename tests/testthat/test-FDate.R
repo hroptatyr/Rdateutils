@@ -32,6 +32,8 @@ test_that("converting from/to character", {
 	expect_true(is.na(as.FDate("20140132")))
 	expect_true(is.na(as.FDate("20141302")))
 	expect_equal(as.FDate("2010402"), as.FDate("201-04-02"))
+	expect_true(is.na(as.FDate("")))
+	expect_true(is.na(as.FDate("0")))
 })
 
 test_that("FDate from factor", {

@@ -147,7 +147,9 @@ _rdFDate(const char *s)
 	case ' ':
 		break;
 	case '\0':
-		if (y < 10000U) {
+		if (UNLIKELY(y < 100U)) {
+			goto nope;
+		} else if (y < 10000U) {
 			return _mkFDate(y, 1, -3);
 		}
 		/* could be 20190202 */
