@@ -2086,7 +2086,7 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 		/* we use at least month steps */
 		with (unsigned int m = fd < td ? td - fd : fd - td) {
 			m >>= 5U;
-			tmp = Calloc(m + 1U, FDate);
+			tmp = Calloc(m + 1U + 1U, FDate);
 		}
 		if (c) {
 			/* because of auto-fixups above */
@@ -2136,7 +2136,7 @@ seq_FDate(SEXP from, SEXP till, SEXP by)
 		with (unsigned int m = fd < td ? td - fd : fd - td) {
 			/* if only month steps, save on allocation */
 			m >>= !d.d * 5U;
-			tmp = Calloc(m + 1U, FDate);
+			tmp = Calloc(m + 1U + 1U, FDate);
 		}
 		/* maybe spurious? */
 		mo &= -!!yd;
