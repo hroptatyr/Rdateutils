@@ -49,6 +49,9 @@ R_CallMethodDef callMethods[] = {
 	{"Ctrunc.FDate.quarter", (DL_FUNC)&trunc_FDate_quarter, -1},
 	{"Ctrunc.FDate.month", (DL_FUNC)&trunc_FDate_month, -1},
 
+	{"Cbegd.FDate", (DL_FUNC)&begd_FDate, -1},
+	{"Cendd.FDate", (DL_FUNC)&endd_FDate, -1},
+
 	{"Cas.ddur.character", (DL_FUNC)&as_ddur_character, -1},
 	{"Cas.ddur.factor", (DL_FUNC)&as_ddur_factor, -1},
 	{"Cas.ddur.numeric", (DL_FUNC)&as_ddur_numeric, -1},

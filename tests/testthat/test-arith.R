@@ -117,6 +117,24 @@ test_that("FDate trunc'ing", {
 	expect_equal(trunc.FDate("2001-11-04", "week"), as.FDate("2001-10-29"))
 })
 
+test_that("FDate untrunc'ing", {
+	expect_true(is.na(begd(as.FDate(NA))))
+	expect_equal(begd(as.FDate("2000-12-04")), as.FDate("2000-12-04"))
+	expect_equal(begd(as.FDate("2000-Z")), as.FDate("2000-12-01"))
+	expect_equal(begd(as.FDate("2000-M")), as.FDate("2000-06-01"))
+	expect_equal(begd(as.FDate("2000-Q4")), as.FDate("2000-10-01"))
+	expect_equal(begd(as.FDate("2000-S2")), as.FDate("2000-07-01"))
+	expect_equal(begd(as.FDate("2000-A")), as.FDate("2000-01-01"))
+
+	expect_true(is.na(endd(as.FDate(NA))))
+	expect_equal(endd(as.FDate("2000-12-04")), as.FDate("2000-12-04"))
+	expect_equal(endd(as.FDate("2000-Z")), as.FDate("2000-12-31"))
+	expect_equal(endd(as.FDate("2000-M")), as.FDate("2000-06-31"))
+	expect_equal(endd(as.FDate("2000-Q3")), as.FDate("2000-09-31"))
+	expect_equal(endd(as.FDate("2000-S1")), as.FDate("2000-06-31"))
+	expect_equal(endd(as.FDate("2000-A")), as.FDate("2000-12-31"))
+})
+
 test_that("ddur arith", {
 	expect_equal(as.ddur("P0") + as.ddur("P2M"), as.ddur("P2M"))
 	expect_equal(as.ddur("P2D") + as.ddur("P2M"), as.ddur("P2M2D"))

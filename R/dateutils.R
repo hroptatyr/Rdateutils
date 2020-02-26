@@ -16,6 +16,8 @@ swcnt <- function(x, ...) UseMethod("swcnt")
 qwcnt <- function(x, ...) UseMethod("qwcnt")
 mwcnt <- function(x, ...) UseMethod("mwcnt")
 dday <- function(x, ...) UseMethod("dday")
+begd <- function(x, ...) UseMethod("begd")
+endd <- function(x, ...) UseMethod("endd")
 
 `year<-` <- function(x, ..., value) UseMethod("year<-")
 `yday<-` <- function(x, ..., value) UseMethod("yday<-")
@@ -205,6 +207,16 @@ trunc.FDate <- function(x, units=c("days", "weeks", "months", "quarters", "semis
 	semis=.Call(Ctrunc.FDate.semi, x),
 	years=.Call(Ctrunc.FDate.year, x),
 	rep.int(as.FDate(NA_integer_), length(x)))
+}
+
+begd.FDate <- begd.default <- function(x, ...)
+{
+	.Call(Cbegd.FDate, as.FDate(x));
+}
+
+endd.FDate <- endd.default <- function(x, ...)
+{
+	.Call(Cendd.FDate, as.FDate(x));
 }
 
 seq.FDate <- function(from, till, by, from.last=F, ...)

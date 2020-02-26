@@ -2574,6 +2574,92 @@ trunc_FDate_month(SEXP x)
 	return ans;
 }
 
+/* beg/end */
+SEXP
+begd_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+
+		if (m != NA_INTEGER && !(yd && md)) {
+			unsigned int qd = (yd % 97U - (yd > 195U));
+			/* just go to the first */
+			m += 4U - (qd%4U);
+		}
+		ansp[i] = m;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+endd_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		unsigned int md = (yd + 192U) % 195U % 97U % 32U;
+
+		if (m != NA_INTEGER && !(yd && md)) {
+			unsigned int qd = (yd % 97U - (yd > 195U));
+
+			switch (qd%4U) {
+			case 0U:
+				/* full year */
+				m += 390U;
+				break;
+			case 1U:
+				/* semi */
+				m += 194U;
+				break;
+			case 2U:
+				/* quarter */
+				m += 96U;
+				break;
+			case 3U:
+				/* month */
+				m += 31U;
+				break;
+			}
+		}
+		ansp[i] = m;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("FDate"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
 
 SEXP
 as_ddur_character(SEXP x)
