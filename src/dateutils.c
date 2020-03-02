@@ -2850,6 +2850,169 @@ format_ddur(SEXP x)
 	return ans;
 }
 
+/* trunc's */
+static inline int
+d2m(ddur x)
+{
+	return (x.m * 61LL + (x.d + x.d / 365LL) * 2LL) / 61LL;
+}
+
+static inline int
+m2d(ddur x)
+{
+	return x.d + x.m * 61LL / 2LL - (x.m + x.m / 100LL) / 12LL + (x.m + x.m / 100LL) / 48LL;
+}
+
+SEXP
+trunc_ddur_year(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur v = xp[i];
+		ansp[i] = !_is_na_ddur(v) ? (ddur){0, d2m(v) / 12LL * 12LL} : NA_DDUR;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+trunc_ddur_semi(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur v = xp[i];
+		ansp[i] = !_is_na_ddur(v) ? (ddur){0, d2m(v) / 6LL * 6LL} : NA_DDUR;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+trunc_ddur_quarter(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur v = xp[i];
+		ansp[i] = !_is_na_ddur(v) ? (ddur){0, d2m(v) / 3LL * 3LL} : NA_DDUR;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+trunc_ddur_month(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur v = xp[i];
+		ansp[i] = !_is_na_ddur(v) ? (ddur){0, d2m(v)} : NA_DDUR;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+trunc_ddur_week(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur v = xp[i];
+		ansp[i] = !_is_na_ddur(v) ? (ddur){m2d(v) / 7LL * 7LL, 0} : NA_DDUR;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
+SEXP
+trunc_ddur_day(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(DDURSXP, n));
+	ddur *restrict ansp = DDUR(ans);
+	const ddur *xp = DDUR(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		ddur v = xp[i];
+		ansp[i] = !_is_na_ddur(v) ? (ddur){m2d(v), 0} : NA_DDUR;
+	}
+
+	with (SEXP class) {
+		PROTECT(class = allocVector(STRSXP, 2));
+		SET_STRING_ELT(class, 0, mkChar("ddur"));
+		SET_STRING_ELT(class, 1, mkChar(".duo"));
+		classgets(ans, class);
+	}
+
+	UNPROTECT(2);
+	return ans;
+}
+
 SEXP
 year_ddur(SEXP x)
 {

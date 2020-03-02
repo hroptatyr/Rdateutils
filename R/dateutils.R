@@ -209,6 +209,20 @@ trunc.FDate <- function(x, units=c("days", "weeks", "months", "quarters", "semis
 	rep.int(as.FDate(NA_integer_), length(x)))
 }
 
+trunc.ddur <- function(x, units=c("days", "weeks", "months", "quarters", "semis", "years"), ...)
+{
+	units <- match.arg(units)
+	x <- as.ddur(x)
+	switch(units,
+	days=.Call(Ctrunc.ddur.day, x),
+	weeks=.Call(Ctrunc.ddur.week, x),
+	months=.Call(Ctrunc.ddur.month, x),
+	quarters=.Call(Ctrunc.ddur.quarter, x),
+	semis=.Call(Ctrunc.ddur.semi, x),
+	years=.Call(Ctrunc.ddur.year, x),
+	rep.int(as.FDate(NA_integer_), length(x)))
+}
+
 begd.FDate <- begd.default <- function(x, ...)
 {
 	.Call(Cbegd.FDate, as.FDate(x));

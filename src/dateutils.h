@@ -45,7 +45,6 @@ SEXP trunc_FDate_year(SEXP x);
 SEXP trunc_FDate_semi(SEXP x);
 SEXP trunc_FDate_quarter(SEXP x);
 SEXP trunc_FDate_month(SEXP x);
-SEXP trunc_FDate_week(SEXP x);
 
 SEXP begd_FDate(SEXP x);
 SEXP endd_FDate(SEXP x);
@@ -67,6 +66,13 @@ SEXP lt_ddur(SEXP x, SEXP y);
 SEXP le_ddur(SEXP x, SEXP y);
 SEXP gt_ddur(SEXP x, SEXP y);
 SEXP ge_ddur(SEXP x, SEXP y);
+
+SEXP trunc_ddur_year(SEXP x);
+SEXP trunc_ddur_semi(SEXP x);
+SEXP trunc_ddur_quarter(SEXP x);
+SEXP trunc_ddur_month(SEXP x);
+SEXP trunc_ddur_week(SEXP x);
+SEXP trunc_ddur_day(SEXP x);
 
 SEXP year_ddur(SEXP x);
 SEXP semi_ddur(SEXP x);

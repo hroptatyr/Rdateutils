@@ -51,3 +51,22 @@ test_that("ddur accessors bang", {
 	dday(f) <- -1
 	expect_equal(f, as.ddur("P-1M-1D"))
 })
+
+test_that("ddur trunc'ing", {
+	expect_equal(trunc(as.ddur("P19M15D"), "year"), as.ddur("P12M"))
+	expect_equal(trunc(as.ddur("P103M-15D"), "year"), as.ddur("P96M"))
+	expect_equal(trunc(as.ddur("P-19M15D"), "year"), as.ddur("P-12M"))
+	expect_equal(trunc(as.ddur("P-12M15D"), "year"), as.ddur("P0M"))
+	expect_equal(trunc(as.ddur("P19M15D"), "month"), as.ddur("P19M"))
+	expect_equal(trunc(as.ddur("P-19M-15D"), "month"), as.ddur("P-19M"))
+	expect_equal(trunc(as.ddur("P-19M15D"), "month"), as.ddur("P-18M"))
+	expect_equal(trunc(as.ddur("P15D"), "week"), as.ddur("P14D"))
+	expect_equal(trunc(as.ddur("P-15D"), "week"), as.ddur("P-14D"))
+	expect_equal(trunc(as.ddur("P-20D"), "week"), as.ddur("P-14D"))
+	expect_equal(trunc(as.ddur("P1M"), "week"), as.ddur("P28D"))
+	expect_equal(trunc(as.ddur("P2M"), "day"), as.ddur("P61D"))
+	expect_equal(trunc(as.ddur("P-2M1D"), "day"), as.ddur("P-60D"))
+	expect_equal(trunc(as.ddur("P12M"), "day"), as.ddur("P365D"))
+	expect_equal(trunc(as.ddur("P12M-1D"), "day"), as.ddur("P364D"))
+	expect_equal(trunc(as.ddur("P-12M1D"), "day"), as.ddur("P-364D"))
+})
