@@ -72,6 +72,7 @@ S3method(as.character, FDate)
 
 S3method(format, FDate)
 S3method(print, FDate)
+S3method(pretty, FDate)
 
 S3method(c, FDate)
 S3method(rev, FDate)

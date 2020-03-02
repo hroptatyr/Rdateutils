@@ -905,3 +905,43 @@ split.wcnt <- unique.wcnt <- min.wcnt <- max.wcnt <- function(x, ...)
 	class(x) <- c("wcnt",".duo")
 	x
 }
+
+
+pretty.FDate <- function(x, n=5L, min.n=n %/% 2L, ...)
+{
+	stopifnot(min.n <= n)
+	xr <- range(x, na.rm=TRUE)
+	rd <- dday(ddur(xr[1L], xr[2L]))
+	if (rd <= n) {
+		## less than requested
+		return(seq(xr[1L], xr[2L], by="P1D"))
+	}
+	## rough estimate of step size
+	rp <- xr[2L] - xr[1L]
+	rpm <- rp / n
+	if (rpm > "1Y") {
+		s <- trunc.ddur(rp / n, "year")
+		t <- "year"
+	} else if (rpm > "6M") {
+		s <- as.ddur("6M")
+		t <- "semi"
+	} else if (rpm > "3M") {
+		s <- as.ddur("3M")
+		t <- "quarter"
+	} else if (rpm > "1M") {
+		s <- as.ddur("1M")
+		t <- "month"
+	} else if (rpm > "1W") {
+		s <- as.ddur("1W")
+		t <- "week"
+	} else {
+		s <- as.ddur("1D")
+		t <- "day"
+	}
+	xs <- seq(trunc(xr[1L]-s, t), trunc(xr[2L]+s, t), by=s, from.last=TRUE)
+	sr1 <- which(xs <= xr[1L])
+	sr2 <- which(xs >= xr[2L])
+	sr1 <- sr1[length(sr1)]
+	sr2 <- sr2[1L]
+	xs[(sr1:sr2)]
+}
