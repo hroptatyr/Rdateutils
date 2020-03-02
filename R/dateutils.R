@@ -437,7 +437,7 @@ as.ddur.factor <- function(x, ...)
 	.Call(Cas.ddur.factor, x)
 }
 
-as.ddur.numeric <- function(x, ...)
+as.ddur.logical <- as.ddur.numeric <- function(x, ...)
 {
 	.Call(Cas.ddur.numeric, x)
 }
@@ -445,11 +445,6 @@ as.ddur.numeric <- function(x, ...)
 as.ddur.wcnt <- function(x, ...)
 {
 	.Call(Cas.ddur.wcnt, x)
-}
-
-as.ddur.logical <- function(x, ...)
-{
-	.Call(Cas.ddur.numeric, NA_integer_)
 }
 
 as.character.ddur <- format.ddur <- function(x, ...)

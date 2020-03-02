@@ -2756,6 +2756,7 @@ as_ddur_numeric(SEXP x)
 		}
 		break;
 	}
+	case LGLSXP:
 	case INTSXP: {
 		const int *xp = INTEGER(x);
 
