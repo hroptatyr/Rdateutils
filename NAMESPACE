@@ -73,6 +73,7 @@ S3method(as.character, FDate)
 S3method(format, FDate)
 S3method(print, FDate)
 S3method(pretty, FDate)
+S3method(Axis, FDate)
 
 S3method(c, FDate)
 S3method(rev, FDate)
@@ -245,3 +246,5 @@ S3method(split, wcnt)
 S3method(unique, wcnt)
 S3method(min, wcnt)
 S3method(max, wcnt)
+
+importFrom(graphics, Axis, axis)

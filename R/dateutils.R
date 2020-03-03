@@ -905,7 +905,7 @@ split.wcnt <- unique.wcnt <- min.wcnt <- max.wcnt <- function(x, ...)
 pretty.FDate <- function(x, n=5L, min.n=n %/% 2L, ...)
 {
 	stopifnot(min.n <= n)
-	xr <- range(x, na.rm=TRUE)
+	xr <- range(as.FDate(x), na.rm=TRUE)
 	rd <- dday(ddur(xr[1L], xr[2L]))
 	if (rd <= n) {
 		## less than requested
@@ -926,12 +926,22 @@ pretty.FDate <- function(x, n=5L, min.n=n %/% 2L, ...)
 	} else if (rpm > "1M") {
 		s <- as.ddur("1M")
 		t <- "month"
-	} else if (rpm > "1W") {
-		s <- as.ddur("1W")
-		t <- "week"
 	} else {
-		s <- as.ddur("1D")
-		t <- "day"
+		## go full day
+		rpm <- ddur(xr[1L], xr[2L]) / n
+		if (rpm > "4W") {
+			s <- as.ddur("4W")
+			t <- "week"
+		} else if (rpm > "2W") {
+			s <- as.ddur("2W")
+			t <- "week"
+		} else if (rpm > "1W") {
+			s <- as.ddur("1W")
+			t <- "week"
+		} else {
+			s <- rpm
+			t <- "day"
+		}
 	}
 	xs <- seq(trunc(xr[1L]-s, t), trunc(xr[2L]+s, t), by=s, from.last=TRUE)
 	sr1 <- which(xs <= xr[1L])
@@ -939,4 +949,23 @@ pretty.FDate <- function(x, n=5L, min.n=n %/% 2L, ...)
 	sr1 <- sr1[length(sr1)]
 	sr2 <- sr2[1L]
 	xs[(sr1:sr2)]
+}
+
+Axis.FDate <- function(x, at, ..., side, labels=TRUE)
+{
+	has.at <- !missing(at) && !is.null(at)
+	at <- if (has.at) {
+		at
+	} else {
+		x
+	}
+	at <- pretty.FDate(at[is.finite(at)], n=5L)
+	if (!is.logical(labels)) {
+		;
+	} else if (isTRUE(labels)) {
+		labels <- as.character(at)
+	} else if (isFALSE(labels)) {
+		labels <- rep("", length(at))
+	}
+	axis(side, at=at, labels=labels, ...)
 }
