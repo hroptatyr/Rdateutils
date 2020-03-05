@@ -70,3 +70,17 @@ test_that("ddur trunc'ing", {
 	expect_equal(trunc(as.ddur("P12M-1D"), "day"), as.ddur("P364D"))
 	expect_equal(trunc(as.ddur("P-12M1D"), "day"), as.ddur("P-364D"))
 })
+
+test_that("pdur", {
+	expect_equal(pdur("2008-A"), as.ddur("P1Y"))
+	expect_equal(pdur("2008-S1"), as.ddur("P6M"))
+	expect_equal(pdur("2008-S2"), as.ddur("P6M"))
+	expect_equal(pdur("2008-Q1"), as.ddur("P3M"))
+	expect_equal(pdur("2008-Q2"), as.ddur("P3M"))
+	expect_equal(pdur("2008-Q3"), as.ddur("P3M"))
+	expect_equal(pdur("2008-Q4"), as.ddur("P3M"))
+	expect_equal(pdur("2008-F"), as.ddur("P1M"))
+	expect_equal(pdur("2008-12"), as.ddur("P1M"))
+	## no syntax for week dates yet
+	expect_equal(pdur("2008-02-03"), as.ddur("P1D"))
+})

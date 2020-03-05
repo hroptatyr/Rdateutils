@@ -153,6 +153,7 @@ S3method(as.ddur, ddur)
 export(ddur)
 S3method(as.character, ddur)
 export(ydur)
+export(pdur)
 
 S3method(format, ddur)
 S3method(print, ddur)

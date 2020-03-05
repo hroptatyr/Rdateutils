@@ -48,6 +48,7 @@ SEXP trunc_FDate_month(SEXP x);
 
 SEXP begd_FDate(SEXP x);
 SEXP endd_FDate(SEXP x);
+SEXP pdur_FDate(SEXP x);
 
 SEXP seq_FDate(SEXP from, SEXP till, SEXP by);
 

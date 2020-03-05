@@ -2660,6 +2660,35 @@ endd_FDate(SEXP x)
 	return ans;
 }
 
+SEXP
+pdur_FDate(SEXP x)
+{
+	R_xlen_t n = XLENGTH(x);
+	SEXP ans = PROTECT(allocVector(INTSXP, n));
+	int *restrict ansp = INTEGER(ans);
+	const int *xp = INTEGER(x);
+
+	#pragma omp parallel for
+	for (R_xlen_t i = 0; i < n; i++) {
+		unsigned int m = xp[i];
+		unsigned int y = m / 391U;
+		unsigned int yd = m % 391U;
+		int md = (yd + 192U) % 195U % 97U % 32U;
+		unsigned int qd = (yd % 97U - (yd > 195U));
+
+		/* return NA, 0 for year, 1 for semi, 2 for quarter 3 for month
+		   4 for week and 5 for day */
+		ansp[i] = m != NA_INTEGER
+			? !(yd && md)
+			? qd%4U + 1U
+			: 5U + 1U
+			: NA_INTEGER;
+	}
+
+	UNPROTECT(1);
+	return ans;
+}
+
 
 SEXP
 as_ddur_character(SEXP x)

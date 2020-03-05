@@ -51,6 +51,7 @@ R_CallMethodDef callMethods[] = {
 
 	{"Cbegd.FDate", (DL_FUNC)&begd_FDate, -1},
 	{"Cendd.FDate", (DL_FUNC)&endd_FDate, -1},
+	{"Cpdur.FDate", (DL_FUNC)&pdur_FDate, -1},
 
 	{"Cas.ddur.character", (DL_FUNC)&as_ddur_character, -1},
 	{"Cas.ddur.factor", (DL_FUNC)&as_ddur_factor, -1},

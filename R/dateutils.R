@@ -576,6 +576,20 @@ ydur <- function(x, y, day.count=c("act/act", "30/360", "30A/360", "30E/360", "3
 	}
 }
 
+pdur <- function(x, type=c("ddur", "character", "raw"))
+{
+	D <- as.ddur(c("P1Y","P6M","P3M","P1M","P1W","P1D"))
+	C <- c("year","semi","quarter","month","week","day")
+
+	type <- match.arg(type)
+	x <- as.FDate(x)
+	r <- .Call("Cpdur.FDate", x)
+	switch(type,
+	ddur=D[r],
+	character=C[r],
+	r)
+}
+
 ## accessors
 year.ddur <- function(x, ...)
 {
